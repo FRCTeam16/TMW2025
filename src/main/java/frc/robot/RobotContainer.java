@@ -5,11 +5,12 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.hci.SwerveSupplier.MaxAngularRate;
+import static frc.robot.hci.SwerveSupplier.MaxSpeed;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -18,21 +19,22 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
 import frc.robot.generated.TunerConstants;
+import frc.robot.hci.JoystickSwerveSupplier;
+import frc.robot.hci.SwerveSupplier;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class RobotContainer {
-    private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-    // TODO: up max angular rate, seems slow by CTRE's defaults
-    private double MaxAngularRate = RotationsPerSecond.of(0.9).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-            .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+            .withDeadband(MaxSpeed.in(MetersPerSecond) * 0.1)
+            .withRotationalDeadband(MaxAngularRate.in(RadiansPerSecond) * 0.1) // Add a 10% deadband
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
-    private final Telemetry logger = new Telemetry(MaxSpeed);
+    private final Telemetry logger = new Telemetry(MaxSpeed.in(MetersPerSecond));
 
     private final Joystick driveStick = new Joystick(0);
     private final Joystick steerStick = new Joystick(2);
@@ -42,7 +44,10 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
+    private final SwerveSupplier swerveSupplier;
+
     public RobotContainer() {
+        swerveSupplier = new JoystickSwerveSupplier(driveStick, steerStick, joystick);
         configureBindings();
     }
 
@@ -52,9 +57,9 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(-driveStick.getY() * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(-driveStick.getX() * MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(-steerStick.getX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+                drive.withVelocityX(swerveSupplier.supplyX()) // Drive forward with negative Y (forward)
+                    .withVelocityY(swerveSupplier.supplyY()) // Drive left with negative X (left)
+                    .withRotationalRate(swerveSupplier.supplyRotationalRate()) // Drive counterclockwise with negative X (left)
             )
         );
 
@@ -66,7 +71,7 @@ public class RobotContainer {
         joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
         // reset the field-centric heading on left bumper press
-        joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }
