@@ -36,7 +36,7 @@ public class JoystickSwerveSupplier implements SwerveSupplier {
 
     @Override
     public AngularVelocity supplyRotationalRate() {
-        double base = -steerStick.getY() * (isRedAlliance ? -1 : 1);
+        double base = -steerStick.getX() * (isRedAlliance ? -1 : 1);
         return RadiansPerSecond.of(base).times(MaxAngularRate.in(RadiansPerSecond));
     }
 }

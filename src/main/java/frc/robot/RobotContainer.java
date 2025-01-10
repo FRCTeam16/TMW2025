@@ -37,8 +37,8 @@ public class RobotContainer {
     private final Telemetry logger = new Telemetry(MaxSpeed.in(MetersPerSecond));
 
     private final Joystick driveStick = new Joystick(0);
-    private final Joystick steerStick = new Joystick(2);
-    private final CommandXboxController joystick = new CommandXboxController(0);
+    private final Joystick steerStick = new Joystick(1);
+    private final CommandXboxController joystick = new CommandXboxController(2);
 
     private final JoystickButton prototypeButton = new JoystickButton(driveStick, 0); // for prototype subsystem
 
