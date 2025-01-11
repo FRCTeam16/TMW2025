@@ -10,19 +10,20 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.subsystems.vision.VisionAssist;
 
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-    // TODO: up max angular rate, seems slow by CTRE's defaults
     private double MaxAngularRate = RotationsPerSecond.of(0.9).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
     /* Setting up bindings for necessary control of the swerve drive platform */
@@ -32,13 +33,17 @@ public class RobotContainer {
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
+    VisionAssist visionAssist = new VisionAssist(drive); // TODO: make real subsystemfile
+
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
     private final Joystick driveStick = new Joystick(0);
     private final Joystick steerStick = new Joystick(2);
     private final CommandXboxController joystick = new CommandXboxController(0);
 
-    private final JoystickButton prototypeButton = new JoystickButton(driveStick, 0); // for prototype subsystem
+    private final JoystickButton prototypeButton = new JoystickButton(driveStick, 1); // for prototype subsystem
+    private final JoystickButton visionAssistButton = new JoystickButton(driveStick, 0);
+    
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
@@ -51,10 +56,16 @@ public class RobotContainer {
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
-            drivetrain.applyRequest(() ->
-                drive.withVelocityX(-driveStick.getY() * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(-driveStick.getX() * MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(-steerStick.getX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+             drivetrain.applyRequest(() -> {
+                 DriverStation.reportWarning("apply Request Reached", false);
+                if(driveStick.getRawButton(1)) {
+                    DriverStation.reportWarning("default drive Reached", false);
+                    return drive.withVelocityX((-driveStick.getY() * MaxSpeed)) // Drive forward with negative Y (forward)
+                            .withVelocityY((-driveStick.getX() * MaxSpeed)) // Drive left with negative X (left)
+                            .withRotationalRate((-steerStick.getX() * MaxAngularRate)); // Drive counterclockwise with negative X (left)
+                }
+                return visionAssist.deferDrive(driveStick, steerStick, MaxSpeed, MaxAngularRate);
+                }
             )
         );
 
