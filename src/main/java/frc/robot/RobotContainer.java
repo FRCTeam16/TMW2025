@@ -8,20 +8,24 @@ import static edu.wpi.first.units.Units.*;
 import static frc.robot.hci.SwerveSupplier.MaxAngularRate;
 import static frc.robot.hci.SwerveSupplier.MaxSpeed;
 
+import java.util.Objects;
+
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
-import frc.robot.generated.TunerConstants;
 import frc.robot.hci.JoystickSwerveSupplier;
 import frc.robot.hci.SwerveSupplier;
+import frc.robot.hci.XBoxSwerveSupplier;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.Lifecycle;
 
 public class RobotContainer {
 
@@ -42,12 +46,16 @@ public class RobotContainer {
 
     private final JoystickButton prototypeButton = new JoystickButton(driveStick, 0); // for prototype subsystem
 
-    public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    public final CommandSwerveDrivetrain drivetrain;
 
     private final SwerveSupplier swerveSupplier;
 
     public RobotContainer() {
-        swerveSupplier = new JoystickSwerveSupplier(driveStick, steerStick, joystick);
+        Subsystems.getInstance(); // Ensure subsystems are initialized
+        drivetrain = Subsystems.swerveSubsystem;
+        swerveSupplier = (!RobotBase.isSimulation()) ?
+                new JoystickSwerveSupplier(driveStick, steerStick, joystick) :
+                new XBoxSwerveSupplier(joystick);
         configureBindings();
     }
 
@@ -65,10 +73,10 @@ public class RobotContainer {
 
         // Run SysId routines when holding back/start and X/Y. // these are fine for now
         // Note that each routine should be run exactly once in a single log.
-        joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+        joystick.back().and(joystick.y()).whileTrue(drivetrain.getSysIdHelper().sysIdDynamic(Direction.kForward));
+        joystick.back().and(joystick.x()).whileTrue(drivetrain.getSysIdHelper().sysIdDynamic(Direction.kReverse));
+        joystick.start().and(joystick.y()).whileTrue(drivetrain.getSysIdHelper().sysIdQuasistatic(Direction.kForward));
+        joystick.start().and(joystick.x()).whileTrue(drivetrain.getSysIdHelper().sysIdQuasistatic(Direction.kReverse));
 
         // reset the field-centric heading on left bumper press
         joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
@@ -77,6 +85,14 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return Commands.print("No autonomous command configured");
+        return Subsystems.autoManager.getSelectedAutoStrategy();
+    }
+
+    public void teleopInit() {
+        Subsystems.lifecycleSubsystems.stream().filter(Objects::nonNull).forEach(Lifecycle::teleopInit);
+    }
+
+    public void autoInit() {
+        Subsystems.lifecycleSubsystems.stream().filter(Objects::nonNull).forEach(Lifecycle::autoInit);
     }
 }
