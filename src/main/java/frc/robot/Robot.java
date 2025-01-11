@@ -5,11 +5,13 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.util.BSLogger;
 
 public class Robot extends TimedRobot {
-  private Command m_autonomousCommand;
+  private Command autonomousCommand;
 
   private final RobotContainer m_robotContainer;
 
@@ -33,23 +35,31 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+    BSLogger.log("Robot", "autoInit:: Started at:" + Timer.getFPGATimestamp());
+    autonomousCommand = m_robotContainer.getAutonomousCommand();
+    BSLogger.log("Robot", "autoInit:: got robotCommand: " + Timer.getFPGATimestamp());
+    m_robotContainer.autoInit();
+    BSLogger.log("Robot", "autoInit:: robot container autoInit finished: " + Timer.getFPGATimestamp());
 
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.schedule();
+    if (autonomousCommand != null) {
+      autonomousCommand.schedule();
+      BSLogger.log("Robot", "autoInit:: scheduled command at: " + Timer.getFPGATimestamp());
     }
+    BSLogger.log("Robot", "autoInit:: finished at: " + Timer.getFPGATimestamp());
   }
 
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+   
+  }
 
   @Override
   public void autonomousExit() {}
 
   @Override
   public void teleopInit() {
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.cancel();
+    if (autonomousCommand != null) {
+      autonomousCommand.cancel();
     }
   }
 
