@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 7.540266393442623,
+        "y": 1.927151639344263
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 6.449385245901639,
+        "y": 1.9271516393442631
+      },
+      "isLocked": false,
+      "linkedName": "EP1S"
+    },
+    {
+      "anchor": {
+        "x": 5.394467213114754,
+        "y": 2.5145491803278683
+      },
+      "prevControl": {
+        "x": 6.089754098360656,
+        "y": 1.8192622950819677
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "EP1E"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 118.81079374297309
+  },
+  "reversed": false,
+  "folder": "EP",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 180.0
+  },
+  "useDefaultConstraints": true
+}

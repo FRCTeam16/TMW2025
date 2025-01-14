@@ -63,6 +63,8 @@ public class AutoManager {
     private void registerStrategies() {
         registerStrategy("Debug Auto", AutoStrategies.DebugAuto, DebugAutoStrategy::new, true);
         registerStrategy("Debug Auto Path", AutoStrategies.DebugAutoPath, DebugAutoPathStrategy::new);
+        registerStrategy("EP", AutoStrategies.EP, EPStrategy::new);
+
     }
 
     /**
@@ -119,7 +121,8 @@ public class AutoManager {
 
     public enum AutoStrategies {
         DebugAuto,
-        DebugAutoPath
+        DebugAutoPath,
+        EP
         // Add new strategies here
     }
 
