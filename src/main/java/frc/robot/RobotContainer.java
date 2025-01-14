@@ -71,10 +71,15 @@ public class RobotContainer {
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
-            drivetrain.applyRequest(() ->
-                drive.withVelocityX(swerveSupplier.supplyX()) // Drive forward with negative Y (forward)
-                    .withVelocityY(swerveSupplier.supplyY()) // Drive left with negative X (left)
-                    .withRotationalRate(swerveSupplier.supplyRotationalRate()) // Drive counterclockwise with negative X (left)
+
+                drivetrain.applyRequest(() -> {
+                if(!visionAssistButton.getAsBoolean()){ // use default swerve request unless visionAssist button pressed
+                    return drive.withVelocityX(swerveSupplier.supplyX()) // Drive forward with negative Y (forward)
+                        .withVelocityY(swerveSupplier.supplyY()) // Drive left with negative X (left)
+                        .withRotationalRate(swerveSupplier.supplyRotationalRate()); // Drive counterclockwise with negative X (left)
+                 }
+                return visionAssist.deferDrive(swerveSupplier);
+                }
             )
         );
 
