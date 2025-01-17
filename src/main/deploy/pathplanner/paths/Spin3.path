@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.5723360655737704,
-        "y": 2.4785860655737704
+        "x": 5.346516393442624,
+        "y": 1.927151639344263
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.349590163934426,
-        "y": 1.699385245901639
+        "x": 4.3755122950819665,
+        "y": 1.951127049180327
       },
       "isLocked": false,
-      "linkedName": "EP4E"
+      "linkedName": "SP2E"
     },
     {
       "anchor": {
-        "x": 1.4505122950819673,
-        "y": 1.111987704918032
+        "x": 4.3875,
+        "y": 1.927151639344263
       },
       "prevControl": {
-        "x": 2.9445000000000006,
-        "y": 2.0847499999999988
+        "x": 5.394467213114754,
+        "y": 1.91516393442623
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "EP2E"
+      "linkedName": "SP3E"
     }
   ],
   "rotationTargets": [],
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 49.55376797915862
+    "rotation": 6.709836807756856
   },
   "reversed": false,
-  "folder": "EP",
+  "folder": "Spin",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 59.47029410006589
+    "rotation": -174.80557109226518
   },
   "useDefaultConstraints": true
 }

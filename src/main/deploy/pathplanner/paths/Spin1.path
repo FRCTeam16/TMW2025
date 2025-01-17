@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.0,
-        "y": 7.0
+        "x": 7.540266393442623,
+        "y": 1.927151639344263
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.0,
-        "y": 7.0
+        "x": 6.317520491803278,
+        "y": 1.9271516393442631
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "EP1S"
     },
     {
       "anchor": {
-        "x": 4.0,
-        "y": 6.0
+        "x": 6.305532786885245,
+        "y": 1.927151639344263
       },
       "prevControl": {
-        "x": 3.0,
-        "y": 6.0
+        "x": 7.324487704918032,
+        "y": 1.939139344262295
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "SP1E"
     }
   ],
   "rotationTargets": [],
@@ -45,10 +45,10 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "Spin",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }
