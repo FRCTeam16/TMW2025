@@ -5,7 +5,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.Lifecycle;
 import frc.robot.subsystems.vision.VisionTypes.TargetInfo;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class VisionSubsystem extends SubsystemBase implements Lifecycle {
@@ -34,6 +36,10 @@ public class VisionSubsystem extends SubsystemBase implements Lifecycle {
 
     public Limelight getDefaultLimelight() {
         return defaultLimelight;
+    }
+
+    public List<Limelight> getLimelights() {
+        return new ArrayList<>(limelightLookup.values());
     }
 
     public Limelight getLimelightByName(String name) {

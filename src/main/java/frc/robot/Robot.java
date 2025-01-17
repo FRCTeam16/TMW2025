@@ -50,7 +50,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousPeriodic() {
-   
+    Subsystems.visionOdometryUpdater.updateOdometry();
   }
 
   @Override
@@ -64,7 +64,9 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    Subsystems.visionOdometryUpdater.updateOdometry();
+  }
 
   @Override
   public void teleopExit() {}

@@ -13,9 +13,13 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Lifecycle;
 import frc.robot.subsystems.RotationController;
 import frc.robot.subsystems.DMS.LEDSubsystem;
+import frc.robot.subsystems.VisionOdometryUpdater;
 import frc.robot.subsystems.vision.Limelight;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.subsystems.vision.VisionTypes;
+
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Inches;
 
 /**
  * The Subsystems class represents a collection of subsystems used in the robot.
@@ -40,14 +44,15 @@ public class Subsystems {
     // are registered
     public static AutoManager autoManager;
     private static Subsystems instance;
+    public static VisionOdometryUpdater visionOdometryUpdater;
 
     public Subsystems() {
         swerveSubsystem = TunerConstants.createDrivetrain();
         visionSubsystem = new VisionSubsystem(
                 Stream.of(
-                        new VisionTypes.LimelightInfo("limelight", 12.9275,  26.84))
-                        // new VisionTypes.LimelightInfo("notelight", 10, 0))
-                        .map(Limelight::new).collect(Collectors.toSet()));
+                    new VisionTypes.LimelightInfo("limelight", Inches.of(6), Degrees.of(26.84)),
+                    new VisionTypes.LimelightInfo("limelight-right", Inches.of(6), Degrees.of(0)))
+                .map(Limelight::new).collect(Collectors.toSet()));
         ledSubsystem = new LEDSubsystem();
 
         lifecycleSubsystems.add(visionSubsystem);
@@ -65,6 +70,8 @@ public class Subsystems {
 
         autoManager = new AutoManager();
         autoManager.initialize();
+
+        visionOdometryUpdater = new VisionOdometryUpdater(visionSubsystem, swerveSubsystem);
     }
 
     public static Subsystems getInstance() {
