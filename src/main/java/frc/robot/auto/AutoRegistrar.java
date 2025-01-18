@@ -17,6 +17,7 @@ public class AutoRegistrar {
         autoManager.registerStrategy("Debug Auto Path", "Debug Auto Path", DebugAutoPathStrategy::new);
         autoManager.registerStrategy("EP", "EP", EPStrategy::new);
         autoManager.registerStrategy("Spin", "Spin", SpinStrategy::new);
+        autoManager.registerStrategy("Cresent", "Cresent", CresentStrategy::new);
     }
 
     public static void registerNamedCommands() {
