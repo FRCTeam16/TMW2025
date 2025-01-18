@@ -10,6 +10,7 @@ import frc.robot.async.AsyncManager;
 import frc.robot.auto.AutoManager;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.JoshPrototype;
 import frc.robot.subsystems.Lifecycle;
 import frc.robot.subsystems.RotationController;
 import frc.robot.subsystems.DMS.LEDSubsystem;
@@ -31,6 +32,7 @@ public class Subsystems {
     public static CommandSwerveDrivetrain swerveSubsystem;
     public static VisionSubsystem visionSubsystem;
     public static LEDSubsystem ledSubsystem;
+    public static JoshPrototype joshPrototype;
 
     public static List<Lifecycle> lifecycleSubsystems = new ArrayList<>();
 
@@ -54,6 +56,7 @@ public class Subsystems {
                     new VisionTypes.LimelightInfo("limelight-right", Inches.of(6), Degrees.of(0)))
                 .map(Limelight::new).collect(Collectors.toSet()));
         ledSubsystem = new LEDSubsystem();
+        joshPrototype = new JoshPrototype();
 
         lifecycleSubsystems.add(visionSubsystem);
         lifecycleSubsystems.add(ledSubsystem);

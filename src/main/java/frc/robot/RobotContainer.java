@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -50,7 +51,7 @@ public class RobotContainer {
     private final CommandXboxController joystick = new CommandXboxController(2);
 
     private final JoystickButton prototypeButton = new JoystickButton(driveStick, 1); // for prototype subsystem
-    private final JoystickButton visionAssistButton = new JoystickButton(driveStick, 0);
+    private final JoystickButton visionAssistButton = new JoystickButton(driveStick, 2);
     
 
     public final CommandSwerveDrivetrain drivetrain;
@@ -83,6 +84,18 @@ public class RobotContainer {
             )
         );
 
+        // Josh Prototype Controls
+        joystick.b().onTrue(Subsystems.joshPrototype.stop());
+        joystick.y().onTrue(Subsystems.joshPrototype.eject()).onFalse(Subsystems.joshPrototype.stop());
+        joystick.a().onTrue(Subsystems.joshPrototype.ingest()).onFalse(Subsystems.joshPrototype.stop());
+
+        // reset the field-centric heading on left bumper press
+        joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
+
+        drivetrain.registerTelemetry(logger::telemeterize);
+    }
+
+    public void bindSysId() {
         // Run SysId routines when holding back/start and X/Y. // these are fine for now
         // Note that each routine should be run exactly once in a single log.
         joystick.back().and(joystick.y()).whileTrue(drivetrain.getSysIdHelper().sysIdDynamic(Direction.kForward));
@@ -90,10 +103,6 @@ public class RobotContainer {
         joystick.start().and(joystick.y()).whileTrue(drivetrain.getSysIdHelper().sysIdQuasistatic(Direction.kForward));
         joystick.start().and(joystick.x()).whileTrue(drivetrain.getSysIdHelper().sysIdQuasistatic(Direction.kReverse));
 
-        // reset the field-centric heading on left bumper press
-        joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
-
-        drivetrain.registerTelemetry(logger::telemeterize);
     }
 
     public Command getAutonomousCommand() {
