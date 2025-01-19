@@ -18,6 +18,7 @@ public class AutoRegistrar {
         autoManager.registerStrategy("EP", "EP", EPStrategy::new);
         autoManager.registerStrategy("Spin", "Spin", SpinStrategy::new);
         autoManager.registerStrategy("Cresent", "Cresent", CresentStrategy::new);
+        autoManager.registerStrategy("ThreePiece", "ThreePiece", ThreePieceStrategy::new);
     }
 
     public static void registerNamedCommands() {

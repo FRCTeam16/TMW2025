@@ -7,31 +7,37 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Spin1"
+            "pathName": "EP1"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Spin2"
+            "pathName": "EP2"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Spin3"
+            "pathName": "EP4"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Spin4"
+            "pathName": "EP5"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "EP4"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": "Tests",
+  "folder": null,
   "choreoAuto": false
 }

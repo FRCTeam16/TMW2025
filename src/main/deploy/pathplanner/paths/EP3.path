@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.4505122950819673,
-        "y": 1.111987704918032
+        "x": 1.2089999999999999,
+        "y": 1.1194999999999993
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.5684999999999993,
-        "y": 1.6069999999999993
+        "x": 3.3269877049180314,
+        "y": 1.6145122950819666
       },
       "isLocked": false,
       "linkedName": "EP2E"
     },
     {
       "anchor": {
-        "x": 5.394467213114754,
-        "y": 2.5145491803278683
+        "x": 5.45025,
+        "y": 2.699
       },
       "prevControl": {
-        "x": 3.6660000000000004,
-        "y": 1.63625
+        "x": 3.721782786885246,
+        "y": 1.8207008196721315
       },
       "nextControl": null,
       "isLocked": false,
@@ -48,7 +48,7 @@
   "folder": "EP",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 49.55376797915862
+    "rotation": 53.13010235415596
   },
   "useDefaultConstraints": true
 }
