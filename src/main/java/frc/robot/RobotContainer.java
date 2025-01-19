@@ -94,7 +94,8 @@ public class RobotContainer {
         if(Constants.austinGearboxPrototype){
             joystick.b().onTrue(Subsystems.austinGearPrototype.stopMotor());
             joystick.a().onTrue(Subsystems.austinGearPrototype.runForward()).onFalse(Subsystems.austinGearPrototype.stopMotor());
-            joystick.a().onTrue(Subsystems.austinGearPrototype.runBackward()).onFalse(Subsystems.austinGearPrototype.stopMotor());
+            joystick.y().onTrue(Subsystems.austinGearPrototype.runBackward()).onFalse(Subsystems.austinGearPrototype.stopMotor());
+            joystick.x().onTrue(Subsystems.austinGearPrototype.updateMotorIds()); // IDs are ran through elastic
         }
 
         // reset the field-centric heading on left bumper press

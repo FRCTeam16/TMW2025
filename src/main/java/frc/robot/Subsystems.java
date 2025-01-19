@@ -28,7 +28,7 @@ public class Subsystems {
     public static VisionSubsystem visionSubsystem;
     public static LEDSubsystem ledSubsystem;
     public static JoshPrototype joshPrototype;
-    public static AustinGearPrototype austinGearPrototype;
+    public static PrototypeGenericMotor austinGearPrototype;
 
     public static List<Lifecycle> lifecycleSubsystems = new ArrayList<>();
 
@@ -53,7 +53,7 @@ public class Subsystems {
                 .map(Limelight::new).collect(Collectors.toSet()));
         ledSubsystem = new LEDSubsystem();
         joshPrototype = new JoshPrototype();
-        austinGearPrototype = new AustinGearPrototype();
+        austinGearPrototype = new PrototypeGenericMotor("austinGearPrototype", 51);
 
         lifecycleSubsystems.add(visionSubsystem);
         lifecycleSubsystems.add(ledSubsystem);
