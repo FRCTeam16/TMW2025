@@ -5,16 +5,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.async.AsyncManager;
 import frc.robot.auto.AutoManager;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.JoshPrototype;
-import frc.robot.subsystems.Lifecycle;
-import frc.robot.subsystems.RotationController;
+import frc.robot.subsystems.*;
 import frc.robot.subsystems.DMS.LEDSubsystem;
-import frc.robot.subsystems.VisionOdometryUpdater;
 import frc.robot.subsystems.vision.Limelight;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.subsystems.vision.VisionTypes;
@@ -33,6 +28,7 @@ public class Subsystems {
     public static VisionSubsystem visionSubsystem;
     public static LEDSubsystem ledSubsystem;
     public static JoshPrototype joshPrototype;
+    public static AustinGearPrototype austinGearPrototype;
 
     public static List<Lifecycle> lifecycleSubsystems = new ArrayList<>();
 
@@ -57,6 +53,7 @@ public class Subsystems {
                 .map(Limelight::new).collect(Collectors.toSet()));
         ledSubsystem = new LEDSubsystem();
         joshPrototype = new JoshPrototype();
+        austinGearPrototype = new AustinGearPrototype();
 
         lifecycleSubsystems.add(visionSubsystem);
         lifecycleSubsystems.add(ledSubsystem);

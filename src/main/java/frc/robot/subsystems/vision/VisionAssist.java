@@ -26,7 +26,7 @@ public class VisionAssist {
 
     public VisionAssist(SwerveRequest.FieldCentric drive) {
         this.drive = drive;
-
+        speedHelper.initialize(0.05, 0, 0,0 ,0, 0);
     }
 
     public SwerveRequest deferDrive(SwerveSupplier swerveSupplier){
@@ -53,14 +53,14 @@ public class VisionAssist {
     }
 
     public void periodic(){
-        
+
         if(limeLight.hasTarget() && isCoralTarget(limeLight.getTagID())){
             distance = limeLight.getDistanceToTag(0.017, 0.018, 0); // TODO: use not unreliable numbers
             tagAngle = limeLight.calculateAngleToTag();
 
             // Polar Coordinates to cartesian coordinates
-            robotCentricX = distance * Math.cos(180 - tagAngle);
-            robotCentricY = distance * Math.cos(180 - tagAngle);
+            robotCentricX = distance * Math.cos(tagAngle - 15);
+            robotCentricY = distance * Math.cos(tagAngle - 15);
 
             // rotate coordinates by angle of pigeon
             fieldCentricX = robotCentricX * Math.cos(robotAngle) - robotCentricY * Math.sin(robotAngle);
@@ -70,6 +70,11 @@ public class VisionAssist {
             fieldCentricX = 0;
             fieldCentricY = 0;
         }
+    }
+
+    private double calcTargetSpeed(double distance){
+        return ((distance * distance) / 8 ) - 1; // we're using a parabola as an easing function
+                                                 // the negative constant is so we reach 0 target speed before hitting the target
     }
 
 
