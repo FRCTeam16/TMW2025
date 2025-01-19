@@ -84,10 +84,18 @@ public class RobotContainer {
             )
         );
 
+        if(Constants.JoshPrototype){
         // Josh Prototype Controls
         joystick.b().onTrue(Subsystems.joshPrototype.stop());
         joystick.y().onTrue(Subsystems.joshPrototype.eject()).onFalse(Subsystems.joshPrototype.stop());
         joystick.a().onTrue(Subsystems.joshPrototype.ingest()).onFalse(Subsystems.joshPrototype.stop());
+        }
+        // austinGear Prototype Controls
+        if(Constants.austinGearboxPrototype){
+            joystick.b().onTrue(Subsystems.austinGearPrototype.stopMotor());
+            joystick.a().onTrue(Subsystems.austinGearPrototype.runForward()).onFalse(Subsystems.austinGearPrototype.stopMotor());
+            joystick.a().onTrue(Subsystems.austinGearPrototype.runBackward()).onFalse(Subsystems.austinGearPrototype.stopMotor());
+        }
 
         // reset the field-centric heading on left bumper press
         joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
