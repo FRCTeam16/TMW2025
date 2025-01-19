@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.3875,
-        "y": 2.159
+        "x": 8.19,
+        "y": 4.83425
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.6082991803278692,
-        "y": 2.147012295081967
+        "x": 6.89325,
+        "y": 5.7995
       },
       "isLocked": false,
-      "linkedName": "SP3E"
+      "linkedName": "OP2E"
     },
     {
       "anchor": {
-        "x": 3.3445696721311475,
-        "y": 2.159
+        "x": 6.805499999999999,
+        "y": 5.858
       },
       "prevControl": {
-        "x": 4.339549180327869,
-        "y": 2.159
+        "x": 8.0925,
+        "y": 4.912249999999999
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": -127.69424046668917
   },
   "reversed": false,
-  "folder": "Spin",
+  "folder": "OnePush",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 6.709836807756856
+    "rotation": -125.83765295427823
   },
   "useDefaultConstraints": true
 }

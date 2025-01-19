@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.371807377049179,
-        "y": 1.9226762295081972
+        "x": 3.7342500000000003,
+        "y": 2.5819999999999994
       },
       "isLocked": false,
       "linkedName": "EP2E"
@@ -20,8 +20,8 @@
         "y": 2.5819999999999994
       },
       "prevControl": {
-        "x": 2.90038524590164,
-        "y": 2.0545409836065573
+        "x": 1.1797500000000003,
+        "y": 1.109749999999999
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,7 +45,7 @@
     "rotation": 59.47029410006589
   },
   "reversed": false,
-  "folder": "EP",
+  "folder": "ThreePiece",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 53.13010235415596

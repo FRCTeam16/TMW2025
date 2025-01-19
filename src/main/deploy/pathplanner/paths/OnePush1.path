@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 6.305532786885245,
-        "y": 2.159
+        "x": 7.546500000000001,
+        "y": 4.181
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.394467213114754,
-        "y": 2.159
+        "x": 6.2204999999999995,
+        "y": 4.17125
       },
       "isLocked": false,
-      "linkedName": "SP1E"
+      "linkedName": "OP1S"
     },
     {
       "anchor": {
-        "x": 5.346516393442624,
-        "y": 2.159
+        "x": 6.1034999999999995,
+        "y": 4.181
       },
       "prevControl": {
-        "x": 5.730122950819672,
-        "y": 2.147012295081967
+        "x": 7.517250000000001,
+        "y": 4.161499999999999
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "SP2E"
+      "linkedName": "OP1E"
     }
   ],
   "rotationTargets": [],
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -174.80557109226518
+    "rotation": -179.54164354199963
   },
   "reversed": false,
-  "folder": "Spin",
+  "folder": "OnePush",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }
