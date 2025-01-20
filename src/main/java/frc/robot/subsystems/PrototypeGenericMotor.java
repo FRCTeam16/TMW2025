@@ -9,39 +9,53 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 
-public class AustinGearPrototype implements Lifecycle, Subsystem {
+public class PrototypeGenericMotor implements Lifecycle, Subsystem {
     private TalonFX motor;
 
     private final NeutralOut stop = new NeutralOut();
     private final DutyCycleOut forward = new DutyCycleOut(0);
     private final DutyCycleOut backward = new DutyCycleOut(0);
+    private String ElasticName;
 
+<<<<<<< HEAD:src/main/java/frc/robot/subsystems/AustinGearPrototype.java
     public AustinGearPrototype(){
         motor = new TalonFX(51);
+=======
+    public PrototypeGenericMotor(String ElasticName, int defaultId){
+        this.ElasticName = ElasticName;
+        motor = new TalonFX((int)SmartDashboard.getNumber(ElasticName + "/motorID", defaultId));
+        
+>>>>>>> c4e541907941c59294edd57132c3b038ddab9fb2:src/main/java/frc/robot/subsystems/PrototypeGenericMotor.java
 
         motor.getConfigurator().apply((new TalonFXConfiguration()));
         motor.setNeutralMode(NeutralModeValue.Brake);
 
-        SmartDashboard.setDefaultNumber("austinGearPrototype/runForward", -0.01);
-        SmartDashboard.setDefaultNumber("austinGearPrototype/runBackward", -0.01);
+        SmartDashboard.setDefaultNumber(ElasticName + "/runForward", -0.3);
+        SmartDashboard.setDefaultNumber(ElasticName + "/runBackward", 0.3);
     }
 
     public Command runForward(){
         return this.runOnce( () -> {
-        motor.setControl(forward.withOutput(SmartDashboard.getNumber("austinGearPrototype/runForward", 0)));
+        motor.setControl(forward.withOutput(SmartDashboard.getNumber(ElasticName+"/runForward", 0)));
         }
         );
     }
 
     public Command runBackward(){
         return this.runOnce(()->{
-        motor.setControl(backward.withOutput(SmartDashboard.getNumber("austinGearPrototype/runBackward", 0)));
+        motor.setControl(backward.withOutput(SmartDashboard.getNumber(ElasticName + "PrototypeGeneric/runBackward", 0)));
         });
     }
 
     public Command stopMotor(){
         return this.runOnce(() -> {
             motor.setControl(stop);
+        });
+    }
+
+    public Command updateMotorIds(){
+        return this.runOnce(() -> {
+            motor = new TalonFX((int)SmartDashboard.getNumber(ElasticName + "/motorID", 51));
         });
     }
 }

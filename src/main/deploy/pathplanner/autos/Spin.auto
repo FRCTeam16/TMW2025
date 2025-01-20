@@ -7,25 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Spin1"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Spin2"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Spin3"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Spin4"
+            "pathName": "Spin"
           }
         }
       ]

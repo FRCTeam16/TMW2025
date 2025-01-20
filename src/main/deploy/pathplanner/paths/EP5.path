@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.540754098360656,
-        "y": 1.802799180327868
+        "x": 1.2285000000000004,
+        "y": 1.1487499999999995
       },
       "isLocked": false,
       "linkedName": "EP4E"
@@ -20,8 +20,8 @@
         "y": 1.1194999999999993
       },
       "prevControl": {
-        "x": 2.7029877049180326,
-        "y": 2.092262295081966
+        "x": 3.77325,
+        "y": 2.581999999999999
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,7 +45,7 @@
     "rotation": 53.13010235415596
   },
   "reversed": false,
-  "folder": "EP",
+  "folder": "ThreePiece",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 59.47029410006589
