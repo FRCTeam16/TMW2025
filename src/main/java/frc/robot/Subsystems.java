@@ -10,6 +10,10 @@ import frc.robot.auto.AutoManager;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.DMS.LEDSubsystem;
+import frc.robot.subsystems.Prototype.ComposedPrototype;
+import frc.robot.subsystems.Prototype.JoshPrototype;
+import frc.robot.subsystems.Prototype.PrototypeGenericMotor;
+import frc.robot.subsystems.Prototype.PrototypeGeneric;
 import frc.robot.subsystems.vision.Limelight;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.subsystems.vision.VisionTypes;
@@ -29,6 +33,7 @@ public class Subsystems {
     public static LEDSubsystem ledSubsystem;
     public static JoshPrototype joshPrototype;
     public static PrototypeGenericMotor austinGearPrototype;
+    public static ComposedPrototype fourMotorElevator;
 
     public static List<Lifecycle> lifecycleSubsystems = new ArrayList<>();
 
@@ -55,10 +60,21 @@ public class Subsystems {
         joshPrototype = new JoshPrototype();
         austinGearPrototype = new PrototypeGenericMotor("austinGearPrototype", 51);
 
+         fourMotorElevator = new ComposedPrototype( (motors) -> {
+                motors.get(0).setDirection(PrototypeGenericMotor.direction.corresponding);
+                motors.get(1).setDirection(PrototypeGenericMotor.direction.corresponding);
+                motors.get(2).setDirection(PrototypeGenericMotor.direction.inverse);
+                motors.get(3).setDirection(PrototypeGenericMotor.direction.inverse);
+            },
+            new PrototypeGenericMotor("ElevatorMotor1", 60),
+            new PrototypeGenericMotor("ElevatorMotor2", 61),
+            new PrototypeGenericMotor("ElevatorMotor3", 62),
+            new PrototypeGenericMotor("ElevatorMotor4", 63)
+        );
+
         lifecycleSubsystems.add(visionSubsystem);
         lifecycleSubsystems.add(ledSubsystem);
 
-        // SmartDashboard.putData("ShooterSubsystem", shooter);
         createUtilitySubsystems();
     }
 
