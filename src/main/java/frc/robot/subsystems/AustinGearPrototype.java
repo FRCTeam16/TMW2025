@@ -17,7 +17,7 @@ public class AustinGearPrototype implements Lifecycle, Subsystem {
     private final DutyCycleOut backward = new DutyCycleOut(0);
 
     public AustinGearPrototype(){
-        motor = new TalonFX(50);
+        motor = new TalonFX(51);
 
         motor.getConfigurator().apply((new TalonFXConfiguration()));
         motor.setNeutralMode(NeutralModeValue.Brake);
