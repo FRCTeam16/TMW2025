@@ -28,20 +28,11 @@ public class PrototypeGenericMotor implements Lifecycle, Subsystem, PrototypeGen
     private final DutyCycleOut forward = new DutyCycleOut(0);
     private final DutyCycleOut backward = new DutyCycleOut(0);
     private String ElasticName;
-
-<<<<<<< HEAD:src/main/java/frc/robot/subsystems/AustinGearPrototype.java
-    public AustinGearPrototype(){
-        motor = new TalonFX(51);
-=======
+    
     public PrototypeGenericMotor(String ElasticName, int defaultId){
         this.ElasticName = ElasticName;
         motor = new TalonFX((int)SmartDashboard.getNumber(ElasticName + "/motorID", defaultId));
         
-<<<<<<< HEAD:src/main/java/frc/robot/subsystems/PrototypeGenericMotor.java
->>>>>>> c4e541907941c59294edd57132c3b038ddab9fb2:src/main/java/frc/robot/subsystems/PrototypeGenericMotor.java
-
-=======
->>>>>>> 970ec6d30ce6277775368d8b4da87c2c1fb18d83:src/main/java/frc/robot/subsystems/Prototype/PrototypeGenericMotor.java
         motor.getConfigurator().apply((new TalonFXConfiguration()));
         motor.setNeutralMode(NeutralModeValue.Brake);
 

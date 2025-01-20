@@ -11,8 +11,8 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 public class ComposedPrototype implements PrototypeGeneric{
     PrototypeGeneric[] prototypeComponents;
                                     //<lambda parameter type>
-    public ComposedPrototype(Consumer<ArrayList<PrototypeGenericMotor>> configurePrototype, PrototypeGeneric... gProtoypes){
-        configurePrototype.accept(this.getMotorList());
+    public ComposedPrototype(Consumer<ArrayList<PrototypeGeneric>> configurePrototype, PrototypeGeneric... gProtoypes){
+        configurePrototype.accept(this.getComponentList());
         prototypeComponents = gProtoypes;
     }
 
@@ -44,8 +44,8 @@ public class ComposedPrototype implements PrototypeGeneric{
         return prototypeComponents[componentIndex];
     }
 
-    public PrototypeGeneric[] getComponentList(){
-        return prototypeComponents;
+    public ArrayList<PrototypeGeneric> getComponentList(){
+        return new ArrayList<>(Arrays.asList(prototypeComponents));
     }
 
     public ArrayList<PrototypeGenericMotor> getMotorList(){
