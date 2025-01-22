@@ -5,8 +5,8 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
-import static frc.robot.hci.SwerveSupplier.MaxAngularRate;
-import static frc.robot.hci.SwerveSupplier.MaxSpeed;
+import static frc.robot.Constants.MaxAngularRate;
+import static frc.robot.Constants.MaxSpeed;
 
 import java.util.Objects;
 
@@ -15,9 +15,8 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -29,7 +28,6 @@ import frc.robot.hci.SwerveSupplier;
 import frc.robot.hci.XBoxSwerveSupplier;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Lifecycle;
-import frc.robot.Constants;
 
 public class RobotContainer {
 
@@ -102,7 +100,8 @@ public class RobotContainer {
                 joystick.x().onTrue(Subsystems.austinGearPrototype.updateIds()); //IDs are ran through elastic
             }
             case AlignmentTest -> {
-                joystick.a().whileTrue(new AlignmentTest());
+                joystick.x().whileTrue(new AlignmentTest(AlignmentTest.TargetSide.LEFT));
+                joystick.b().whileTrue(new AlignmentTest(AlignmentTest.TargetSide.RIGHT));
             }
         }
 
