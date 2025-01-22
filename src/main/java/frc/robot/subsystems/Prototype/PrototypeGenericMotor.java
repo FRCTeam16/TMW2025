@@ -28,9 +28,10 @@ public class PrototypeGenericMotor implements Lifecycle, Subsystem, PrototypeGen
     private final DutyCycleOut forward = new DutyCycleOut(0);
     private final DutyCycleOut backward = new DutyCycleOut(0);
     private String ElasticName;
-    
+
     public PrototypeGenericMotor(String ElasticName, int defaultId){
         this.ElasticName = ElasticName;
+        SmartDashboard.setDefaultNumber(ElasticName + "/motorID", defaultId);
         motor = new TalonFX((int)SmartDashboard.getNumber(ElasticName + "/motorID", defaultId));
         
         motor.getConfigurator().apply((new TalonFXConfiguration()));

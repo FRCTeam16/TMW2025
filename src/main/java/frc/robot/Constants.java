@@ -2,6 +2,6 @@ package frc.robot;
 
 public class Constants {
 
-    public static boolean JoshPrototype = false;
-    public static boolean austinGearboxPrototype = true;
+    public static final boolean JoshPrototype = false;
+    public static final boolean austinGearboxPrototype = true;
 }

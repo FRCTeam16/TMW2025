@@ -31,7 +31,7 @@ public class VisionAssist {
 
     public SwerveRequest deferDrive(SwerveSupplier swerveSupplier){
         DriverStation.reportWarning("Defer Drive Reached", false);
-        return drive.withVelocityX(swerveSupplier.supplyX().plus(MetersPerSecond.of(fieldCentricX))) // Drive forward with negative Y (forward) + (distance * Math.cos(180-tagAngle))
+        return drive.withVelocityX(swerveSupplier.supplyX()/*.plus(MetersPerSecond.of(fieldCentricX))*/) // Drive forward with negative Y (forward) + (distance * Math.cos(180-tagAngle))
                 .withVelocityY(swerveSupplier.supplyY().plus(MetersPerSecond.of(fieldCentricY))) // Drive left with negative X (left)
                 .withRotationalRate(swerveSupplier.supplyRotationalRate()); // Drive counterclockwise with negative X (left)
     }
@@ -55,7 +55,7 @@ public class VisionAssist {
     public void periodic(){
 
         if(limeLight.hasTarget() && isCoralTarget(limeLight.getTagID())){
-            distance = limeLight.getDistanceToTag(0.017, 0.018, 0); // TODO: use not unreliable numbers
+            distance = limeLight.getDistanceToTag(0.017, 0.018, 15); // TODO: use not unreliable numbers
             tagAngle = limeLight.calculateAngleToTag();
 
             // Polar Coordinates to cartesian coordinates
@@ -71,13 +71,4 @@ public class VisionAssist {
             fieldCentricY = 0;
         }
     }
-
-    private double calcTargetSpeed(double distance){
-        return ((distance * distance) / 8 ) - 1; // we're using a parabola as an easing function
-                                                 // the negative constant is so we reach 0 target speed before hitting the target
-    }
-
-
-
-
 }

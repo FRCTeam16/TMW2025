@@ -93,7 +93,7 @@ public class RobotContainer {
         // austinGear Prototype Controls
         if(Constants.austinGearboxPrototype){
             joystick.b().onTrue(Subsystems.austinGearPrototype.stop());
-            joystick.a().onTrue(Subsystems.austinGearPrototype.runForward()).onFalse(Subsystems.austinGearPrototype.stop());
+            joystick.a().onTrue(Subsystems.austinGearPrototype.runForward());
             joystick.y().onTrue(Subsystems.austinGearPrototype.runBackward()).onFalse(Subsystems.austinGearPrototype.stop());
             joystick.x().onTrue(Subsystems.austinGearPrototype.updateIds()); // IDs are ran through elastic
         }
