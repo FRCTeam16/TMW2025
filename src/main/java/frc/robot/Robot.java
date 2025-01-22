@@ -66,6 +66,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     Subsystems.visionOdometryUpdater.updateOdometry();
+    System.out.println("[MAIN] " + Subsystems.swerveSubsystem.getCurrentCommand());
   }
 
   @Override
