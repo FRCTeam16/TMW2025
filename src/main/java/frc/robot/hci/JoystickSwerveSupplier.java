@@ -4,6 +4,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.Constants;
 import frc.robot.util.GameInfo;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -25,18 +26,18 @@ public class JoystickSwerveSupplier implements SwerveSupplier {
     @Override
     public LinearVelocity supplyX() {
         double base = -driveStick.getY() * (isRedAlliance ? -1 : 1);
-        return MetersPerSecond.of(base).times(MaxSpeed.in(MetersPerSecond));
+        return MetersPerSecond.of(base).times(Constants.MaxSpeed.in(MetersPerSecond));
     }
 
     @Override
     public LinearVelocity supplyY() {
         double base = -driveStick.getX() * (isRedAlliance ? -1 : 1);
-        return MetersPerSecond.of(base).times(MaxSpeed.in(MetersPerSecond));
+        return MetersPerSecond.of(base).times(Constants.MaxSpeed.in(MetersPerSecond));
     }
 
     @Override
     public AngularVelocity supplyRotationalRate() {
         double base = -steerStick.getX() * (isRedAlliance ? -1 : 1);
-        return RadiansPerSecond.of(base).times(MaxAngularRate.in(RadiansPerSecond));
+        return RadiansPerSecond.of(base).times(Constants.MaxAngularRate.in(RadiansPerSecond));
     }
 }

@@ -60,12 +60,17 @@ public class Subsystems {
         joshPrototype = new JoshPrototype();
         austinGearPrototype = new PrototypeGenericMotor("austinGearPrototype", 51);
 
-         fourMotorElevator = new ComposedPrototype(
-            new PrototypeGenericMotor("ElevatorMotor1", 60),
-            new PrototypeGenericMotor("ElevatorMotor2", 61),
-            new PrototypeGenericMotor("ElevatorMotor3", 62),
-            new PrototypeGenericMotor("ElevatorMotor4", 63)
-        );
+//         fourMotorElevator = new ComposedPrototype( (components) -> {
+//                PrototypeGeneric.filterByType(components, PrototypeGenericMotor.class).get(0).setDirection(PrototypeGenericMotor.direction.corresponding);
+//                PrototypeGeneric.filterByType(components, PrototypeGenericMotor.class).get(1).setDirection(PrototypeGenericMotor.direction.corresponding);
+//                PrototypeGeneric.filterByType(components, PrototypeGenericMotor.class).get(2).setDirection(PrototypeGenericMotor.direction.inverse);
+//                PrototypeGeneric.filterByType(components, PrototypeGenericMotor.class).get(3).setDirection(PrototypeGenericMotor.direction.inverse);
+//            },
+//            new PrototypeGenericMotor("ElevatorMotor1", 60),
+//            new PrototypeGenericMotor("ElevatorMotor2", 61),
+//            new PrototypeGenericMotor("ElevatorMotor3", 62),
+//            new PrototypeGenericMotor("ElevatorMotor4", 63)
+//        );
 
         lifecycleSubsystems.add(visionSubsystem);
         lifecycleSubsystems.add(ledSubsystem);

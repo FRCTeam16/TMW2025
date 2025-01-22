@@ -5,8 +5,8 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
-import static frc.robot.hci.SwerveSupplier.MaxAngularRate;
-import static frc.robot.hci.SwerveSupplier.MaxSpeed;
+import static frc.robot.Constants.MaxAngularRate;
+import static frc.robot.Constants.MaxSpeed;
 
 import java.util.Objects;
 
@@ -15,12 +15,12 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.commands.AlignmentTest;
 import frc.robot.subsystems.vision.VisionAssist;
 
 import frc.robot.hci.JoystickSwerveSupplier;
@@ -58,6 +58,8 @@ public class RobotContainer {
 
     private final SwerveSupplier swerveSupplier;
 
+    private Constants.JoystickMode joystickMode = Constants.JoystickMode.AlignmentTest;
+
     public RobotContainer() {
         Subsystems.getInstance(); // Ensure subsystems are initialized
         drivetrain = Subsystems.swerveSubsystem;
@@ -84,19 +86,25 @@ public class RobotContainer {
             )
         );
 
-        if(Constants.JoshPrototype){
-        // Josh Prototype Controls
-        joystick.b().onTrue(Subsystems.joshPrototype.stop());
-        joystick.y().onTrue(Subsystems.joshPrototype.eject()).onFalse(Subsystems.joshPrototype.stop());
-        joystick.a().onTrue(Subsystems.joshPrototype.ingest()).onFalse(Subsystems.joshPrototype.stop());
+        switch (this.joystickMode) {
+            case JoshPrototype -> {
+                // Josh Prototype Controls
+                joystick.b().onTrue(Subsystems.joshPrototype.stop());
+                joystick.y().onTrue(Subsystems.joshPrototype.eject()).onFalse(Subsystems.joshPrototype.stop());
+                joystick.a().onTrue(Subsystems.joshPrototype.ingest()).onFalse(Subsystems.joshPrototype.stop());
+            }
+            case AustinGearboxPrototype -> {
+                joystick.b().onTrue(Subsystems.austinGearPrototype.stop());
+                joystick.a().onTrue(Subsystems.austinGearPrototype.runForward()).onFalse(Subsystems.austinGearPrototype.stop());
+                joystick.y().onTrue(Subsystems.austinGearPrototype.runBackward()).onFalse(Subsystems.austinGearPrototype.stop());
+                joystick.x().onTrue(Subsystems.austinGearPrototype.updateIds()); //IDs are ran through elastic
+            }
+            case AlignmentTest -> {
+                joystick.x().whileTrue(new AlignmentTest(AlignmentTest.TargetSide.LEFT));
+                joystick.b().whileTrue(new AlignmentTest(AlignmentTest.TargetSide.RIGHT));
+            }
         }
-        // austinGear Prototype Controls
-        if(Constants.austinGearboxPrototype){
-            joystick.b().onTrue(Subsystems.austinGearPrototype.stop());
-            joystick.a().onTrue(Subsystems.austinGearPrototype.runForward());
-            joystick.y().onTrue(Subsystems.austinGearPrototype.runBackward()).onFalse(Subsystems.austinGearPrototype.stop());
-            joystick.x().onTrue(Subsystems.austinGearPrototype.updateIds()); // IDs are ran through elastic
-        }
+
 
         // reset the field-centric heading on left bumper press
         joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));

@@ -72,6 +72,11 @@ public class VisionOdometryUpdater {
     private Optional<LimelightHelpers.PoseEstimate> doMegaTag2Estimate(String limelightName) {
         LimelightHelpers.SetRobotOrientation(limelightName, m_poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
         LimelightHelpers.PoseEstimate visionPoseEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limelightName);    // TODO Check red switch here?
+
+        if (visionPoseEstimate == null) {
+            return Optional.empty();
+        }
+
         if (Math.abs(drivetrain.getPigeon2().getAngularVelocityZWorld().getValue().in(DegreesPerSecond)) > 720) // if our angular velocity is greater than 720 degrees per second, ignore vision updates
         {
             return Optional.empty();
