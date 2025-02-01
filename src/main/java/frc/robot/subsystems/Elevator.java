@@ -43,7 +43,7 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     private PIDController elevatorPID = new PIDController(0, 0, 0);
     private PIDHelper elevatorHelper = new PIDHelper("Elevator/pid");
 
-    private boolean isOpenloop;
+    private boolean isOpenloop = true; // DON'T TURN TO FALSE
     private double openLoopMotorOutput;
     private double closedLoopMotorOutput;
 
