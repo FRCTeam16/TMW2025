@@ -34,7 +34,8 @@ public class Subsystems {
     public static JoshPrototype joshPrototype;
     public static PrototypeGenericMotor austinGearPrototype;
     public static Elevator elevator;
-
+    public static Climber climber;
+    
     public static List<Lifecycle> lifecycleSubsystems = new ArrayList<>();
 
     //
