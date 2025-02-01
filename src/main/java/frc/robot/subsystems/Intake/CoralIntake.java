@@ -8,12 +8,18 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+import au.grapplerobotics.LaserCan;
+import au.grapplerobotics.ConfigurationFailedException;
+
 public class CoralIntake extends SubsystemBase {
     private TalonFX TopMotor;
     private TalonFX BottomMotor;
     
-    private DutyCycleOut RunForwad= new DutyCycleOut(1);
-    private DutyCycleOut RunBackward= new DutyCycleOut(-1);
+    private DutyCycleOut RunForwad = new DutyCycleOut(1);
+    private DutyCycleOut RunBackward = new DutyCycleOut(-1);
+
+    private LaserCan laser1 = new LaserCan(111);
+    private LaserCan laser2 = new LaserCan(112);
 
     private NeutralOut Stop = new NeutralOut();
 
@@ -25,7 +31,8 @@ public class CoralIntake extends SubsystemBase {
     
     @Override
     public void periodic(){
-
+        RunForwad = new DutyCycleOut(SmartDashboard.getNumber("Intake/CoralIntakeSpeed", 1));
+        RunForwad = new DutyCycleOut(SmartDashboard.getNumber("Intake/CoralIntakeSpeed", -1));
     }
 
     public Command runForward(){
@@ -48,5 +55,48 @@ public class CoralIntake extends SubsystemBase {
             BottomMotor.setControl(Stop);
         });
     };
+
+    public Command intakeCoral(){
+        return new Command() {
+            int step = 1;
+            boolean shooting = false;
+            @Override
+            public void execute(){
+                
+                //default action when intake: runForward(fast)
+                if(step == 1){
+                    SmartDashboard.putNumber("Intake/CoralIntakeSpeed", 0.70); //todo: get real Speed
+                    //if first laser sees coral while default action: change action to action 2
+                    if( laser1.getMeasurement().distance_mm > 3 ){ // todo: get real nums
+                        step = 2;
+                    }
+                }
+
+                //secound action when intake: runForward(slow)
+                if(step == 2){
+                    SmartDashboard.putNumber("Intake/CoralIntakeSpeed", 0.30); //todo: get real Speed
+                    //if secound laser sees coral while secound action: change action to action 3
+                    if(laser2.getMeasurement().distance_mm > 3){
+                        step = 3;
+                    }
+                }
+
+                //thrid action when intake: stop
+                if(step == 3){
+                    //if shooting == true {runForwards(fast)}
+                    if(shooting){
+                        SmartDashboard.putNumber("Intake/CoralIntakeSpeed", 0.70); //todo: get real Speed
+                    }else{
+                        //defualt action when we're doing nothing: stop
+                        stop();
+                    }
+                    //if we've stopped shooting and secound laser sees nothing: go back to default action
+                    if(!shooting && laser2.getMeasurement().distance_mm <= 3){
+                        step = 1;
+                    }
+                }
+            }
+        };
+    }
 
 }
