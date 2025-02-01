@@ -14,7 +14,8 @@ public class Constants {
     public enum JoystickMode {
         JoshPrototype,
         AustinGearboxPrototype,
-        AlignmentTest
+        AlignmentTest,
+        ElevatorProto
     }
     public static final boolean JoshPrototype = false;
     public static final boolean austinGearboxPrototype = true;

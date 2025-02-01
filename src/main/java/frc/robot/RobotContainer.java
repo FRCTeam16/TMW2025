@@ -103,6 +103,11 @@ public class RobotContainer {
                 joystick.x().whileTrue(new AlignmentTest(AlignmentTest.TargetSide.LEFT));
                 joystick.b().whileTrue(new AlignmentTest(AlignmentTest.TargetSide.RIGHT));
             }
+            case ElevatorProto -> {
+                joystick.a().onTrue(Subsystems.elevator.openLoopDown()).onFalse(Subsystems.elevator.openLoopStop());
+                joystick.y().onTrue(Subsystems.elevator.openLoopUp()).onFalse(Subsystems.elevator.openLoopStop());
+                joystick.x().onTrue(Subsystems.elevator.updateMotorIds());
+            }
         }
 
 

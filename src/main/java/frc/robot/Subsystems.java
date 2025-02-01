@@ -33,7 +33,7 @@ public class Subsystems {
     public static LEDSubsystem ledSubsystem;
     public static JoshPrototype joshPrototype;
     public static PrototypeGenericMotor austinGearPrototype;
-    public static ComposedPrototype fourMotorElevator;
+    public static Elevator elevator;
 
     public static List<Lifecycle> lifecycleSubsystems = new ArrayList<>();
 
@@ -59,6 +59,7 @@ public class Subsystems {
         ledSubsystem = new LEDSubsystem();
         joshPrototype = new JoshPrototype();
         austinGearPrototype = new PrototypeGenericMotor("austinGearPrototype", 51);
+        elevator = new Elevator();
 
 //         fourMotorElevator = new ComposedPrototype( (components) -> {
 //                PrototypeGeneric.filterByType(components, PrototypeGenericMotor.class).get(0).setDirection(PrototypeGenericMotor.direction.corresponding);
