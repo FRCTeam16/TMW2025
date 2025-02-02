@@ -2,12 +2,20 @@ package frc.robot.generated;
 
 import edu.wpi.first.wpilibj.Filesystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.vision.Limelight;
+import frc.robot.subsystems.vision.VisionTypes;
 import frc.robot.util.BSLogger;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Inches;
 
 /**
  * The `RobotConfig` class is a singleton that manages the configuration of the robot.
@@ -40,6 +48,17 @@ public class RobotConfig {
             instance = new RobotConfig();
         }
         return instance;
+    }
+
+    public Iterable<Limelight> getLimelights() {
+        return switch (this.config) {
+            case LOWRIDA ->
+                Stream.of(
+                    new VisionTypes.LimelightInfo("limelight", Inches.of(6), Degrees.of(26.84)),
+                    new VisionTypes.LimelightInfo("limelight-right", Inches.of(6), Degrees.of(-26.84)))
+                .map(Limelight::new).collect(Collectors.toSet());
+            default -> Collections.emptySet();
+        };
     }
 
     /**

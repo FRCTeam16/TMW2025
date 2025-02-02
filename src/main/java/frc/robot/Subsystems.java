@@ -51,11 +51,7 @@ public class Subsystems {
 
     public Subsystems() {
         swerveSubsystem = Robot.robotConfig.createDrivetrain();
-        visionSubsystem = new VisionSubsystem(
-                Stream.of(
-                    new VisionTypes.LimelightInfo("limelight", Inches.of(6), Degrees.of(26.84)),
-                    new VisionTypes.LimelightInfo("limelight-right", Inches.of(6), Degrees.of(0)))
-                .map(Limelight::new).collect(Collectors.toSet()));
+        visionSubsystem = new VisionSubsystem(Robot.robotConfig.getLimelights());
         ledSubsystem = new LEDSubsystem();
         joshPrototype = new JoshPrototype();
         austinGearPrototype = new PrototypeGenericMotor("austinGearPrototype", 51);
