@@ -7,7 +7,6 @@ import java.util.stream.Stream;
 
 import frc.robot.async.AsyncManager;
 import frc.robot.auto.AutoManager;
-import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.DMS.LEDSubsystem;
 import frc.robot.subsystems.Prototype.ComposedPrototype;
@@ -51,7 +50,7 @@ public class Subsystems {
     public static VisionOdometryUpdater visionOdometryUpdater;
 
     public Subsystems() {
-        swerveSubsystem = TunerConstants.createDrivetrain();
+        swerveSubsystem = Robot.robotConfig.createDrivetrain();
         visionSubsystem = new VisionSubsystem(
                 Stream.of(
                     new VisionTypes.LimelightInfo("limelight", Inches.of(6), Degrees.of(26.84)),

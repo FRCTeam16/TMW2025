@@ -1,6 +1,5 @@
 package frc.robot.util;
 
-import frc.robot.generated.TunerConstants;
 import com.ctre.phoenix6.hardware.Pigeon2;
 
 public class PigeonUtil {
