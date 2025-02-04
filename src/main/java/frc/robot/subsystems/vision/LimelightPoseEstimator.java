@@ -48,6 +48,14 @@ public class LimelightPoseEstimator implements Sendable  {
         this(limelightName, true);
     }
 
+    public String getLimelightName() {
+        return limelightName;
+    }
+
+    public LimelightHelpers.PoseEstimate getLastPoseEstimate() {
+        return lastPoseEstimate;
+    }
+
     /**
      * Estimates the robot pose using the current robot yaw angle.
      *

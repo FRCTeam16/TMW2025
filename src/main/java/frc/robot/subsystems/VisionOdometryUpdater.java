@@ -91,6 +91,10 @@ public class VisionOdometryUpdater implements Sendable {
         return mainPoseEstimator;
     }
 
+    public Pose2d getEstimatedPose() {
+         return mainPoseEstimator.getEstimatedPosition();
+    }
+
     public List<LimelightPoseEstimator> getVisionPoseEstimators() {
         return visionPoseEstimators;
     }
@@ -108,4 +112,6 @@ public class VisionOdometryUpdater implements Sendable {
                     visionPoseEstimator);
         });
     }
+
+
 }

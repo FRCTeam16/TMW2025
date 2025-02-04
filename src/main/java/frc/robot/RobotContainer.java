@@ -21,6 +21,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.AlignmentTest;
+import frc.robot.commands.ResetPoseCommand;
+import frc.robot.commands.vision.UpdateRobotPoseFromVision;
 import frc.robot.subsystems.vision.VisionAssist;
 
 import frc.robot.hci.JoystickSwerveSupplier;
@@ -114,6 +116,8 @@ public class RobotContainer {
         // reset the field-centric heading on left bumper press
         joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
+        bindSmartDashboardButtons();
+
         drivetrain.registerTelemetry(logger::telemeterize);
     }
 
@@ -124,7 +128,13 @@ public class RobotContainer {
         joystick.back().and(joystick.x()).whileTrue(drivetrain.getSysIdHelper().sysIdDynamic(Direction.kReverse));
         joystick.start().and(joystick.y()).whileTrue(drivetrain.getSysIdHelper().sysIdQuasistatic(Direction.kForward));
         joystick.start().and(joystick.x()).whileTrue(drivetrain.getSysIdHelper().sysIdQuasistatic(Direction.kReverse));
+    }
 
+    public void bindSmartDashboardButtons() {
+        SmartDashboard.putData("Reset Pose", new ResetPoseCommand());
+        Subsystems.visionSubsystem.getLimelights().forEach(limelight ->
+                SmartDashboard.putData("Rest Pose from " + limelight.getName(),
+                UpdateRobotPoseFromVision.resetFromLimelightPoseEstimator(limelight.getName())));
     }
 
     public Command getAutonomousCommand() {
