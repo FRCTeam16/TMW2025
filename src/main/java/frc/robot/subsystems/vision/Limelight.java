@@ -31,6 +31,9 @@ public class Limelight {
                 DEFAULT_HEIGHT_TO_TARGET,
                 this.info.cameraAngle());
 
+        // TODO: Add robotspace coordinates for camera
+        // https://docs.limelightvision.io/docs/docs-limelight/apis/limelight-lib#6-special-apriltag-functionality
+
         updateTagList();
     }
 

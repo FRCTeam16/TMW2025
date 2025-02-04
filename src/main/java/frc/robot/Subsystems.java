@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.async.AsyncManager;
 import frc.robot.auto.AutoManager;
 import frc.robot.subsystems.*;
@@ -73,6 +74,9 @@ public class Subsystems {
         lifecycleSubsystems.add(ledSubsystem);
 
         createUtilitySubsystems();
+
+        // Add SD registrations
+        registerSmartDashboardEntries();
     }
 
     private void createUtilitySubsystems() {
@@ -85,6 +89,10 @@ public class Subsystems {
         autoManager.initialize();
 
         visionOdometryUpdater = new VisionOdometryUpdater(visionSubsystem, swerveSubsystem);
+    }
+
+    private void registerSmartDashboardEntries() {
+        SmartDashboard.putData("VisionOdometryUpdater", visionOdometryUpdater);
     }
 
     public static Subsystems getInstance() {
