@@ -102,3 +102,8 @@ wpi.java.configureTestTasks(test)
 tasks.withType(JavaCompile) {
     options.compilerArgs.add '-XDstringConcat=inline'
 }
+
+task runGenReefCoords(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass.set('tools.GenReefCoords')
+}
