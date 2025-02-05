@@ -35,7 +35,7 @@ public class LimelightPoseEstimator implements Sendable  {
         this.useMegaTag2 = useMegaTag2;
 
         this.publisher = NetworkTableInstance.getDefault()
-                .getStructTopic("LimelightPoseEstimator/" + limelightName, Pose2d.struct).publish();
+                .getStructTopic("LimelightPoseEstimator/" + limelightName + "/pose", Pose2d.struct).publish();
     }
 
     /**
@@ -131,7 +131,7 @@ public class LimelightPoseEstimator implements Sendable  {
 
     @Override
     public void initSendable(SendableBuilder sendableBuilder) {
-        sendableBuilder.setSmartDashboardType("LimelightPoseEstimator-"+limelightName);
+        sendableBuilder.setSmartDashboardType("LimelightPoseEstimator");
         sendableBuilder.addStringProperty("Limelight Name", () -> limelightName, null);
         sendableBuilder.addBooleanProperty("Use MegaTag2", () -> useMegaTag2, null);
         if (lastPoseEstimate != null) {

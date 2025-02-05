@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -8,6 +9,7 @@ import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Subsystems;
 import frc.robot.subsystems.vision.LimelightPoseEstimator;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
@@ -58,7 +60,13 @@ public class VisionOdometryUpdater implements Sendable {
 
         this.posePublisher = NetworkTableInstance.getDefault()
                 .getStructTopic("VisionOdometryUpdater/Pose", Pose2d.struct).publish();
-        this.visionPoseEstimators.forEach(visionPoseEstimator -> SmartDashboard.putData(visionPoseEstimator));
+
+        this.visionPoseEstimators.forEach(visionPoseEstimator -> 
+        SmartDashboard.putData("VisionPoseEstimator-"+visionPoseEstimator.getName(), visionPoseEstimator));
+
+        //
+        Subsystems.swerveSubsystem.setVisionMeasurementStdDevs(VecBuilder.fill(0.5, 0.5, 99)); // Example tuning values
+
 
     }
 
@@ -82,6 +90,10 @@ public class VisionOdometryUpdater implements Sendable {
                 .filter(pose -> pose.avgTagDist < MAX_TAG_DIST_METERS)
                 .forEach(pose -> {
                     mainPoseEstimator.addVisionMeasurement(pose.pose, pose.timestampSeconds);
+
+                    // We need to figure out why this isn't working
+                    // Subsystems.swerveSubsystem.addVisionMeasurement(pose.pose, pose.timestampSeconds);
+                    
                 });
 
         // Publish pose to network tables
@@ -107,12 +119,7 @@ public class VisionOdometryUpdater implements Sendable {
         sendableBuilder.addDoubleProperty("MainPose/X", () -> mainPoseEstimator.getEstimatedPosition().getX(), null);
         sendableBuilder.addDoubleProperty("MainPose/Y", () -> mainPoseEstimator.getEstimatedPosition().getY(), null);
         sendableBuilder.addDoubleProperty("MainPose/Rotation", () -> mainPoseEstimator.getEstimatedPosition().getRotation().getDegrees(), null);
-
-        this.visionPoseEstimators.forEach(visionPoseEstimator -> {
-            SmartDashboard.putData(
-                    "VisionOdometryUpdater/" + visionPoseEstimator.getName() + "-estimator",
-                    visionPoseEstimator);
-        });
+    
     }
 
 

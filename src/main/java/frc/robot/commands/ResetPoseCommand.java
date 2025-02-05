@@ -4,21 +4,17 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Subsystems;
+import frc.robot.util.BSLogger;
 
 public class ResetPoseCommand extends Command {
     private final Pose2d pose;
 
-
-    public ResetPoseCommand(Pose2d pose) {
-        this.pose = pose;
+    public ResetPoseCommand() {
+        this.pose = null;
     }
 
     public ResetPoseCommand(Translation2d translation) {
         this.pose = new Pose2d(translation, Subsystems.swerveSubsystem.getPigeon2().getRotation2d());
-    }
-
-    public ResetPoseCommand() {
-        this(new Pose2d(0, 0, Subsystems.swerveSubsystem.getPigeon2().getRotation2d()));
     }
 
     @Override
@@ -28,6 +24,13 @@ public class ResetPoseCommand extends Command {
 
     @Override
     public void initialize() {
-         Subsystems.swerveSubsystem.resetPose(pose);
+        if (pose != null) {
+            BSLogger.log("ResetPoseCommand", "Resetting pose to: " + pose);
+            Subsystems.swerveSubsystem.resetPose(pose);
+        } else {
+            BSLogger.log("RestPoseCommand", "Zeroing Pose");
+            Subsystems.swerveSubsystem.tareEverything();
+        }
+
     }
 }

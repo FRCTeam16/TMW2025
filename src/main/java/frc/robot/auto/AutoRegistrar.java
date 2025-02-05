@@ -19,6 +19,7 @@ public class AutoRegistrar {
         autoManager.registerStrategy("Spin", "Spin", SpinStrategy::new);
         autoManager.registerStrategy("Cresent", "Cresent", CresentStrategy::new);
         autoManager.registerStrategy("ThreePiece", "ThreePiece", ThreePieceStrategy::new);
+        autoManager.registerStrategy("BlueReefCheck", "BlueReefCheck", () -> new SimplePathStrategy("BlueReefCheck"));
     }
 
     public static void registerNamedCommands() {

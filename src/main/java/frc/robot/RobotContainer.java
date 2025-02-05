@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.AlignmentTest;
 import frc.robot.commands.ResetPoseCommand;
+import frc.robot.commands.ZeroYawCommand;
 import frc.robot.commands.vision.UpdateRobotPoseFromVision;
 import frc.robot.subsystems.vision.VisionAssist;
 
@@ -131,9 +132,11 @@ public class RobotContainer {
     }
 
     public void bindSmartDashboardButtons() {
-        SmartDashboard.putData("Reset Pose", new ResetPoseCommand());
+        SmartDashboard.putData("Zero Yaw", new ZeroYawCommand());
+
+        SmartDashboard.putData("Test Reset Pose", new ResetPoseCommand());
         Subsystems.visionSubsystem.getLimelights().forEach(limelight ->
-                SmartDashboard.putData("Reset Pose from " + limelight.getName(),
+                SmartDashboard.putData("Test Reset Pose from " + limelight.getName(),
                 UpdateRobotPoseFromVision.resetFromLimelightPoseEstimator(limelight.getName())));
     }
 
