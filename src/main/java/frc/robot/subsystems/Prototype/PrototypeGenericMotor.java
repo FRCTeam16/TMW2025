@@ -27,8 +27,8 @@ public class PrototypeGenericMotor implements Lifecycle, Subsystem, PrototypeGen
     private TalonFX motor;
 
     private final NeutralOut stop = new NeutralOut();
-    private final DutyCycleOut forward = new DutyCycleOut(0);
-    private final DutyCycleOut backward = new DutyCycleOut(0);
+    private final DutyCycleOut forward = new DutyCycleOut(0.3);
+    private final DutyCycleOut backward = new DutyCycleOut(-0.3);
     private String ElasticName;
 
     // Overloaded constructor for default configs
@@ -44,8 +44,8 @@ public class PrototypeGenericMotor implements Lifecycle, Subsystem, PrototypeGen
         motor.getConfigurator().apply((new TalonFXConfiguration()));
         motor.setNeutralMode(NeutralModeValue.Brake);
 
-        SmartDashboard.setDefaultNumber(ElasticName + "/runForward", -0);
-        SmartDashboard.setDefaultNumber(ElasticName + "/runBackward", 0);
+        SmartDashboard.setDefaultNumber(ElasticName + "/runForward", -0.3);
+        SmartDashboard.setDefaultNumber(ElasticName + "/runBackward", 0.3);
         
         config.accept(this);
     }
@@ -54,12 +54,14 @@ public class PrototypeGenericMotor implements Lifecycle, Subsystem, PrototypeGen
     public Command runForward(){
         return this.runOnce(() -> {
         motor.setControl(forward.withOutput(SmartDashboard.getNumber(ElasticName+"/runForward", 0)));
+        System.out.println(SmartDashboard.getNumber(ElasticName+"/runForward", 0));
         });
     }
 
     public Command runBackward(){
         return this.runOnce(() -> {
         motor.setControl(backward.withOutput(SmartDashboard.getNumber(ElasticName + "/runBackward", 0)));
+        System.out.println(SmartDashboard.getNumber(ElasticName+"/runBackward", 0));
         });
     }
 

@@ -35,6 +35,8 @@ public class Subsystems {
     public static PrototypeGenericMotor austinGearPrototype;
     public static Elevator elevator;
     public static Climber climber;
+    public static PrototypeGenericMotor Climberproto1;
+    public static PrototypeGenericMotor Climberproto2;
     
     public static List<Lifecycle> lifecycleSubsystems = new ArrayList<>();
 
@@ -58,6 +60,8 @@ public class Subsystems {
         austinGearPrototype = new PrototypeGenericMotor("austinGearPrototype", 51);
         elevator = new Elevator();
 
+
+
 //         fourMotorElevator = new ComposedPrototype( (components) -> {
 //                PrototypeGeneric.filterByType(components, PrototypeGenericMotor.class).get(0).setDirection(PrototypeGenericMotor.direction.corresponding);
 //                PrototypeGeneric.filterByType(components, PrototypeGenericMotor.class).get(1).setDirection(PrototypeGenericMotor.direction.corresponding);
@@ -69,6 +73,14 @@ public class Subsystems {
 //            new PrototypeGenericMotor("ElevatorMotor3", 62),
 //            new PrototypeGenericMotor("ElevatorMotor4", 63)
 //        );
+
+
+        Climberproto1 = new PrototypeGenericMotor("ClimberProto3", 50, (m) -> {m.setDirection(PrototypeGenericMotor.direction.inverse);});
+        Climberproto2 = new PrototypeGenericMotor("ClimberProto4", 51, (m) -> {m.setDirection(PrototypeGenericMotor.direction.corresponding);});
+
+
+
+
 
         lifecycleSubsystems.add(visionSubsystem);
         lifecycleSubsystems.add(ledSubsystem);

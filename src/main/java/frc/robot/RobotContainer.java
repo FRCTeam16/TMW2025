@@ -4,7 +4,8 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static frc.robot.Constants.MaxAngularRate;
 import static frc.robot.Constants.MaxSpeed;
 
@@ -20,17 +21,16 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.robot.commands.AlignmentTest;
 import frc.robot.commands.ResetPoseCommand;
 import frc.robot.commands.ZeroYawCommand;
 import frc.robot.commands.vision.UpdateRobotPoseFromVision;
-import frc.robot.subsystems.vision.VisionAssist;
-
 import frc.robot.hci.JoystickSwerveSupplier;
 import frc.robot.hci.SwerveSupplier;
 import frc.robot.hci.XBoxSwerveSupplier;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Lifecycle;
+import frc.robot.subsystems.vision.VisionAssist;
+import frc.robot.commands.AlignmentTest;
 
 public class RobotContainer {
 
@@ -61,7 +61,7 @@ public class RobotContainer {
 
     private final SwerveSupplier swerveSupplier;
 
-    private Constants.JoystickMode joystickMode = Constants.JoystickMode.AlignmentTest;
+    private Constants.JoystickMode joystickMode = Constants.JoystickMode.climberProto;
 
     public RobotContainer() {
         Subsystems.getInstance(); // Ensure subsystems are initialized
@@ -110,6 +110,14 @@ public class RobotContainer {
                 joystick.a().onTrue(Subsystems.elevator.openLoopDown()).onFalse(Subsystems.elevator.openLoopStop());
                 joystick.y().onTrue(Subsystems.elevator.openLoopUp()).onFalse(Subsystems.elevator.openLoopStop());
                 joystick.x().onTrue(Subsystems.elevator.updateMotorIds());
+            }
+            case climberProto -> { // dual integrated motors
+                joystick.rightBumper().and(joystick.a()).onTrue(Subsystems.Climberproto1.runForward()).onFalse(Subsystems.Climberproto1.stop());
+                joystick.rightBumper().and(joystick.y()).onTrue(Subsystems.Climberproto1.runBackward()).onFalse(Subsystems.Climberproto1.stop());
+                joystick.leftBumper().and(joystick.a()).onTrue(Subsystems.Climberproto2.runForward()).onFalse(Subsystems.Climberproto2.stop());
+                joystick.leftBumper().and(joystick.y()).onTrue(Subsystems.Climberproto2.runBackward()).onFalse(Subsystems.Climberproto2.stop());
+                joystick.b().onTrue(Subsystems.Climberproto1.stop());
+                joystick.b().onTrue(Subsystems.Climberproto2.stop());
             }
         }
 
