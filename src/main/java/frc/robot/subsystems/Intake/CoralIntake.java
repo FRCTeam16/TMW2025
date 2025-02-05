@@ -23,6 +23,13 @@ public class CoralIntake extends SubsystemBase {
 
     private NeutralOut Stop = new NeutralOut();
 
+    //TODO: GET REAL NUMS
+    int laser1SenseDistance = 3;
+    int laser2SenseDistance = 3;
+    double intakeHighSpeed = 0.7;
+    double intakeLowSpeed = 0.2;
+    //TODO: GET REAL NUMS
+
 
     public CoralIntake() {
         TopMotor = new TalonFX((int)SmartDashboard.getNumber("Intake/CoralIntakeTopMotor", 101));
@@ -65,18 +72,18 @@ public class CoralIntake extends SubsystemBase {
                 
                 //default action when intake: runForward(fast)
                 if(step == 1){
-                    SmartDashboard.putNumber("Intake/CoralIntakeSpeed", 0.70); //todo: get real Speed
+                    SmartDashboard.putNumber("Intake/CoralIntakeSpeed", intakeHighSpeed); 
                     //if first laser sees coral while default action: change action to action 2
-                    if( laser1.getMeasurement().distance_mm > 3 ){ // todo: get real nums
+                    if( laser1.getMeasurement().distance_mm > laser1SenseDistance){ 
                         step = 2;
                     }
                 }
 
                 //secound action when intake: runForward(slow)
                 if(step == 2){
-                    SmartDashboard.putNumber("Intake/CoralIntakeSpeed", 0.30); //todo: get real Speed
+                    SmartDashboard.putNumber("Intake/CoralIntakeSpeed", intakeLowSpeed); 
                     //if secound laser sees coral while secound action: change action to action 3
-                    if(laser2.getMeasurement().distance_mm > 3){
+                    if(laser2.getMeasurement().distance_mm > laser2SenseDistance){
                         step = 3;
                     }
                 }
@@ -85,13 +92,13 @@ public class CoralIntake extends SubsystemBase {
                 if(step == 3){
                     //if shooting == true {runForwards(fast)}
                     if(shooting){
-                        SmartDashboard.putNumber("Intake/CoralIntakeSpeed", 0.70); //todo: get real Speed
+                        SmartDashboard.putNumber("Intake/CoralIntakeSpeed", intakeHighSpeed);
                     }else{
                         //defualt action when we're doing nothing: stop
                         stop();
                     }
                     //if we've stopped shooting and secound laser sees nothing: go back to default action
-                    if(!shooting && laser2.getMeasurement().distance_mm <= 3){
+                    if(!shooting && laser2.getMeasurement().distance_mm <= laser2SenseDistance){
                         step = 1;
                     }
                 }
