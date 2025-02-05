@@ -131,7 +131,7 @@ public class LimelightPoseEstimator implements Sendable  {
 
     @Override
     public void initSendable(SendableBuilder sendableBuilder) {
-        sendableBuilder.setSmartDashboardType("LimelightPoseEstimator");
+        sendableBuilder.setSmartDashboardType("LimelightPoseEstimator-"+limelightName);
         sendableBuilder.addStringProperty("Limelight Name", () -> limelightName, null);
         sendableBuilder.addBooleanProperty("Use MegaTag2", () -> useMegaTag2, null);
         if (lastPoseEstimate != null) {

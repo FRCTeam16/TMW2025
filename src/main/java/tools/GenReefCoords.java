@@ -15,8 +15,8 @@ public class GenReefCoords {
     private static Map<String, Translation2d> getNewWaypoints() {
         Map<String, Translation2d> lookup = new HashMap<>();
 
-        lookup.put("BlueA", new Translation2d(2.9624999999998676, 4.237499999995492));
-        lookup.put("BlueB", new Translation2d(2.9624999999998676, 3.8437499999954925));
+        lookup.put("BlueA", new Translation2d(2.69, 4.42));
+        lookup.put("BlueB", new Translation2d(2.69, 4.08));
         lookup.put("BlueC", new Translation2d(3.6874999999998677, 2.9312499999954924));
         lookup.put("BlueD", new Translation2d(4.031249999999868, 2.7749999999954924));
         lookup.put("BlueE", new Translation2d(4.981249999999868, 2.6749999999954923));

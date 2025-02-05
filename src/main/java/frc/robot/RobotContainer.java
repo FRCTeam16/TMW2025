@@ -133,7 +133,7 @@ public class RobotContainer {
     public void bindSmartDashboardButtons() {
         SmartDashboard.putData("Reset Pose", new ResetPoseCommand());
         Subsystems.visionSubsystem.getLimelights().forEach(limelight ->
-                SmartDashboard.putData("Rest Pose from " + limelight.getName(),
+                SmartDashboard.putData("Reset Pose from " + limelight.getName(),
                 UpdateRobotPoseFromVision.resetFromLimelightPoseEstimator(limelight.getName())));
     }
 

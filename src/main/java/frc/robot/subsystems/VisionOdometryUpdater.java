@@ -55,8 +55,10 @@ public class VisionOdometryUpdater implements Sendable {
         this.visionPoseEstimators = visionSubsystem.getLimelights().stream()
                 .map(limelight -> new LimelightPoseEstimator(limelight.getName()))
                 .toList();
+
         this.posePublisher = NetworkTableInstance.getDefault()
                 .getStructTopic("VisionOdometryUpdater/Pose", Pose2d.struct).publish();
+        this.visionPoseEstimators.forEach(visionPoseEstimator -> SmartDashboard.putData(visionPoseEstimator));
 
     }
 
