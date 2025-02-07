@@ -13,8 +13,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.PIDHelper;
 
-public class Elevator extends SubsystemBase implements Lifecycle {
-
+    public class Elevator extends SubsystemBase implements Lifecycle {
     // looks like elevator is in fixed position so we dont have to deal with pivot pose
     // We may end up having a cancoder for the elevator, I'll assume we have them for now then make adjestments later if need be
 
@@ -22,6 +21,14 @@ public class Elevator extends SubsystemBase implements Lifecycle {
 
     public enum elevatatorSetpoint{ //TODO: these numbers will probably break things if ran on the bot but I need a robot built before we're able to fix them
         zero(0),
+        TROUGH(0.0),    // Lowest position
+        P1(0.0),        // POLE 1
+        P2(0.0),        // POLE 2
+        P3(0.0),        // POLE 3
+        AlgaeBarge(0.0),        // ALGAE BED
+        AlgaeProcessor(0.0),    // ALGAE Processor
+        AlgaeReefHigh(0.0),     // ALGAE Reef High
+        AlgaeReefLow(0.0),      // ALGAE Reef Low
         twoPi(2*Math.PI);
 
         public final double val;
@@ -105,5 +112,10 @@ public class Elevator extends SubsystemBase implements Lifecycle {
             right.setControl(brake);
         });
     }
-
-}
+    public Command moveToPosition(elevatatorSetpoint e) {
+                return this.runOnce(() -> {
+                    currentSetpoint = e.val;
+                    //    moveToPosition(val);
+                    });
+            }
+        }
