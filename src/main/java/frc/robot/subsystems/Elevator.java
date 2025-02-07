@@ -25,7 +25,10 @@ import frc.robot.util.PIDHelper;
         P1(0.0),        // POLE 1
         P2(0.0),        // POLE 2
         P3(0.0),        // POLE 3
-        ALGAE(0.0),   // ALGAE BED
+        AlgaeBarge(0.0),        // ALGAE BED
+        AlgaeProcessor(0.0),    // ALGAE Processor
+        AlgaeReefHigh(0.0),     // ALGAE Reef High
+        AlgaeReefLow(0.0),      // ALGAE Reef Low
         twoPi(2*Math.PI);
 
         public final double val;
