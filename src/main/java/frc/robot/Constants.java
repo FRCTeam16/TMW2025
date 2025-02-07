@@ -16,7 +16,8 @@ public class Constants {
         AustinGearboxPrototype,
         AlignmentTest,
         ElevatorProto,
-        climberProto
+        climberProto,
+        AlgaeProto,
     }
     public static final boolean JoshPrototype = false;
     public static final boolean austinGearboxPrototype = true;

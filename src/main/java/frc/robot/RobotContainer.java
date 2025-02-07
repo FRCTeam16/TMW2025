@@ -61,7 +61,7 @@ public class RobotContainer {
 
     private final SwerveSupplier swerveSupplier;
 
-    private Constants.JoystickMode joystickMode = Constants.JoystickMode.climberProto;
+    private Constants.JoystickMode joystickMode = Constants.JoystickMode.AlgaeProto;
 
     public RobotContainer() {
         Subsystems.getInstance(); // Ensure subsystems are initialized
@@ -118,6 +118,10 @@ public class RobotContainer {
                 joystick.leftBumper().and(joystick.y()).onTrue(Subsystems.Climberproto2.runBackward()).onFalse(Subsystems.Climberproto2.stop());
                 joystick.b().onTrue(Subsystems.Climberproto1.stop());
                 joystick.b().onTrue(Subsystems.Climberproto2.stop());
+            }
+            case AlgaeProto -> {
+                joystick.x().onTrue(Subsystems.algaeIntake.runForward()).onFalse(Subsystems.algaeIntake.hold());
+                joystick.b().onTrue(Subsystems.algaeIntake.runBackward()).onFalse(Subsystems.algaeIntake.stop());
             }
         }
 

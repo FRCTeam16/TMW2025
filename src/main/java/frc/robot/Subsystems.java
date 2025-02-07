@@ -10,6 +10,7 @@ import frc.robot.async.AsyncManager;
 import frc.robot.auto.AutoManager;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.DMS.LEDSubsystem;
+import frc.robot.subsystems.Intake.AlgaeIntake;
 import frc.robot.subsystems.Prototype.ComposedPrototype;
 import frc.robot.subsystems.Prototype.JoshPrototype;
 import frc.robot.subsystems.Prototype.PrototypeGenericMotor;
@@ -37,6 +38,7 @@ public class Subsystems {
     public static Climber climber;
     public static PrototypeGenericMotor Climberproto1;
     public static PrototypeGenericMotor Climberproto2;
+    public static AlgaeIntake algaeIntake;
     
     public static List<Lifecycle> lifecycleSubsystems = new ArrayList<>();
 
@@ -59,6 +61,7 @@ public class Subsystems {
         joshPrototype = new JoshPrototype();
         austinGearPrototype = new PrototypeGenericMotor("austinGearPrototype", 51);
         elevator = new Elevator();
+        algaeIntake = new AlgaeIntake();
 
 
 
@@ -77,10 +80,6 @@ public class Subsystems {
 
         Climberproto1 = new PrototypeGenericMotor("ClimberProto3", 50, (m) -> {m.setDirection(PrototypeGenericMotor.direction.inverse);});
         Climberproto2 = new PrototypeGenericMotor("ClimberProto4", 51, (m) -> {m.setDirection(PrototypeGenericMotor.direction.corresponding);});
-
-
-
-
 
         lifecycleSubsystems.add(visionSubsystem);
         lifecycleSubsystems.add(ledSubsystem);
@@ -105,6 +104,7 @@ public class Subsystems {
 
     private void registerSmartDashboardEntries() {
         SmartDashboard.putData("VisionOdometryUpdater", visionOdometryUpdater);
+        SmartDashboard.putData("AlgaeIntake", algaeIntake);
     }
 
     public static Subsystems getInstance() {
