@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static frc.robot.Constants.MaxAngularRate;
 import static frc.robot.Constants.MaxSpeed;
+import static frc.robot.Constants.austinGearboxPrototype;
 
 import java.util.Objects;
 
@@ -28,7 +29,9 @@ import frc.robot.hci.JoystickSwerveSupplier;
 import frc.robot.hci.SwerveSupplier;
 import frc.robot.hci.XBoxSwerveSupplier;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.Controls;
 import frc.robot.subsystems.Lifecycle;
+import frc.robot.subsystems.Prototype.ComponentPreconfig;
 import frc.robot.subsystems.vision.VisionAssist;
 import frc.robot.commands.AlignmentTest;
 
@@ -49,9 +52,9 @@ public class RobotContainer {
 
     private final Telemetry logger = new Telemetry(MaxSpeed.in(MetersPerSecond));
 
-    private final Joystick driveStick = new Joystick(0);
-    private final Joystick steerStick = new Joystick(1);
-    private final CommandXboxController joystick = new CommandXboxController(2);
+    private final Joystick driveStick = Controls.left;
+    private final Joystick steerStick = Controls.right;
+    private final CommandXboxController joystick = Controls.joystick;
 
     private final JoystickButton prototypeButton = new JoystickButton(driveStick, 1); // for prototype subsystem
     private final JoystickButton visionAssistButton = new JoystickButton(driveStick, 2);
@@ -97,10 +100,7 @@ public class RobotContainer {
                 joystick.a().onTrue(Subsystems.joshPrototype.ingest()).onFalse(Subsystems.joshPrototype.stop());
             }
             case AustinGearboxPrototype -> {
-                joystick.b().onTrue(Subsystems.austinGearPrototype.stop());
-                joystick.a().onTrue(Subsystems.austinGearPrototype.runForward()).onFalse(Subsystems.austinGearPrototype.stop());
-                joystick.y().onTrue(Subsystems.austinGearPrototype.runBackward()).onFalse(Subsystems.austinGearPrototype.stop());
-                joystick.x().onTrue(Subsystems.austinGearPrototype.updateIds()); //IDs are ran through elastic
+                Subsystems.austinGearPrototype.InjectControls(ComponentPreconfig.ABXYpreconf);
             }
             case AlignmentTest -> {
                 joystick.x().whileTrue(new AlignmentTest(AlignmentTest.TargetSide.LEFT));

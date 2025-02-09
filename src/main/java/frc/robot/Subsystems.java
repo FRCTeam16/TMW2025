@@ -13,8 +13,9 @@ import frc.robot.subsystems.DMS.LEDSubsystem;
 import frc.robot.subsystems.Intake.AlgaeIntake;
 import frc.robot.subsystems.Prototype.ComposedPrototype;
 import frc.robot.subsystems.Prototype.JoshPrototype;
-import frc.robot.subsystems.Prototype.PrototypeGenericMotor;
-import frc.robot.subsystems.Prototype.PrototypeGeneric;
+import frc.robot.subsystems.Prototype.ComponentMotor;
+import frc.robot.subsystems.Prototype.ComponentPreconfig;
+import frc.robot.subsystems.Prototype.PrototypeComponent;
 import frc.robot.subsystems.vision.Limelight;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.subsystems.vision.VisionTypes;
@@ -33,11 +34,11 @@ public class Subsystems {
     public static VisionSubsystem visionSubsystem;
     public static LEDSubsystem ledSubsystem;
     public static JoshPrototype joshPrototype;
-    public static PrototypeGenericMotor austinGearPrototype;
+    public static ComponentMotor austinGearPrototype;
     public static Elevator elevator;
     public static Climber climber;
-    public static PrototypeGenericMotor Climberproto1;
-    public static PrototypeGenericMotor Climberproto2;
+    public static ComponentMotor Climberproto1;
+    public static ComponentMotor Climberproto2;
     public static AlgaeIntake algaeIntake;
     
     public static List<Lifecycle> lifecycleSubsystems = new ArrayList<>();
@@ -59,7 +60,7 @@ public class Subsystems {
         visionSubsystem = new VisionSubsystem(Robot.robotConfig.getLimelights());
         ledSubsystem = new LEDSubsystem();
         joshPrototype = new JoshPrototype();
-        austinGearPrototype = new PrototypeGenericMotor("austinGearPrototype", 51);
+        austinGearPrototype = new ComponentMotor("austinGearPrototype", 51);
         elevator = new Elevator();
         algaeIntake = new AlgaeIntake();
 
@@ -78,8 +79,9 @@ public class Subsystems {
 //        );
 
 
-        Climberproto1 = new PrototypeGenericMotor("ClimberProto3", 50, (m) -> {m.setDirection(PrototypeGenericMotor.direction.inverse);});
-        Climberproto2 = new PrototypeGenericMotor("ClimberProto4", 51, (m) -> {m.setDirection(PrototypeGenericMotor.direction.corresponding);});
+        Climberproto1 = new ComponentMotor("ClimberProto3", 50, (m) -> {m.setDirection(ComponentMotor.direction.inverse);});
+        Climberproto1.InjectControls(ComponentPreconfig.ABXYpreconf);
+        Climberproto2 = new ComponentMotor( "ClimberProto4", 51, (m) -> {m.setDirection(ComponentMotor.direction.corresponding);});
 
         lifecycleSubsystems.add(visionSubsystem);
         lifecycleSubsystems.add(ledSubsystem);
