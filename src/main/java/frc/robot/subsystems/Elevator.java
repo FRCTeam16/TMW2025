@@ -61,10 +61,19 @@ public class Elevator extends SubsystemBase implements Lifecycle {
         }
     }
 
+    private void moveToPosition(ElevatorSetpoint setpoint) {
+        this.currentSetpoint = setpoint.val;
+        left.setControl(positionVoltage.withPosition(setpoint.val));
+    }
+
     private double getCurrentPosition() {
         // FIXME when robot is wired
         // return left.getPosition().getValueAsDouble();
         return 0;
+    }
+
+    public boolean isInPosition() {
+        return Math.abs(getCurrentPosition() - currentSetpoint) < 0.1;
     }
 
 
@@ -92,19 +101,12 @@ public class Elevator extends SubsystemBase implements Lifecycle {
         });
     }
 
-    public Command moveToPositionCommand(ElevatorSetpoint e) {
-        return this.runOnce(() -> {
-            BSLogger.log("Elevator", "Moving to position: " + e.val);
-            left.setControl(positionVoltage.withPosition(e.val));
-            currentSetpoint = e.val;
-        });
-    }
-
     @Override
     public void initSendable(SendableBuilder builder) {
         super.initSendable(builder);
         builder.setSmartDashboardType("Elevator");
         builder.addDoubleProperty("Current Position", this::getCurrentPosition, null);
+        builder.addBooleanProperty("Is In Position", this::isInPosition, null);
         builder.addDoubleProperty("Current Setpoint", () -> currentSetpoint, (sp) -> currentSetpoint = sp);
         builder.addDoubleProperty("Open Loop Motor Speed", () -> openLoopMotorSpeed, (speed) -> openLoopMotorSpeed = speed);
     }
@@ -126,4 +128,25 @@ public class Elevator extends SubsystemBase implements Lifecycle {
             this.val = val;
         }
     }
+
+
+    public class ElevatorMoveToPositionCommand extends Command {
+        private final ElevatorSetpoint setpoint;
+
+        public ElevatorMoveToPositionCommand(ElevatorSetpoint setpoint) {
+            this.setpoint = setpoint;
+            addRequirements(Elevator.this);
+        }
+
+        @Override
+        public void initialize() {
+            Elevator.this.moveToPosition(this.setpoint);
+        }
+
+        @Override
+        public boolean isFinished() {
+            return Elevator.this.isInPosition();
+        }
+    }
+
 }

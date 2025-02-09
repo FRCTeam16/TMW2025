@@ -1,27 +1,19 @@
 package frc.robot;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.async.AsyncManager;
 import frc.robot.auto.AutoManager;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.DMS.LEDSubsystem;
+import frc.robot.subsystems.Intake.AlgaeArm;
 import frc.robot.subsystems.Intake.AlgaeIntake;
 import frc.robot.subsystems.Intake.CoralIntake;
-import frc.robot.subsystems.Prototype.ComposedPrototype;
 import frc.robot.subsystems.Prototype.JoshPrototype;
 import frc.robot.subsystems.Prototype.PrototypeGenericMotor;
-import frc.robot.subsystems.Prototype.PrototypeGeneric;
-import frc.robot.subsystems.vision.Limelight;
 import frc.robot.subsystems.vision.VisionSubsystem;
-import frc.robot.subsystems.vision.VisionTypes;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Inches;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The Subsystems class represents a collection of subsystems used in the robot.
@@ -36,6 +28,7 @@ public class Subsystems {
     public static Elevator elevator;
     public static Climber climber;
     public static AlgaeIntake algaeIntake;
+    public static AlgaeArm algaeArm;
     public static CoralIntake coralIntake;
 
     public static JoshPrototype joshPrototype;
@@ -65,6 +58,7 @@ public class Subsystems {
         elevator = new Elevator();
         climber = new Climber();
         algaeIntake = new AlgaeIntake();
+        algaeArm = new AlgaeArm();
         coralIntake = new CoralIntake();
 
         // Prototype support
@@ -101,6 +95,7 @@ public class Subsystems {
         lifecycleSubsystems.add(elevator);
         lifecycleSubsystems.add(climber);
         lifecycleSubsystems.add(algaeIntake);
+        lifecycleSubsystems.add(algaeArm);
         lifecycleSubsystems.add(coralIntake);
     }
 
@@ -109,6 +104,7 @@ public class Subsystems {
         SmartDashboard.putData("Subsystems/Elevator", elevator);
         SmartDashboard.putData("Subsystems/Climber", climber);
         SmartDashboard.putData("Subsystems/AlgaeIntake", algaeIntake);
+        SmartDashboard.putData("Subsystems/AlgaeArm", algaeArm);
         SmartDashboard.putData("Subsystems/CoralIntake", coralIntake);
     }
 
