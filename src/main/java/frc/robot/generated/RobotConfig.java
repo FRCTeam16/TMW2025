@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -24,6 +25,8 @@ import static edu.wpi.first.units.Units.Inches;
 public class RobotConfig {
     private static RobotConfig instance;
     private final ConfigName config;
+    private final CanIDLookup canIDLookup;
+
 
     /**
      * Private constructor to prevent instantiation.
@@ -35,6 +38,7 @@ public class RobotConfig {
             case "lowrida" -> ConfigName.LOWRIDA;
             default -> ConfigName.DEFAULT;
         };
+        this.canIDLookup = new CanIDLookup(this.config);
         BSLogger.log("RobotConfig", "Using configuration: " + this.config);
     }
 
@@ -52,12 +56,11 @@ public class RobotConfig {
 
     public Iterable<Limelight> getLimelights() {
         return switch (this.config) {
-            case LOWRIDA ->
-                Stream.of(
+            case LOWRIDA -> Stream.of(
 //                    new VisionTypes.LimelightInfo("limelight", Inches.of(6), Degrees.of(26.84)),
-                    new VisionTypes.LimelightInfo("limelight-lfour", Inches.of(6), Degrees.of(26.84)),
-                    new VisionTypes.LimelightInfo("limelight-right", Inches.of(6), Degrees.of(-26.84)))
-                .map(Limelight::new).collect(Collectors.toSet());
+                            new VisionTypes.LimelightInfo("limelight-lfour", Inches.of(6), Degrees.of(26.84)),
+                            new VisionTypes.LimelightInfo("limelight-right", Inches.of(6), Degrees.of(-26.84)))
+                    .map(Limelight::new).collect(Collectors.toSet());
             default -> Collections.emptySet();
         };
     }
@@ -118,6 +121,10 @@ public class RobotConfig {
             case LOWRIDA -> LowridaTunerConstants.createDrivetrain();
             default -> TunerConstants.createDrivetrain();
         };
+    }
+
+    public int getCanID(String motorName) {
+        return canIDLookup.getCanID(motorName);
     }
 
     /**

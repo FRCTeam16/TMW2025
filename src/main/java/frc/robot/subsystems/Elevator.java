@@ -1,27 +1,116 @@
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.Radian;
-
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
-
-import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.util.PIDHelper;
+import frc.robot.Robot;
+import frc.robot.util.BSLogger;
 
-    public class Elevator extends SubsystemBase implements Lifecycle {
-    // looks like elevator is in fixed position so we dont have to deal with pivot pose
+import static edu.wpi.first.units.Units.Radian;
+
+public class Elevator extends SubsystemBase implements Lifecycle {
     // We may end up having a cancoder for the elevator, I'll assume we have them for now then make adjestments later if need be
 
     //  left.getPosition().getValue().in(Radian); is the equivalent to the CANcoder elevatorPose.getPosition().getValue().in(Radian);|
 
-    public enum elevatatorSetpoint{ //TODO: these numbers will probably break things if ran on the bot but I need a robot built before we're able to fix them
-        zero(0),
-        TROUGH(0.0),    // Lowest position
+    private final CANcoder elevatorPose = new CANcoder(61);
+    private final NeutralOut brake = new NeutralOut();
+    private final PositionVoltage positionVoltage = new PositionVoltage(0);
+    private TalonFX left;
+    private TalonFX right;
+    private double currentPoseAsRad;
+    private final DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
+    private double openLoopMotorSpeed = 0.2;
+    private double currentSetpoint = 0;
+
+    public Elevator() {
+        if (false) {
+            left = new TalonFX(Robot.robotConfig.getCanID("elevatorLeftMotor"));
+            right = new TalonFX(Robot.robotConfig.getCanID("elevatorRightMotor"));
+            right.setControl(new Follower(left.getDeviceID(), true));
+
+            Slot0Configs slot0 = new Slot0Configs();
+            slot0.kP = 0.1;
+            slot0.kI = 0.0;
+            slot0.kD = 0.0;
+            slot0.kG = 0.0;
+
+            MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs();
+            motionMagicConfigs.MotionMagicCruiseVelocity = 1;
+            motionMagicConfigs.MotionMagicAcceleration = 1;
+            motionMagicConfigs.MotionMagicJerk = 1;
+            motionMagicConfigs.MotionMagicExpo_kA = 0.0;
+            motionMagicConfigs.MotionMagicExpo_kV = 0.0;
+
+            TalonFXConfiguration configuration = new TalonFXConfiguration().withSlot0(slot0).withMotionMagic(motionMagicConfigs);
+
+            left.getConfigurator().apply(configuration);
+
+            // Zero motor position at startup
+            left.setPosition(0);
+        }
+    }
+
+    private double getCurrentPosition() {
+        // FIXME when robot is wired
+        // return left.getPosition().getValueAsDouble();
+        return 0;
+    }
+
+
+    public Command openLoopUpCommand() {
+        return this.runOnce(() -> {
+            left.setControl(dutyCycleOut.withOutput(openLoopMotorSpeed));
+        });
+    }
+
+    public Command openLoopDownCommand() {
+        return this.runOnce(() -> {
+            left.setControl(dutyCycleOut.withOutput(-openLoopMotorSpeed));
+        });
+    }
+
+    public Command openLoopStopCommand() {
+        return this.runOnce(() -> {
+            left.setControl(brake);
+        });
+    }
+
+    public Command holdPositionCommand() {
+        return this.runOnce(() -> {
+            left.setControl(positionVoltage.withPosition(getCurrentPosition()));
+        });
+    }
+
+    public Command moveToPositionCommand(ElevatorSetpoint e) {
+        return this.runOnce(() -> {
+            BSLogger.log("Elevator", "Moving to position: " + e.val);
+            left.setControl(positionVoltage.withPosition(e.val));
+            currentSetpoint = e.val;
+        });
+    }
+
+    @Override
+    public void initSendable(SendableBuilder builder) {
+        super.initSendable(builder);
+        builder.setSmartDashboardType("Elevator");
+        builder.addDoubleProperty("Current Position", this::getCurrentPosition, null);
+        builder.addDoubleProperty("Current Setpoint", () -> currentSetpoint, (sp) -> currentSetpoint = sp);
+        builder.addDoubleProperty("Open Loop Motor Speed", () -> openLoopMotorSpeed, (speed) -> openLoopMotorSpeed = speed);
+    }
+
+    public enum ElevatorSetpoint { //TODO: these numbers will probably break things if ran on the bot but I need a robot built before we're able to fix them
+        Zero(0), TROUGH(0.0),    // Lowest position
         P1(0.0),        // POLE 1
         P2(0.0),        // POLE 2
         P3(0.0),        // POLE 3
@@ -29,93 +118,12 @@ import frc.robot.util.PIDHelper;
         AlgaeProcessor(0.0),    // ALGAE Processor
         AlgaeReefHigh(0.0),     // ALGAE Reef High
         AlgaeReefLow(0.0),      // ALGAE Reef Low
-        twoPi(2*Math.PI);
+        twoPi(2 * Math.PI);
 
         public final double val;
-        private elevatatorSetpoint(double val){
+
+        ElevatorSetpoint(double val) {
             this.val = val;
         }
     }
-
-    private TalonFX left;
-    private TalonFX right;
-    private CANcoder elevatorPose = new CANcoder(61);
-    private double currentPoseAsRad; // refers to the number rotations of the cancoder in radians
-    private double currentSetpoint;
-
-    private NeutralOut brake = new NeutralOut();
-    private DutyCycleOut runOpenLoop = new DutyCycleOut(0);
-    private DutyCycleOut runClosedLoop = new DutyCycleOut(0);
-
-    private PIDController elevatorPID = new PIDController(0, 0, 0);
-    private PIDHelper elevatorHelper = new PIDHelper("Elevator/pid");
-
-    private boolean isOpenloop = true; // DON'T TURN TO FALSE
-    private double openLoopMotorOutput;
-    private double closedLoopMotorOutput;
-
-    public Elevator(){
-        SmartDashboard.setDefaultNumber("Elevator/openLoopMotorOutput", 1);
-        SmartDashboard.setDefaultNumber("Elevator/closedLoopMotorOutput", 0);
-        SmartDashboard.setDefaultNumber("Elevator/leftMotorID", 160);
-        SmartDashboard.setDefaultNumber("Elevator/rightMotorID", 161);
-
-        updateMotorIds();
-
-        elevatorHelper.initialize(0.01, 0, 0, 0, 0, 0); // TODO: real numbers
-        elevatorPID.setTolerance(0.5); // TODO: real numbers
-    }
-
-    @Override
-    public void periodic(){
-        currentPoseAsRad = elevatorPose.getPosition().getValue().in(Radian);
-        closedLoopMotorOutput = elevatorPID.calculate(currentPoseAsRad, currentSetpoint);
-        runClosedLoop = new DutyCycleOut(closedLoopMotorOutput);
-
-        if(!isOpenloop){
-            right.setControl(runClosedLoop);
-            left.setControl(runClosedLoop);
-        }
-
-        openLoopMotorOutput = SmartDashboard.getNumber("Elevator/openLoopMotorOutput", 0);
-        SmartDashboard.setDefaultNumber("Elvator/closedLoopMotorOutput", closedLoopMotorOutput);
-        SmartDashboard.updateValues();
-       
-    }
-
-    public Command updateMotorIds(){
-        return this.runOnce(() -> {
-        left = new TalonFX((int)SmartDashboard.getNumber("Elevator/leftMotorID", 160));
-        right = new TalonFX((int)SmartDashboard.getNumber("Elevator/rightMotorID", 161));
-        });
-    }
-
-    public Command openLoopUp(){
-        return this.runOnce(()->{
-        runOpenLoop = new DutyCycleOut(openLoopMotorOutput);
-        left.setControl(runOpenLoop);
-        right.setControl(runOpenLoop);
-        });
-    }
-
-    public Command openLoopDown(){
-        return this.runOnce(()->{
-        runOpenLoop = new DutyCycleOut(-openLoopMotorOutput);
-        left.setControl(runOpenLoop);
-        right.setControl(runOpenLoop);
-        });
-    }
-
-    public Command openLoopStop(){
-        return this.runOnce(() -> {
-            left.setControl(brake);
-            right.setControl(brake);
-        });
-    }
-    public Command moveToPosition(elevatatorSetpoint e) {
-                return this.runOnce(() -> {
-                    currentSetpoint = e.val;
-                    //    moveToPosition(val);
-                    });
-            }
-        }
+}
