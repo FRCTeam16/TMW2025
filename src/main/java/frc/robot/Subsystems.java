@@ -1,27 +1,22 @@
 package frc.robot;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.async.AsyncManager;
 import frc.robot.auto.AutoManager;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.DMS.LEDSubsystem;
+import frc.robot.subsystems.Intake.AlgaeArm;
 import frc.robot.subsystems.Intake.AlgaeIntake;
-import frc.robot.subsystems.Prototype.ComposedPrototype;
+import frc.robot.subsystems.Intake.CoralIntake;
 import frc.robot.subsystems.Prototype.JoshPrototype;
 import frc.robot.subsystems.Prototype.ComponentMotor;
 import frc.robot.subsystems.Prototype.ComponentPreconfig;
 import frc.robot.subsystems.Prototype.PrototypeComponent;
 import frc.robot.subsystems.vision.Limelight;
 import frc.robot.subsystems.vision.VisionSubsystem;
-import frc.robot.subsystems.vision.VisionTypes;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Inches;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The Subsystems class represents a collection of subsystems used in the robot.
@@ -33,13 +28,17 @@ public class Subsystems {
     public static CommandSwerveDrivetrain swerveSubsystem;
     public static VisionSubsystem visionSubsystem;
     public static LEDSubsystem ledSubsystem;
-    public static JoshPrototype joshPrototype;
-    public static ComponentMotor austinGearPrototype;
     public static Elevator elevator;
     public static Climber climber;
-    public static ComponentMotor Climberproto1;
-    public static ComponentMotor Climberproto2;
     public static AlgaeIntake algaeIntake;
+    public static AlgaeArm algaeArm;
+    public static CoralIntake coralIntake;
+
+    public static JoshPrototype joshPrototype;
+    public static PrototypeComponent austinGearPrototype;
+    public static PrototypeComponent Climberproto1;
+    public static PrototypeComponent Climberproto2;
+
     
     public static List<Lifecycle> lifecycleSubsystems = new ArrayList<>();
 
@@ -59,6 +58,22 @@ public class Subsystems {
         swerveSubsystem = Robot.robotConfig.createDrivetrain();
         visionSubsystem = new VisionSubsystem(Robot.robotConfig.getLimelights());
         ledSubsystem = new LEDSubsystem();
+        elevator = new Elevator();
+        climber = new Climber();
+        algaeIntake = new AlgaeIntake();
+        algaeArm = new AlgaeArm();
+        coralIntake = new CoralIntake();
+
+        // Prototype support
+        createPrototypeSubsystems();
+        createUtilitySubsystems();
+
+        // Bookkeeping and registrations
+        registerLifecycleSubsystems();
+        registerSmartDashboardEntries();
+    }
+
+    private void createPrototypeSubsystems() {
         joshPrototype = new JoshPrototype();
         austinGearPrototype = new ComponentMotor("austinGearPrototype", 51);
         elevator = new Elevator();
@@ -104,9 +119,23 @@ public class Subsystems {
         visionOdometryUpdater = new VisionOdometryUpdater(visionSubsystem, swerveSubsystem);
     }
 
+    private void registerLifecycleSubsystems() {
+        lifecycleSubsystems.add(visionSubsystem);
+        lifecycleSubsystems.add(ledSubsystem);
+        lifecycleSubsystems.add(elevator);
+        lifecycleSubsystems.add(climber);
+        lifecycleSubsystems.add(algaeIntake);
+        lifecycleSubsystems.add(algaeArm);
+        lifecycleSubsystems.add(coralIntake);
+    }
+
     private void registerSmartDashboardEntries() {
         SmartDashboard.putData("VisionOdometryUpdater", visionOdometryUpdater);
-        SmartDashboard.putData("AlgaeIntake", algaeIntake);
+        SmartDashboard.putData("Subsystems/Elevator", elevator);
+        SmartDashboard.putData("Subsystems/Climber", climber);
+        SmartDashboard.putData("Subsystems/AlgaeIntake", algaeIntake);
+        SmartDashboard.putData("Subsystems/AlgaeArm", algaeArm);
+        SmartDashboard.putData("Subsystems/CoralIntake", coralIntake);
     }
 
     public static Subsystems getInstance() {

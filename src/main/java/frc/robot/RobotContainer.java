@@ -15,6 +15,8 @@ import java.util.Objects;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -72,6 +74,11 @@ public class RobotContainer {
         swerveSupplier = (!RobotBase.isSimulation()) ?
                 new JoystickSwerveSupplier(driveStick, steerStick, joystick) :
                 new XBoxSwerveSupplier(joystick);
+
+        if (RobotBase.isSimulation()) {
+            drivetrain.resetPose(new Pose2d(3, 3, Rotation2d.fromDegrees(0)));
+        }
+
         configureBindings();
     }
 
@@ -107,9 +114,8 @@ public class RobotContainer {
                 joystick.b().whileTrue(new AlignmentTest(AlignmentTest.TargetSide.RIGHT));
             }
             case ElevatorProto -> {
-                joystick.a().onTrue(Subsystems.elevator.openLoopDown()).onFalse(Subsystems.elevator.openLoopStop());
-                joystick.y().onTrue(Subsystems.elevator.openLoopUp()).onFalse(Subsystems.elevator.openLoopStop());
-                joystick.x().onTrue(Subsystems.elevator.updateMotorIds());
+                joystick.a().onTrue(Subsystems.elevator.openLoopDownCommand()).onFalse(Subsystems.elevator.openLoopStopCommand());
+                joystick.y().onTrue(Subsystems.elevator.openLoopUpCommand()).onFalse(Subsystems.elevator.openLoopStopCommand());
             }
             case climberProto -> { // dual integrated motors
                 joystick.rightBumper().and(joystick.a()).onTrue(Subsystems.Climberproto1.runForward()).onFalse(Subsystems.Climberproto1.stop());
@@ -120,8 +126,8 @@ public class RobotContainer {
                 joystick.b().onTrue(Subsystems.Climberproto2.stop());
             }
             case AlgaeProto -> {
-                joystick.x().onTrue(Subsystems.algaeIntake.runForward()).onFalse(Subsystems.algaeIntake.hold());
-                joystick.b().onTrue(Subsystems.algaeIntake.runBackward()).onFalse(Subsystems.algaeIntake.stop());
+                joystick.x().onTrue(Subsystems.algaeIntake.intakeCommand()).onFalse(Subsystems.algaeIntake.holdAlgaeCommand());
+                joystick.b().onTrue(Subsystems.algaeIntake.ejectCommand()).onFalse(Subsystems.algaeIntake.stopCommand());
             }
         }
 
