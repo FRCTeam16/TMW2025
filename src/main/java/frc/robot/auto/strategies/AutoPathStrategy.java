@@ -13,7 +13,7 @@ import java.util.function.Supplier;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
-public class AutoPathStrategy extends SequentialCommandGroup {
+public abstract class AutoPathStrategy extends SequentialCommandGroup {
 
     private final SwerveRequest.PointWheelsAt pointWheels = new SwerveRequest.PointWheelsAt().withModuleDirection(Rotation2d.fromDegrees(0));
 

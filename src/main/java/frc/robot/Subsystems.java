@@ -136,6 +136,7 @@ public class Subsystems {
         SmartDashboard.putData("Subsystems/AlgaeIntake", algaeIntake);
         SmartDashboard.putData("Subsystems/AlgaeArm", algaeArm);
         SmartDashboard.putData("Subsystems/CoralIntake", coralIntake);
+        SmartDashboard.putData("Subsystems/Vision", visionSubsystem);
     }
 
     public static Subsystems getInstance() {

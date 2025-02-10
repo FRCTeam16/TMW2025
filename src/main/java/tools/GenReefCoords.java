@@ -10,14 +10,20 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This class is used to generate new waypoints for the BlueCoordPath.path file.
+ * Current waypoints can be extracted using the ExtractWaypoints class.
+ */
 public class GenReefCoords {
 
     private static Map<String, Translation2d> getNewWaypoints() {
         Map<String, Translation2d> lookup = new HashMap<>();
 
-        lookup.put("BlueA", new Translation2d(2.69, 4.42));
-        lookup.put("BlueB", new Translation2d(2.69, 4.08));
+        lookup.put("BlueA", new Translation2d(2.962, 4.42));
+        lookup.put("BlueB", new Translation2d(2.9624999999998676, 3.8437499999954925));
         lookup.put("BlueC", new Translation2d(3.6874999999998677, 2.9312499999954924));
+        lookup.put("BlueCSLeft", new Translation2d(1.0595663265306123, 7.2074298469387745));
+        lookup.put("BlueCSRight", new Translation2d(0.9103316326530613, 0.8500318877551013));
         lookup.put("BlueD", new Translation2d(4.031249999999868, 2.7749999999954924));
         lookup.put("BlueE", new Translation2d(4.981249999999868, 2.6749999999954923));
         lookup.put("BlueF", new Translation2d(5.281249999999867, 2.9312499999954924));
