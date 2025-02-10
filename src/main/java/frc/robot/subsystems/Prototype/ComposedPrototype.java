@@ -8,63 +8,68 @@ import java.util.function.Function;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
-public class ComposedPrototype implements PrototypeGeneric{
-    PrototypeGeneric[] prototypeComponents;
-    
+public class ComposedPrototype implements PrototypeComponent{
+    PrototypeComponent[] prototypeComponents;
+    // need do: 
 
-    public ComposedPrototype(PrototypeGeneric... gProtoypes){
+    public ComposedPrototype(PrototypeComponent... gProtoypes){
         prototypeComponents = gProtoypes;
     }
 
     public Command runForward(){
         return new SequentialCommandGroup(
-            commandComponents(PrototypeGeneric::runForward)
+            commandComponents(PrototypeComponent::runForward)
         );
     }
 
     public Command runBackward(){
         return new SequentialCommandGroup(
-            commandComponents(PrototypeGeneric::runBackward)
+            commandComponents(PrototypeComponent::runBackward)
         );
     }
 
     public Command stop(){
         return new SequentialCommandGroup(
-            commandComponents(PrototypeGeneric::stop)
+            commandComponents(PrototypeComponent::stop)
         );
     }
 
     public Command updateIds(){
         return new SequentialCommandGroup(
-            commandComponents(PrototypeGeneric::updateIds)
+            commandComponents(PrototypeComponent::updateIds)
         );
     }
 
-    public PrototypeGeneric getComponent(int componentIndex){
+    public PrototypeComponent getComponent(int componentIndex){
         return prototypeComponents[componentIndex];
     }
 
-    public PrototypeGeneric[] getComponentList(){
+    public PrototypeComponent[] getComponentList(){
         return prototypeComponents;
     }
 
-    public ArrayList<PrototypeGenericMotor> getMotorList(){
-        ArrayList<PrototypeGenericMotor> motors = new ArrayList<>(0);
-        for(PrototypeGeneric component : prototypeComponents){
-            if(component instanceof PrototypeGenericMotor)
-                motors.add((PrototypeGenericMotor)component);
+    public ArrayList<ComponentMotor> getMotorList(){
+        ArrayList<ComponentMotor> motors = new ArrayList<>(0);
+        for(PrototypeComponent component : prototypeComponents){
+            if(component instanceof ComponentMotor)
+                motors.add((ComponentMotor)component);
         }
         return motors;
     }
     
-    private Command[] commandComponents(Function<PrototypeGeneric, Command> extractor){
+    private Command[] commandComponents(Function<PrototypeComponent, Command> extractor){
         return Arrays.stream(prototypeComponents)
                 .map(extractor)
                 .toArray(Command[]::new);
     }
+    
+    public void InjectControls(Consumer<PrototypeComponent> config){
+        
+    }
 
-    
-    
+    public void ClosedLoop(Consumer<PrototypeComponent> setup,Consumer<PrototypeComponent> periodic){
+        
+    }
     
 }
 

@@ -8,12 +8,15 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static frc.robot.Constants.MaxAngularRate;
 import static frc.robot.Constants.MaxSpeed;
+import static frc.robot.Constants.austinGearboxPrototype;
 
 import java.util.Objects;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -28,7 +31,9 @@ import frc.robot.hci.JoystickSwerveSupplier;
 import frc.robot.hci.SwerveSupplier;
 import frc.robot.hci.XBoxSwerveSupplier;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.Controls;
 import frc.robot.subsystems.Lifecycle;
+import frc.robot.subsystems.Prototype.ComponentPreconfig;
 import frc.robot.subsystems.vision.VisionAssist;
 import frc.robot.commands.AlignmentTest;
 
@@ -49,9 +54,9 @@ public class RobotContainer {
 
     private final Telemetry logger = new Telemetry(MaxSpeed.in(MetersPerSecond));
 
-    private final Joystick driveStick = new Joystick(0);
-    private final Joystick steerStick = new Joystick(1);
-    private final CommandXboxController joystick = new CommandXboxController(2);
+    private final Joystick driveStick = Controls.left;
+    private final Joystick steerStick = Controls.right;
+    private final CommandXboxController joystick = Controls.joystick;
 
     private final JoystickButton prototypeButton = new JoystickButton(driveStick, 1); // for prototype subsystem
     private final JoystickButton visionAssistButton = new JoystickButton(driveStick, 2);
@@ -69,6 +74,11 @@ public class RobotContainer {
         swerveSupplier = (!RobotBase.isSimulation()) ?
                 new JoystickSwerveSupplier(driveStick, steerStick, joystick) :
                 new XBoxSwerveSupplier(joystick);
+
+        if (RobotBase.isSimulation()) {
+            drivetrain.resetPose(new Pose2d(3, 3, Rotation2d.fromDegrees(0)));
+        }
+
         configureBindings();
     }
 
@@ -97,19 +107,15 @@ public class RobotContainer {
                 joystick.a().onTrue(Subsystems.joshPrototype.ingest()).onFalse(Subsystems.joshPrototype.stop());
             }
             case AustinGearboxPrototype -> {
-                joystick.b().onTrue(Subsystems.austinGearPrototype.stop());
-                joystick.a().onTrue(Subsystems.austinGearPrototype.runForward()).onFalse(Subsystems.austinGearPrototype.stop());
-                joystick.y().onTrue(Subsystems.austinGearPrototype.runBackward()).onFalse(Subsystems.austinGearPrototype.stop());
-                joystick.x().onTrue(Subsystems.austinGearPrototype.updateIds()); //IDs are ran through elastic
+                Subsystems.austinGearPrototype.InjectControls(ComponentPreconfig.ABXYpreconf);
             }
             case AlignmentTest -> {
                 joystick.x().whileTrue(new AlignmentTest(AlignmentTest.TargetSide.LEFT));
                 joystick.b().whileTrue(new AlignmentTest(AlignmentTest.TargetSide.RIGHT));
             }
             case ElevatorProto -> {
-                joystick.a().onTrue(Subsystems.elevator.openLoopDown()).onFalse(Subsystems.elevator.openLoopStop());
-                joystick.y().onTrue(Subsystems.elevator.openLoopUp()).onFalse(Subsystems.elevator.openLoopStop());
-                joystick.x().onTrue(Subsystems.elevator.updateMotorIds());
+                joystick.a().onTrue(Subsystems.elevator.openLoopDownCommand()).onFalse(Subsystems.elevator.openLoopStopCommand());
+                joystick.y().onTrue(Subsystems.elevator.openLoopUpCommand()).onFalse(Subsystems.elevator.openLoopStopCommand());
             }
             case climberProto -> { // dual integrated motors
                 joystick.rightBumper().and(joystick.a()).onTrue(Subsystems.Climberproto1.runForward()).onFalse(Subsystems.Climberproto1.stop());
@@ -120,8 +126,8 @@ public class RobotContainer {
                 joystick.b().onTrue(Subsystems.Climberproto2.stop());
             }
             case AlgaeProto -> {
-                joystick.x().onTrue(Subsystems.algaeIntake.runForward()).onFalse(Subsystems.algaeIntake.hold());
-                joystick.b().onTrue(Subsystems.algaeIntake.runBackward()).onFalse(Subsystems.algaeIntake.stop());
+                joystick.x().onTrue(Subsystems.algaeIntake.intakeCommand()).onFalse(Subsystems.algaeIntake.holdAlgaeCommand());
+                joystick.b().onTrue(Subsystems.algaeIntake.ejectCommand()).onFalse(Subsystems.algaeIntake.stopCommand());
             }
         }
 

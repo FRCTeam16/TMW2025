@@ -1,14 +1,17 @@
 package frc.robot.subsystems;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.math.controller.PIDController;
+import frc.robot.Robot;
 
-public class Climber extends SubsystemBase {
+public class Climber extends SubsystemBase implements Lifecycle {
 
-    private TalonFX climberHand = new TalonFX(1); 
-    private TalonFX climberPivot = new TalonFX(2); 
+    private TalonFX climberHand = new TalonFX(Robot.robotConfig.getCanID("climberHand"));
+    private TalonFX climberPivot = new TalonFX(Robot.robotConfig.getCanID("climberPivot"));
 
     private DutyCycleOut runOpenLoop = new DutyCycleOut(0);
     private DutyCycleOut runClosedLoop = new DutyCycleOut(0);
@@ -29,6 +32,12 @@ public class Climber extends SubsystemBase {
             climberHand.setControl(runClosedLoop);
             climberPivot.setControl(runClosedLoop);
         }
+    }
+
+    @Override
+    public void initSendable(SendableBuilder builder) {
+        super.initSendable(builder);
+        builder.setSmartDashboardType("Climber");
     }
 
     public Command openLoopPivot() {

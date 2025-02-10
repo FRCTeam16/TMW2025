@@ -1,0 +1,146 @@
+package frc.robot.subsystems.Intake;
+
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Robot;
+import frc.robot.subsystems.Lifecycle;
+
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Radians;
+
+public class AlgaeArm extends SubsystemBase implements Lifecycle {
+
+    public static final double ALLOWED_POSITION_ERROR = 0.1;
+    private static final double GEAR_RATIO = 100.0; // Adjust based on actual gearing
+    private static final double STARTING_ANGLE_DEGREES = 0.0; // Assume horizontal start
+
+    private final TalonFX algaeArmMotor = new TalonFX(Robot.robotConfig.getCanID("algaeArmMotor"));
+
+    //    private static final double TICKS_PER_ROTATION = 2048.0; // TalonFX integrated encoder
+    private final TalonFXConfiguration armConfiguration;
+
+    private final DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
+    private final PositionVoltage positionVoltage = new PositionVoltage(0);
+
+    private double openLoopUpSpeed = 0.1;
+    private double openLoopDownSpeed = 0.1;
+
+
+    public AlgaeArm() {
+        armConfiguration = new TalonFXConfiguration();
+        armConfiguration.Slot0.kP = 0;
+        armConfiguration.Slot0.kI = 0;
+        armConfiguration.Slot0.kD = 0;
+        armConfiguration.MotionMagic.MotionMagicCruiseVelocity = 0;
+        armConfiguration.MotionMagic.MotionMagicAcceleration = 0;
+        algaeArmMotor.getConfigurator().apply(armConfiguration);
+        algaeArmMotor.setNeutralMode(NeutralModeValue.Brake);
+    }
+
+    private void setArmPosition(double position) {
+        // TODO: Consider translating angles?
+        algaeArmMotor.setControl(
+                positionVoltage.withPosition(position)
+                        .withFeedForward(calculateGravityCompensation(getEstimatedAngle())));
+    }
+
+    public Angle getEstimatedAngle() {
+        // Convert encoder ticks to rotations
+        double rotations = getMotorPosition();
+
+        // Convert to degrees
+        double degrees = STARTING_ANGLE_DEGREES + (rotations * 360.0 / GEAR_RATIO);
+
+        return Degrees.of(degrees);
+    }
+
+    private double calculateGravityCompensation(Angle angle) {
+        return Math.cos(angle.in(Radians)) * armConfiguration.Slot0.kG;
+    }
+
+    public void holdPosition() {
+        double currentPosition = getMotorPosition();
+        setArmPosition(currentPosition);
+    }
+
+    public void setPosition(AlgaeArmPosition position) {
+        setArmPosition(position.getPosition());
+    }
+
+    public boolean isInPosition() {
+        // TODO: Use algaeArmMotor.getClosedLoopError() if using magic motion
+        return Math.abs(getMotorPosition()) < ALLOWED_POSITION_ERROR;
+    }
+
+    public double getMotorPosition() {
+        return algaeArmMotor.getPosition().getValueAsDouble();
+    }
+
+    @Override
+    public void initSendable(SendableBuilder builder) {
+        builder.setSmartDashboardType("AlgaeArm");
+        builder.addDoubleProperty("motorPosition", this::getMotorPosition, null);
+        builder.addDoubleProperty("estimatedAngle", () -> this.getEstimatedAngle().in(Degrees), null);
+        builder.addBooleanProperty("isInPosition", this::isInPosition, null);
+        builder.addDoubleProperty("openLoopUpSpeed", () -> openLoopUpSpeed, (v) -> openLoopUpSpeed = v);
+        builder.addDoubleProperty("openLoopDownSpeed", () -> openLoopDownSpeed, (v) -> openLoopDownSpeed = v);
+    }
+
+    public Command openLoopUpCommand() {
+        return this.runOnce(() -> {
+            algaeArmMotor.setControl(dutyCycleOut.withOutput(openLoopUpSpeed));
+        });
+    }
+
+    public Command openLoopDownCommand() {
+        return this.runOnce(() -> {
+            algaeArmMotor.setControl(dutyCycleOut.withOutput(openLoopDownSpeed));
+        });
+    }
+
+    public enum AlgaeArmPosition {
+        Start(0.0),
+        ReefLow(0.0),
+        ReefHigh(0.0),
+        Processor(0.0),
+        Shooting(0.0);
+
+        private final double position;
+
+        AlgaeArmPosition(double position) {
+            this.position = position;
+        }
+
+        public double getPosition() {
+            return position;
+        }
+    }
+
+    public class SetArmPositionCommand extends Command {
+        private final AlgaeArm.AlgaeArmPosition position;
+
+        public SetArmPositionCommand(AlgaeArm.AlgaeArmPosition position) {
+            this.position = position;
+            addRequirements(AlgaeArm.this);
+        }
+
+        @Override
+        public void initialize() {
+            AlgaeArm.this.setArmPosition(position.position);
+        }
+
+        @Override
+        public boolean isFinished() {
+            return AlgaeArm.this.isInPosition();
+        }
+    }
+
+}
+

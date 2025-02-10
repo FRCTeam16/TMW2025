@@ -10,9 +10,11 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.Subsystems;
 import frc.robot.subsystems.Lifecycle;
+import edu.wpi.first.wpilibj2.command.button.Trigger.*;
 
-public class PrototypeGenericMotor implements Lifecycle, Subsystem, PrototypeGeneric {
+public class ComponentMotor implements Lifecycle, Subsystem, PrototypeComponent {
     public enum direction{
         inverse(-1),
         corresponding(1);
@@ -32,11 +34,11 @@ public class PrototypeGenericMotor implements Lifecycle, Subsystem, PrototypeGen
     private String ElasticName;
 
     // Overloaded constructor for default configs
-    public PrototypeGenericMotor(String ElasticName, int defaultId){
+    public ComponentMotor(String ElasticName, int defaultId){
         this(ElasticName, defaultId, (temp)->{});
     }
 
-    public PrototypeGenericMotor(String ElasticName, int defaultId, Consumer<PrototypeGenericMotor> config){
+    public ComponentMotor(String ElasticName, int defaultId, Consumer<ComponentMotor> config){
         this.ElasticName = ElasticName;
         SmartDashboard.setDefaultNumber(ElasticName + "/motorID", defaultId);
         motor = new TalonFX((int)SmartDashboard.getNumber(ElasticName + "/motorID", defaultId));
@@ -77,10 +79,18 @@ public class PrototypeGenericMotor implements Lifecycle, Subsystem, PrototypeGen
         });
     }
 
-    public Command setDirection(PrototypeGenericMotor.direction dir){ // generally usedfull for config lambdas
+    public Command setDirection(ComponentMotor.direction dir){ // generally usedfull for config lambdas
         return this.runOnce(() -> {
             SmartDashboard.setDefaultNumber(ElasticName + "/runForward", SmartDashboard.getNumber(ElasticName + "/runForward", 0) * dir.value);
             SmartDashboard.setDefaultNumber(ElasticName + "/runBackward", SmartDashboard.getNumber(ElasticName + "/runBackward", 0) * -dir.value);
         });
+    }
+
+    public void InjectControls(Consumer<PrototypeComponent> config){
+        config.accept(this);
+    }
+
+    public void ClosedLoop(Consumer<PrototypeComponent> setup,Consumer<PrototypeComponent> periodic){
+
     }
 }
