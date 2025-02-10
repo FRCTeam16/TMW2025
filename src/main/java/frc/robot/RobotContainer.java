@@ -10,10 +10,15 @@ import static frc.robot.Constants.MaxAngularRate;
 import static frc.robot.Constants.MaxSpeed;
 import static frc.robot.Constants.austinGearboxPrototype;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.PathConstraints;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -21,11 +26,13 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.ResetPoseCommand;
 import frc.robot.commands.ZeroYawCommand;
+import frc.robot.commands.auto.PathfindToPoseCommand;
 import frc.robot.commands.vision.UpdateRobotPoseFromVision;
 import frc.robot.hci.JoystickSwerveSupplier;
 import frc.robot.hci.SwerveSupplier;
@@ -131,6 +138,12 @@ public class RobotContainer {
             }
         }
 
+        // Debug Testing
+        Pose2d targetPose = new Pose2d(3.39, 4.05, Rotation2d.fromDegrees(180));
+        PathConstraints pathConstraints = new PathConstraints(1.0, 1.0, 1.0, 1.0);
+        Command cmd = Commands.runOnce(() -> AutoBuilder.pathfindToPose(targetPose, pathConstraints).schedule(), Subsystems.swerveSubsystem);
+        joystick.rightBumper().onTrue(cmd).onFalse(Commands.run(cmd::cancel));
+        // Debug Testing// Debug Testing
 
         // reset the field-centric heading on left bumper press
         joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
@@ -156,6 +169,13 @@ public class RobotContainer {
         Subsystems.visionSubsystem.getLimelights().forEach(limelight ->
                 SmartDashboard.putData("Test Reset Pose from " + limelight.getName(),
                 UpdateRobotPoseFromVision.resetFromLimelightPoseEstimator(limelight.getName())));
+
+        // Debug Testing
+        SmartDashboard.putData("Pathfind", new PathfindToPoseCommand());
+        SmartDashboard.putData("ResetPose", Commands.run(
+                () -> drivetrain.resetPose(new Pose2d(7, 6, Rotation2d.fromDegrees(0))),
+                Subsystems.swerveSubsystem));
+        // Debug Testing
     }
 
     public Command getAutonomousCommand() {

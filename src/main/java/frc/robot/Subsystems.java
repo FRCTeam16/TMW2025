@@ -1,6 +1,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.async.AsyncManager;
 import frc.robot.auto.AutoManager;
 import frc.robot.subsystems.*;
@@ -137,6 +138,8 @@ public class Subsystems {
         SmartDashboard.putData("Subsystems/AlgaeArm", algaeArm);
         SmartDashboard.putData("Subsystems/CoralIntake", coralIntake);
         SmartDashboard.putData("Subsystems/Vision", visionSubsystem);
+
+        SmartDashboard.putData("CommandScheduler", CommandScheduler.getInstance());
     }
 
     public static Subsystems getInstance() {
