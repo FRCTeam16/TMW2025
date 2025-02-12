@@ -11,5 +11,5 @@ public interface PrototypeComponent {
     Command updateIds();
 
     void ClosedLoop(Consumer<PrototypeComponent> setup,Consumer<PrototypeComponent> periodic);
-    void InjectControls(Consumer<PrototypeComponent> config);
+    void InjectControls(Consumer<PrototypeComponent>... config);
 }
