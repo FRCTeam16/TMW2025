@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -13,11 +14,14 @@ import frc.robot.generated.RobotConfig;
 import frc.robot.util.BSLogger;
 import au.grapplerobotics.CanBridge;
 
+import java.util.Queue;
+
 public class Robot extends TimedRobot {
   private Command autonomousCommand;
 
   public static final RobotConfig robotConfig = RobotConfig.getInstance();
   private final RobotContainer m_robotContainer;
+  public static Queue<Pose2d> poseUpdates = new java.util.LinkedList<>();
 
   public Robot() {
     m_robotContainer = new RobotContainer();
@@ -28,6 +32,13 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
     SmartDashboard.putNumber("Yaw", Subsystems.swerveSubsystem.getPigeon2().getYaw().getValueAsDouble());
+
+
+    if (!poseUpdates.isEmpty()) {
+      Pose2d pose = poseUpdates.poll();
+      System.out.println("Resetting pose to: " + pose);
+      Subsystems.swerveSubsystem.resetPose(pose);
+    }
   }
 
   @Override

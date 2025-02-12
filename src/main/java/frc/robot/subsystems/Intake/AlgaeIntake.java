@@ -79,7 +79,7 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle {
     public Command stopCommand() {
         return this.runOnce(() -> {
             algaeIntakeMotor.setControl(brake);
-        });
+        }).withName("Algae Stop");
     }
 
 }

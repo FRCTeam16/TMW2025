@@ -8,12 +8,8 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static frc.robot.Constants.MaxAngularRate;
 import static frc.robot.Constants.MaxSpeed;
-import static frc.robot.Constants.austinGearboxPrototype;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -30,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.commands.AlignmentTest;
 import frc.robot.commands.ResetPoseCommand;
 import frc.robot.commands.ZeroYawCommand;
 import frc.robot.commands.auto.PathfindToPoseCommand;
@@ -42,7 +39,6 @@ import frc.robot.subsystems.Controls;
 import frc.robot.subsystems.Lifecycle;
 import frc.robot.subsystems.Prototype.ComponentPreconfig;
 import frc.robot.subsystems.vision.VisionAssist;
-import frc.robot.commands.AlignmentTest;
 
 public class RobotContainer {
 
@@ -103,7 +99,7 @@ public class RobotContainer {
                  }
                 return visionAssist.deferDrive(swerveSupplier);
                 }
-            )
+            ).withName("Default Teleop")
         );
 
         switch (this.joystickMode) {
@@ -172,9 +168,19 @@ public class RobotContainer {
 
         // Debug Testing
         SmartDashboard.putData("Pathfind", new PathfindToPoseCommand());
-        SmartDashboard.putData("ResetPose", Commands.run(
-                () -> drivetrain.resetPose(new Pose2d(7, 6, Rotation2d.fromDegrees(0))),
-                Subsystems.swerveSubsystem));
+        SmartDashboard.putData("ResetPoseTest", Commands.runOnce(
+            () ->{
+                // Locking robot code when called from a command
+                System.out.println("PRE RESET");
+//                drivetrain.resetPose(new Pose2d(7, 6, Rotation2d.fromDegrees(0)));
+                Robot.poseUpdates.add(new Pose2d(7, 6, Rotation2d.fromDegrees(0)));
+                System.out.println("POST RESET");
+            },
+                Subsystems.swerveSubsystem)
+                .withName("RESET POSE TEST")
+                .withTimeout(5.0)
+                .ignoringDisable(true)
+        );
         // Debug Testing
     }
 

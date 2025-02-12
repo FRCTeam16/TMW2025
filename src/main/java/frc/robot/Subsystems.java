@@ -80,7 +80,6 @@ public class Subsystems {
         joshPrototype = new JoshPrototype();
         austinGearPrototype = new ComponentMotor("austinGearPrototype", 51);
         elevator = new Elevator();
-        algaeIntake = new AlgaeIntake();
 
 
 
@@ -121,7 +120,7 @@ public class Subsystems {
         asyncManager.start();
 
         autoManager = new AutoManager();
-        autoManager.initialize(); BiConsumer<PrototypeComponent, String>[] ControlCommandList;
+        autoManager.initialize();
 
         visionOdometryUpdater = new VisionOdometryUpdater(visionSubsystem, swerveSubsystem);
     }
