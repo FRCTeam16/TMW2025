@@ -97,6 +97,7 @@ public class RobotConfig {
             System.err.println("Error reading /home/lvuser/2025-robotconfig.txt: " + e.getMessage());
         }
 
+        //Albatross
         // Try to read the file from the deploy folder
         try {
             Path path = Paths.get(Filesystem.getDeployDirectory().getAbsolutePath(), "2025-robotconfig.txt");

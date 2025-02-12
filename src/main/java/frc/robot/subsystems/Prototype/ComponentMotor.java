@@ -86,8 +86,12 @@ public class ComponentMotor implements Lifecycle, Subsystem, PrototypeComponent 
         });
     }
 
-    public void InjectControls(Consumer<PrototypeComponent> config){
-        config.accept(this);
+
+    @SuppressWarnings("unchecked")  //  when java assigns Consumer<PrototypeComponent> to the array configs[] it'll not save that its <PrototypeComponent> so this isn't realy type safe
+    public void InjectControls(Consumer<PrototypeComponent>... configs){
+        for(Consumer<PrototypeComponent> config : configs){
+            config.accept(this);
+        }
     }
 
     public void ClosedLoop(Consumer<PrototypeComponent> setup,Consumer<PrototypeComponent> periodic){

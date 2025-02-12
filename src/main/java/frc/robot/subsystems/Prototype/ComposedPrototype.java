@@ -63,7 +63,7 @@ public class ComposedPrototype implements PrototypeComponent{
                 .toArray(Command[]::new);
     }
     
-    public void InjectControls(Consumer<PrototypeComponent> config){
+    public void InjectControls(Consumer<PrototypeComponent>... config){
         
     }
 

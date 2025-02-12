@@ -18,6 +18,7 @@ import frc.robot.subsystems.vision.VisionSubsystem;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 /**
  * The Subsystems class represents a collection of subsystems used in the robot.
@@ -74,6 +75,7 @@ public class Subsystems {
         registerSmartDashboardEntries();
     }
 
+    @SuppressWarnings("unchecked") // for inject Controls
     private void createPrototypeSubsystems() {
         joshPrototype = new JoshPrototype();
         austinGearPrototype = new ComponentMotor("austinGearPrototype", 51);
@@ -95,9 +97,13 @@ public class Subsystems {
 //        );
 
 
-        Climberproto1 = new ComponentMotor("ClimberProto3", 50, (m) -> {m.setDirection(ComponentMotor.direction.inverse);});
-        Climberproto1.InjectControls(ComponentPreconfig.ABXYpreconf);
-        Climberproto2 = new ComponentMotor( "ClimberProto4", 51, (m) -> {m.setDirection(ComponentMotor.direction.corresponding);});
+        // Climberproto1 = new ComponentMotor("ClimberProto3", 50, (m) -> {m.setDirection(ComponentMotor.direction.inverse);});
+        // Climberproto1.InjectControls(ComponentPreconfig.ABXYpreconf);
+        // Climberproto2 = new ComponentMotor( "ClimberProto4", 51, (m) -> {m.setDirection(ComponentMotor.direction.corresponding);});
+        // Climberproto2.InjectControls(
+        //     ComponentPreconfig.getElasticOnTrueComand("Climberproto2ElasticCmdRun"), // a little clunky but should work
+        //     ComponentPreconfig.getElasticOnFalseComand("Climberproto2ElasticCmdStop")
+        // );
 
         lifecycleSubsystems.add(visionSubsystem);
         lifecycleSubsystems.add(ledSubsystem);
@@ -115,7 +121,7 @@ public class Subsystems {
         asyncManager.start();
 
         autoManager = new AutoManager();
-        autoManager.initialize();
+        autoManager.initialize(); BiConsumer<PrototypeComponent, String>[] ControlCommandList;
 
         visionOdometryUpdater = new VisionOdometryUpdater(visionSubsystem, swerveSubsystem);
     }
