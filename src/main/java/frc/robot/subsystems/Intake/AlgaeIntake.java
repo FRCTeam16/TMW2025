@@ -52,10 +52,10 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle {
     public void initSendable(SendableBuilder builder) {
         super.initSendable(builder);
         builder.setSmartDashboardType("AlgaeIntake");
-        builder.addDoubleProperty("intake/forwardSpeed", () -> forwardSpeed, this::setForwardSpeed);
-        builder.addDoubleProperty("intake/backwardSpeed", () -> backwardSpeed, this::setBackwardSpeed);
-        builder.addDoubleProperty("intake/clampSpeed", () -> clampSpeed, (v) -> clampSpeed = v);
-        builder.addDoubleProperty("intake/holdSpeed", () -> holdSpeed, this::setHoldSpeed);
+        builder.addDoubleProperty("forwardSpeed", () -> forwardSpeed, this::setForwardSpeed);
+        builder.addDoubleProperty("backwardSpeed", () -> backwardSpeed, this::setBackwardSpeed);
+        builder.addDoubleProperty("clampSpeed", () -> clampSpeed, (v) -> clampSpeed = v);
+        builder.addDoubleProperty("holdSpeed", () -> holdSpeed, this::setHoldSpeed);
     }
 
     public Command intakeCommand() {
@@ -79,7 +79,7 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle {
     public Command stopCommand() {
         return this.runOnce(() -> {
             algaeIntakeMotor.setControl(brake);
-        });
+        }).withName("Algae Stop");
     }
 
 }

@@ -1,6 +1,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.async.AsyncManager;
 import frc.robot.auto.AutoManager;
 import frc.robot.subsystems.*;
@@ -79,7 +80,6 @@ public class Subsystems {
         joshPrototype = new JoshPrototype();
         austinGearPrototype = new ComponentMotor("austinGearPrototype", 51);
         elevator = new Elevator();
-        algaeIntake = new AlgaeIntake();
 
 
 
@@ -117,7 +117,7 @@ public class Subsystems {
         asyncManager.start();
 
         autoManager = new AutoManager();
-        autoManager.initialize(); BiConsumer<PrototypeComponent, String>[] ControlCommandList;
+        autoManager.initialize();
 
         visionOdometryUpdater = new VisionOdometryUpdater(visionSubsystem, swerveSubsystem);
     }
@@ -139,6 +139,9 @@ public class Subsystems {
         SmartDashboard.putData("Subsystems/AlgaeIntake", algaeIntake);
         SmartDashboard.putData("Subsystems/AlgaeArm", algaeArm);
         SmartDashboard.putData("Subsystems/CoralIntake", coralIntake);
+        SmartDashboard.putData("Subsystems/Vision", visionSubsystem);
+
+        SmartDashboard.putData("CommandScheduler", CommandScheduler.getInstance());
     }
 
     public static Subsystems getInstance() {

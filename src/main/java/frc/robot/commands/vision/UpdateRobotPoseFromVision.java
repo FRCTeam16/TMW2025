@@ -15,11 +15,11 @@ public class UpdateRobotPoseFromVision {
         return Commands.runOnce(() -> {
             Subsystems.visionOdometryUpdater.getVisionPoseEstimators().stream()
                     .filter(visionPoseEstimator -> visionPoseEstimator.getLimelightName().equals(limelightName))
-                    .findFirst()
                     .map(LimelightPoseEstimator::getLastPoseEstimate)
                     .map(poseEstimate -> poseEstimate.pose)
+                    .findFirst()
                     .ifPresent(pose2d -> Subsystems.swerveSubsystem.resetPose(pose2d));
-        });
+        }, Subsystems.swerveSubsystem);
     }
 
 }

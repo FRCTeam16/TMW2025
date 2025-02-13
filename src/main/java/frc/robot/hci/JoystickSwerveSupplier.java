@@ -25,19 +25,19 @@ public class JoystickSwerveSupplier implements SwerveSupplier {
 
     @Override
     public LinearVelocity supplyX() {
-        double base = -driveStick.getY() * (isRedAlliance ? -1 : 1);
+        double base = driveStick.getY() * (isRedAlliance ? -1 : 1);
         return MetersPerSecond.of(base).times(Constants.MaxSpeed.in(MetersPerSecond));
     }
 
     @Override
     public LinearVelocity supplyY() {
-        double base = -driveStick.getX() * (isRedAlliance ? -1 : 1);
+        double base = driveStick.getX() * (isRedAlliance ? -1 : 1);
         return MetersPerSecond.of(base).times(Constants.MaxSpeed.in(MetersPerSecond));
     }
 
     @Override
     public AngularVelocity supplyRotationalRate() {
-        double base = -steerStick.getX() * (isRedAlliance ? -1 : 1);
+        double base = steerStick.getX() * (isRedAlliance ? -1 : 1);
         return RadiansPerSecond.of(base).times(Constants.MaxAngularRate.in(RadiansPerSecond));
     }
 }
