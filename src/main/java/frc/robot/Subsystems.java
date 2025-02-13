@@ -96,13 +96,10 @@ public class Subsystems {
 //        );
 
 
-        // Climberproto1 = new ComponentMotor("ClimberProto3", 50, (m) -> {m.setDirection(ComponentMotor.direction.inverse);});
-        // Climberproto1.InjectControls(ComponentPreconfig.ABXYpreconf);
-        // Climberproto2 = new ComponentMotor( "ClimberProto4", 51, (m) -> {m.setDirection(ComponentMotor.direction.corresponding);});
-        // Climberproto2.InjectControls(
-        //     ComponentPreconfig.getElasticOnTrueComand("Climberproto2ElasticCmdRun"), // a little clunky but should work
-        //     ComponentPreconfig.getElasticOnFalseComand("Climberproto2ElasticCmdStop")
-        // );
+        //Climberproto1 = new ComponentMotor("ClimberProto3", 50, (m) -> {m.setDirection(ComponentMotor.direction.inverse);});
+        //Climberproto1.InjectControls(ComponentPreconfig.ABXYpreconf);
+        //Climberproto2 = new ComponentMotor( "ClimberProto4", 51, (m) -> {m.setDirection(ComponentMotor.direction.corresponding);});
+        
 
         lifecycleSubsystems.add(visionSubsystem);
         lifecycleSubsystems.add(ledSubsystem);

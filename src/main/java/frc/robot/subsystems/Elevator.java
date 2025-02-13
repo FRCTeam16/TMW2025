@@ -69,6 +69,7 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     private double getCurrentPosition() {
         // FIXME when robot is wired
         // return left.getPosition().getValueAsDouble();
+        //return left.getPosition().getValue().in(Radian); //
         return 0;
     }
 
