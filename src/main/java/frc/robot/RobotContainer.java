@@ -69,7 +69,7 @@ public class RobotContainer {
 
     private final SwerveSupplier swerveSupplier;
 
-    private Constants.JoystickMode joystickMode = Constants.JoystickMode.AlgaeProto;
+    private Constants.JoystickMode joystickMode = Constants.JoystickMode.ElevatorProto;
 
     public RobotContainer() {
         Subsystems.getInstance(); // Ensure subsystems are initialized

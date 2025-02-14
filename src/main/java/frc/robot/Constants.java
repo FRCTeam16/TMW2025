@@ -20,5 +20,5 @@ public class Constants {
         AlgaeProto,
     }
     public static final boolean JoshPrototype = false;
-    public static final boolean austinGearboxPrototype = true;
+    public static final boolean austinGearboxPrototype = false;
 }

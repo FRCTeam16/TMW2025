@@ -5,10 +5,15 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.VoltageUnit;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -30,32 +35,33 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     private TalonFX right;
     private double currentPoseAsRad;
     private final DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
+    private final MotionMagicVoltage motionMagicV = new MotionMagicVoltage(0).withFeedForward(Units.Volts.of(-0.5));
     private double openLoopMotorSpeed = 0.2;
     private double currentSetpoint = 0;
 
     public Elevator() {
-        if (false) {
+        if (true) {
             left = new TalonFX(Robot.robotConfig.getCanID("elevatorLeftMotor"));
             right = new TalonFX(Robot.robotConfig.getCanID("elevatorRightMotor"));
             right.setControl(new Follower(left.getDeviceID(), true));
 
             Slot0Configs slot0 = new Slot0Configs();
-            slot0.kP = 0.1;
+            slot0.kP = 2.5; //2.5
             slot0.kI = 0.0;
             slot0.kD = 0.0;
-            slot0.kG = 0.0;
+            slot0.kG = -0.75; // -0.75
 
             MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs();
-            motionMagicConfigs.MotionMagicCruiseVelocity = 1;
-            motionMagicConfigs.MotionMagicAcceleration = 1;
-            motionMagicConfigs.MotionMagicJerk = 1;
+            motionMagicConfigs.MotionMagicCruiseVelocity = 80;
+            motionMagicConfigs.MotionMagicAcceleration = 140;
+            motionMagicConfigs.MotionMagicJerk = 0;
             motionMagicConfigs.MotionMagicExpo_kA = 0.0;
-            motionMagicConfigs.MotionMagicExpo_kV = 0.0;
+            motionMagicConfigs.MotionMagicExpo_kV = 0.01;
 
             TalonFXConfiguration configuration = new TalonFXConfiguration().withSlot0(slot0).withMotionMagic(motionMagicConfigs);
 
             left.getConfigurator().apply(configuration);
-
+            
             // Zero motor position at startup
             left.setPosition(0);
         }
@@ -67,10 +73,8 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     }
 
     private double getCurrentPosition() {
-        // FIXME when robot is wired
-        // return left.getPosition().getValueAsDouble();
-        //return left.getPosition().getValue().in(Radian); //
-        return 0;
+        return left.getPosition().getValueAsDouble();
+        //return 0;
     }
 
     public boolean isInPosition() {
@@ -83,6 +87,8 @@ public class Elevator extends SubsystemBase implements Lifecycle {
             left.setControl(dutyCycleOut.withOutput(openLoopMotorSpeed));
         });
     }
+    
+    // left.getPosition().getValue().in(Radian);
 
     public Command openLoopDownCommand() {
         return this.runOnce(() -> {
@@ -110,6 +116,8 @@ public class Elevator extends SubsystemBase implements Lifecycle {
         builder.addBooleanProperty("Is In Position", this::isInPosition, null);
         builder.addDoubleProperty("Current Setpoint", () -> currentSetpoint, (sp) -> currentSetpoint = sp);
         builder.addDoubleProperty("Open Loop Motor Speed", () -> openLoopMotorSpeed, (speed) -> openLoopMotorSpeed = speed);
+        builder.addDoubleProperty("Motor Volts", () -> left.getMotorVoltage().getValueAsDouble(), null);
+        builder.addDoubleProperty("Motor DutyCycle", () -> left.getDutyCycle().getValueAsDouble(), null);
     }
 
     public enum ElevatorSetpoint { //TODO: these numbers will probably break things if ran on the bot but I need a robot built before we're able to fix them
@@ -122,6 +130,8 @@ public class Elevator extends SubsystemBase implements Lifecycle {
         AlgaeReefHigh(0.0),     // ALGAE Reef High
         AlgaeReefLow(0.0),      // ALGAE Reef Low
         twoPi(2 * Math.PI);
+
+        // -150 soft lim during testing
 
         public final double val;
 
