@@ -1,6 +1,5 @@
 package frc.robot.subsystems.DMS;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.SerialPort;
@@ -10,7 +9,6 @@ import edu.wpi.first.wpilibj.SerialPort.WriteBufferMode;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Subsystems;
 import frc.robot.subsystems.Lifecycle;
 
 public class LEDSubsystem extends SubsystemBase implements Lifecycle {
@@ -25,8 +23,8 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
     private DMSPhase currentPhase = DMSPhase.Stopped;
     private DMSStats driveDmsStatus = new DMSStats();
     private DMSStats steerDmsStatus = new DMSStats();
-    private DriveInfo<Integer> driveStatus = new DriveInfo<Integer>(0);
-    private DriveInfo<Integer> steerStatus = new DriveInfo<Integer>(0);
+    private DriveInfo<Integer> driveStatus = new DriveInfo<>(0);
+    private DriveInfo<Integer> steerStatus = new DriveInfo<>(0);
     private int lastComm = 0;
     private int noCommCounter = 0;  // avoid intermittent counter by looking for a set number before reporting this
     private int secondsToClimb = 30;
@@ -62,7 +60,7 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
         SmartDashboard.putBoolean("DMS/HasSerial", (serial != null));
         if (running && serial != null) {
             try {
-                SendData(new DriveInfo<Double>(0.0), new DriveInfo<Double>(0.0));
+                SendData(new DriveInfo<>(0.0), new DriveInfo<>(0.0));
             } catch (Exception e) {
                 // error sending data
                 System.out.println("LED EXCEPTION: " + e.getMessage());
@@ -146,8 +144,8 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
         driveDmsStatus = new DMSStats();
         steerDmsStatus = new DMSStats();
 
-        driveStatus = new DriveInfo<Integer>(0);
-        steerStatus = new DriveInfo<Integer>(0);
+        driveStatus = new DriveInfo<>(0);
+        steerStatus = new DriveInfo<>(0);
 
         currentPhase = DMSPhase.RunDriveMotors;
     }
@@ -160,8 +158,8 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
         System.out.println("*********************** STOPPING DMS ****************************");
         currentPhase = DMSPhase.Stopped;
 
-        driveStatus = new DriveInfo<Integer>(0);
-        steerStatus = new DriveInfo<Integer>(0);
+        driveStatus = new DriveInfo<>(0);
+        steerStatus = new DriveInfo<>(0);
         timer.stop();
     }
 

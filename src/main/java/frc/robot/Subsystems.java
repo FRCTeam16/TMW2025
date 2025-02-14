@@ -11,14 +11,11 @@ import frc.robot.subsystems.Intake.AlgaeIntake;
 import frc.robot.subsystems.Intake.CoralIntake;
 import frc.robot.subsystems.Prototype.JoshPrototype;
 import frc.robot.subsystems.Prototype.ComponentMotor;
-import frc.robot.subsystems.Prototype.ComponentPreconfig;
 import frc.robot.subsystems.Prototype.PrototypeComponent;
-import frc.robot.subsystems.vision.Limelight;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiConsumer;
 
 /**
  * The Subsystems class represents a collection of subsystems used in the robot.

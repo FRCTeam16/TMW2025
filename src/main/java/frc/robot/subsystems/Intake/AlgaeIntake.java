@@ -12,8 +12,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.subsystems.Lifecycle;
 
-import static edu.wpi.first.units.Units.Degrees;
-
 public class AlgaeIntake extends SubsystemBase implements Lifecycle {
     private final TalonFX algaeIntakeMotor = new TalonFX(Robot.robotConfig.getCanID("algaeIntakeMotor"));
     private final NeutralOut brake = new NeutralOut();
@@ -59,27 +57,20 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle {
     }
 
     public Command intakeCommand() {
-        return this.runOnce(() -> {
-            algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(forwardSpeed));
-        });
+        return this.runOnce(() -> algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(forwardSpeed))).withName("Algae Intake");
     }
 
     public Command ejectCommand() {
-        return this.runOnce(() -> {
-            algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(backwardSpeed));
-        });
+        return this.runOnce(() -> algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(backwardSpeed))).withName("Algae Eject");
     }
 
     public Command holdAlgaeCommand() {
-        return this.runOnce(() -> {
-            algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(holdSpeed));
-        });
+        // TODO: Investigate StaticBrake instead of small output
+        return this.runOnce(() -> algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(holdSpeed))).withName("Algae Hold");
     }
 
     public Command stopCommand() {
-        return this.runOnce(() -> {
-            algaeIntakeMotor.setControl(brake);
-        }).withName("Algae Stop");
+        return this.runOnce(() -> algaeIntakeMotor.setControl(brake)).withName("Algae Stop");
     }
 
 }

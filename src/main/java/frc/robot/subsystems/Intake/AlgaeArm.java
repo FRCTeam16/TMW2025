@@ -94,15 +94,11 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
     }
 
     public Command openLoopUpCommand() {
-        return this.runOnce(() -> {
-            algaeArmMotor.setControl(dutyCycleOut.withOutput(openLoopUpSpeed));
-        });
+        return this.runOnce(() -> algaeArmMotor.setControl(dutyCycleOut.withOutput(openLoopUpSpeed))).withName("Open Loop Up");
     }
 
     public Command openLoopDownCommand() {
-        return this.runOnce(() -> {
-            algaeArmMotor.setControl(dutyCycleOut.withOutput(openLoopDownSpeed));
-        });
+        return this.runOnce(() -> algaeArmMotor.setControl(dutyCycleOut.withOutput(openLoopDownSpeed))).withName("Open Loop Down");
     }
 
     public enum AlgaeArmPosition {
