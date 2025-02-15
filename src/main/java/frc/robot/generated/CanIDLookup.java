@@ -18,8 +18,8 @@ public class CanIDLookup {
     private final Map<String, Integer> defaultCanIDs = Map.of(
             "algaeIntakeMotor", 52,
             "algaeArmMotor", 53,
-            "coralIntakeTopMotor", 54,
-            "coralIntakeBottomMotor", 55,
+            "coralIntakeLeftMotor", 54,
+            "coralIntakeRightMotor", 55,
             "climberHand", 21,
             "climberPivot", 22,
             "elevatorLeftMotor", 30,

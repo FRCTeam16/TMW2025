@@ -14,8 +14,8 @@ import frc.robot.util.BSLogger;
 
 public class CoralIntake extends SubsystemBase implements Lifecycle {
     public static final double COMMAND_TIMEOUT_SECONDS = 5.0;
-    private final TalonFX topMotor = new TalonFX(Robot.robotConfig.getCanID("coralIntakeTopMotor"));
-    private final TalonFX bottomMotor  = new TalonFX(Robot.robotConfig.getCanID("coralIntakeBottomMotor"));;
+    private final TalonFX topMotor = new TalonFX(Robot.robotConfig.getCanID("coralIntakeLeftMotor"));
+    private final TalonFX bottomMotor  = new TalonFX(Robot.robotConfig.getCanID("coralIntakeRightMotor"));;
     private final DutyCycleOut dutyCycleOutTop = new DutyCycleOut(1);
     private final DutyCycleOut dutyCycleOutBottom = new DutyCycleOut(1);
     private final LaserCan laser1 = new LaserCan(1);

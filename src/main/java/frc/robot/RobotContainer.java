@@ -147,6 +147,9 @@ public class RobotContainer {
         bindSmartDashboardButtons();
 
         drivetrain.registerTelemetry(logger::telemeterize);
+
+        //joystick.povUpLeft().and(joystick.a()).onTrue(Subsystems.coralIntake::intakeCoralCommand);
+
     }
 
     public void bindSysId() {
