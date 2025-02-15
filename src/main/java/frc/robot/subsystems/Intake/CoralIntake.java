@@ -71,12 +71,12 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
 
     private int getLaser1Measurement() {
         Measurement measurement = laser1.getMeasurement();
-        return measurement != null ? measurement.distance_mm : 9999;
+        return measurement != null && measurement.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT? measurement.distance_mm : 9999;
     }
 
     private int getLaser2Measurement() {
         Measurement measurement = laser2.getMeasurement();
-        return measurement != null ? measurement.distance_mm : 9999;
+        return measurement != null && measurement.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT ? measurement.distance_mm : 9999;
     }
 
     private boolean coralDetectedAtFirstLaser() {

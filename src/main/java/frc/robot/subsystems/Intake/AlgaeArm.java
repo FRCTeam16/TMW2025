@@ -35,23 +35,27 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
 
     public AlgaeArm() {
         armConfiguration = new TalonFXConfiguration();
-        armConfiguration.Slot0.kP = 0;
+        armConfiguration.Slot0.kP = 0.68;
         armConfiguration.Slot0.kI = 0;
         armConfiguration.Slot0.kD = 0;
         armConfiguration.MotionMagic.MotionMagicCruiseVelocity = 0;
         armConfiguration.MotionMagic.MotionMagicAcceleration = 0;
         algaeArmMotor.getConfigurator().apply(armConfiguration);
         algaeArmMotor.setNeutralMode(NeutralModeValue.Brake);
+
+        // FIXME: Hold not working
+        this.setDefaultCommand(this.holdPositionCommand());
     }
 
     private void setArmPosition(double position) {
         // TODO: Consider translating angles?
         algaeArmMotor.setControl(
-                positionVoltage.withPosition(position)
-                        .withFeedForward(calculateGravityCompensation(getEstimatedAngle())));
+                positionVoltage.withPosition(position));
+                        //.withFeedForward(calculateGravityCompensation(getEstimatedAngle())));
     }
 
     public Angle getEstimatedAngle() {
+        // TODO: Fix me
         // Convert encoder ticks to rotations
         double rotations = getMotorPosition();
 
@@ -94,11 +98,15 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
     }
 
     public Command openLoopUpCommand() {
-        return this.runOnce(() -> algaeArmMotor.setControl(dutyCycleOut.withOutput(openLoopUpSpeed))).withName("Open Loop Up");
+        return this.run(() -> algaeArmMotor.setControl(dutyCycleOut.withOutput(openLoopUpSpeed))).withName("Open Loop Up");
     }
 
     public Command openLoopDownCommand() {
-        return this.runOnce(() -> algaeArmMotor.setControl(dutyCycleOut.withOutput(openLoopDownSpeed))).withName("Open Loop Down");
+        return this.run(() -> algaeArmMotor.setControl(dutyCycleOut.withOutput(openLoopDownSpeed))).withName("Open Loop Down");
+    }
+
+    public Command holdPositionCommand() {
+        return this.run(this::holdPosition).withName("Algae Arm Hold");
     }
 
     public enum AlgaeArmPosition {
