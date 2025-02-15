@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.Constants.JoystickMode;
 import frc.robot.commands.AlignmentTest;
 import frc.robot.commands.ResetPoseCommand;
 import frc.robot.commands.ZeroYawCommand;
@@ -69,7 +70,7 @@ public class RobotContainer {
 
     private final SwerveSupplier swerveSupplier;
 
-    private Constants.JoystickMode joystickMode = Constants.JoystickMode.ElevatorProto;
+    private Constants.JoystickMode joystickMode = JoystickMode.none;
 
     public RobotContainer() {
         Subsystems.getInstance(); // Ensure subsystems are initialized
@@ -132,6 +133,9 @@ public class RobotContainer {
                 joystick.x().onTrue(Subsystems.algaeIntake.intakeCommand()).onFalse(Subsystems.algaeIntake.holdAlgaeCommand());
                 joystick.b().onTrue(Subsystems.algaeIntake.ejectCommand()).onFalse(Subsystems.algaeIntake.stopCommand());
             }
+            case none -> {
+
+            }
         }
 
         // Debug Testing
@@ -148,7 +152,10 @@ public class RobotContainer {
 
         drivetrain.registerTelemetry(logger::telemeterize);
 
-        //joystick.povUpLeft().and(joystick.a()).onTrue(Subsystems.coralIntake::intakeCoralCommand);
+        joystick.povLeft().and(joystick.a()).onTrue(Subsystems.coralIntake.intakeCoralCommand());
+        joystick.povLeft().and(joystick.b()).onTrue(Subsystems.coralIntake.stopCommand());
+        joystick.povLeft().and(joystick.y()).whileTrue(Subsystems.coralIntake.ejectCommand());
+        joystick.povLeft().and(joystick.x()).whileTrue(Subsystems.coralIntake.shootCoralCommand());
 
     }
 

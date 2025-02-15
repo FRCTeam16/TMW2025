@@ -4,6 +4,7 @@ import au.grapplerobotics.LaserCan;
 import au.grapplerobotics.interfaces.LaserCanInterface.Measurement;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -18,12 +19,14 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
     private final TalonFX bottomMotor  = new TalonFX(Robot.robotConfig.getCanID("coralIntakeRightMotor"));;
     private final DutyCycleOut dutyCycleOutTop = new DutyCycleOut(1);
     private final DutyCycleOut dutyCycleOutBottom = new DutyCycleOut(1);
-    private final LaserCan laser1 = new LaserCan(1);
-    private final LaserCan laser2 = new LaserCan(2);
-    private final NeutralOut stop = new NeutralOut();
+    private final LaserCan laser1 = new LaserCan(1);    // top
+    private final LaserCan laser2 = new LaserCan(2);    // bottom
+    private final StaticBrake stop = new StaticBrake();
+    
+
     //TODO: GET REAL NUMS
-    int laser1SenseDistance = 3;
-    int laser2SenseDistance = 3;
+    int laser1SenseDistance = 15;
+    int laser2SenseDistance = 15;
     double intakeHighSpeed = 0.7;
     double intakeLowSpeed = 0.2;
     double ejectSpeed = -0.3;
@@ -41,22 +44,24 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
         builder.addDoubleProperty("intakeLowSpeed", () -> intakeLowSpeed, (v) -> intakeLowSpeed = v);
         builder.addDoubleProperty("ejectSpeed", () -> ejectSpeed, (v) -> ejectSpeed = v);
         builder.addBooleanProperty("coralDetectedAtFirstLaser", this::coralDetectedAtFirstLaser, null);
+        builder.addIntegerProperty("laser1 Dist", this::getLaser1Measurement, null);
         builder.addBooleanProperty("coralDetectedAtSecondLaser", this::coralDetectedAtSecondLaser, null);
+        builder.addIntegerProperty("laser2 Dist", this::getLaser2Measurement, null);
     }
 
     private void intakeFast() {
         topMotor.setControl(dutyCycleOutTop.withOutput(intakeHighSpeed));
-        bottomMotor.setControl(dutyCycleOutBottom.withOutput(intakeHighSpeed));
+        bottomMotor.setControl(dutyCycleOutBottom.withOutput(-intakeHighSpeed));
     }
 
     private void intakeSlow() {
         topMotor.setControl(dutyCycleOutTop.withOutput(intakeLowSpeed));
-        bottomMotor.setControl(dutyCycleOutBottom.withOutput(intakeLowSpeed));
+        bottomMotor.setControl(dutyCycleOutBottom.withOutput(-intakeLowSpeed));
     }
 
     private void eject() {
         topMotor.setControl(dutyCycleOutTop.withOutput(ejectSpeed));
-        bottomMotor.setControl(dutyCycleOutBottom.withOutput(ejectSpeed));
+        bottomMotor.setControl(dutyCycleOutBottom.withOutput(-ejectSpeed));
     }
 
     private void stop() {
@@ -64,10 +69,20 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
         bottomMotor.setControl(stop);
     }
 
+    private int getLaser1Measurement() {
+        Measurement measurement = laser1.getMeasurement();
+        return measurement != null ? measurement.distance_mm : 9999;
+    }
+
+    private int getLaser2Measurement() {
+        Measurement measurement = laser2.getMeasurement();
+        return measurement != null ? measurement.distance_mm : 9999;
+    }
+
     private boolean coralDetectedAtFirstLaser() {
         Measurement measurement = laser1.getMeasurement();
         if (measurement != null) {
-            return measurement.distance_mm > laser1SenseDistance;
+            return measurement.distance_mm < laser1SenseDistance;
         }
         return false;
     }
@@ -75,14 +90,15 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
     private boolean coralDetectedAtSecondLaser() {
         Measurement measurement = laser2.getMeasurement();
         if (measurement != null) {
-            return measurement.distance_mm > laser2SenseDistance;
+            return measurement.distance_mm < laser2SenseDistance;
         }
         return false;
     }
 
 
     public Command ejectCommand() {
-        return this.runOnce(this::eject);
+        System.out.println("Intake Eject Command Active");
+        return this.run(this::eject);
     }
 
     public Command stopCommand() {
@@ -94,6 +110,7 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
     }
 
     public Command shootCoralCommand() {
+        System.out.println("Intake Shoot Command Active");
         return new ShootCoralCommand().withTimeout(COMMAND_TIMEOUT_SECONDS);
     }
 

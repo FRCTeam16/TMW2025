@@ -18,6 +18,7 @@ public class Constants {
         ElevatorProto,
         climberProto,
         AlgaeProto,
+        none
     }
     public static final boolean JoshPrototype = false;
     public static final boolean austinGearboxPrototype = false;
