@@ -32,7 +32,6 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
     private double openLoopUpSpeed = 0.1;
     private double openLoopDownSpeed = 0.1;
 
-
     public AlgaeArm() {
         armConfiguration = new TalonFXConfiguration();
         armConfiguration.Slot0.kP = 0;
@@ -137,6 +136,6 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
             return AlgaeArm.this.isInPosition();
         }
     }
-
+    
 }
 
