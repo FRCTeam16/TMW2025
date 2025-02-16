@@ -38,6 +38,7 @@ import frc.robot.hci.SwerveSupplier;
 import frc.robot.hci.XBoxSwerveSupplier;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Controls;
+import frc.robot.subsystems.Intake.AlgaeArm;
 import frc.robot.subsystems.Lifecycle;
 import frc.robot.subsystems.Prototype.ComponentPreconfig;
 import frc.robot.subsystems.vision.Pipeline;
@@ -134,6 +135,8 @@ public class RobotContainer {
             case AlgaeProto -> {
                 joystick.x().onTrue(Subsystems.algaeIntake.intakeCommand()).onFalse(Subsystems.algaeIntake.holdAlgaeCommand());
                 joystick.b().onTrue(Subsystems.algaeIntake.ejectCommand()).onFalse(Subsystems.algaeIntake.stopCommand());
+                joystick.a().onTrue(Subsystems.algaeArm.setArmPositionCommand(AlgaeArm.AlgaeArmPosition.ReefLow));
+                joystick.y().onTrue(Subsystems.algaeArm.setArmPositionCommand(AlgaeArm.AlgaeArmPosition.ReefHigh));
             }
             case none -> {
 

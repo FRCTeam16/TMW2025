@@ -18,8 +18,6 @@ import static edu.wpi.first.units.Units.Radians;
 public class AlgaeArm extends SubsystemBase implements Lifecycle {
 
     public static final double ALLOWED_POSITION_ERROR = 0.1;
-    private static final double GEAR_RATIO = 100.0; // Adjust based on actual gearing
-    private static final double STARTING_ANGLE_DEGREES = 0.0; // Assume horizontal start
 
     private final TalonFX algaeArmMotor = new TalonFX(Robot.robotConfig.getCanID("algaeArmMotor"));
 
@@ -35,32 +33,37 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
 
     public AlgaeArm() {
         armConfiguration = new TalonFXConfiguration();
-        armConfiguration.Slot0.kP = 0.68;
+        armConfiguration.Slot0.kP = 0.6;
         armConfiguration.Slot0.kI = 0;
         armConfiguration.Slot0.kD = 0;
+        armConfiguration.Slot0.kG = -0.49; // Gravity compensation
         armConfiguration.MotionMagic.MotionMagicCruiseVelocity = 0;
         armConfiguration.MotionMagic.MotionMagicAcceleration = 0;
         algaeArmMotor.getConfigurator().apply(armConfiguration);
         algaeArmMotor.setNeutralMode(NeutralModeValue.Brake);
 
-        // FIXME: Hold not working
+        this.setDefaultCommand(this.holdPositionCommand());
+    }
+
+    @Override
+    public void teleopInit() {
         this.setDefaultCommand(this.holdPositionCommand());
     }
 
     private void setArmPosition(double position) {
         // TODO: Consider translating angles?
+        // TODO: Store and display target position
         algaeArmMotor.setControl(
-                positionVoltage.withPosition(position));
-                        //.withFeedForward(calculateGravityCompensation(getEstimatedAngle())));
+                positionVoltage.withPosition(position)
+                        .withFeedForward(calculateGravityCompensation(getEstimatedAngle())));
     }
 
     public Angle getEstimatedAngle() {
-        // TODO: Fix me
         // Convert encoder ticks to rotations
         double rotations = getMotorPosition();
 
-        // Convert to degrees
-        double degrees = STARTING_ANGLE_DEGREES + (rotations * 360.0 / GEAR_RATIO);
+        // Convert rotations to degrees
+        double degrees = 90.0 - (rotations / 8.6) * 90.0;
 
         return Degrees.of(degrees);
     }
@@ -74,7 +77,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
         setArmPosition(currentPosition);
     }
 
-    public void setPosition(AlgaeArmPosition position) {
+    private void setPosition(AlgaeArmPosition position) {
         setArmPosition(position.getPosition());
     }
 
@@ -90,7 +93,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
     @Override
     public void initSendable(SendableBuilder builder) {
         builder.setSmartDashboardType("AlgaeArm");
-        builder.addDoubleProperty("motorPosition", this::getMotorPosition, null);
+        builder.addDoubleProperty("motorPosition", this::getMotorPosition, this::setArmPosition);
         builder.addDoubleProperty("estimatedAngle", () -> this.getEstimatedAngle().in(Degrees), null);
         builder.addBooleanProperty("isInPosition", this::isInPosition, null);
         builder.addDoubleProperty("openLoopUpSpeed", () -> openLoopUpSpeed, (v) -> openLoopUpSpeed = v);
@@ -106,13 +109,19 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
     }
 
     public Command holdPositionCommand() {
-        return this.run(this::holdPosition).withName("Algae Arm Hold");
+        // TODO: Need to run a new hold position on teleop init
+//        return this.run(this::holdPosition).withName("Algae Arm Hold");
+        return this.run(() -> algaeArmMotor.setControl(dutyCycleOut.withOutput(0.0))).withName("Algae Zero DC Hold");
+    }
+
+    public Command setArmPositionCommand(AlgaeArmPosition position) {
+        return new SetArmPositionCommand(position);
     }
 
     public enum AlgaeArmPosition {
         Start(0.0),
-        ReefLow(0.0),
-        ReefHigh(0.0),
+        ReefLow(7.0),
+        ReefHigh(4.0),
         Processor(0.0),
         Shooting(0.0);
 
