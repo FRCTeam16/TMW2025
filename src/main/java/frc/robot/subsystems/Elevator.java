@@ -35,8 +35,8 @@ public class Elevator extends SubsystemBase implements Lifecycle {
         slot0.kG = GRAVITY_VOLTS; // -0.75
 
         MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs();
-        motionMagicConfigs.MotionMagicCruiseVelocity = 80;
-        motionMagicConfigs.MotionMagicAcceleration = 140;
+        motionMagicConfigs.MotionMagicCruiseVelocity = 40; //80;
+        motionMagicConfigs.MotionMagicAcceleration = 60; // 140;
         motionMagicConfigs.MotionMagicJerk = 0;
         motionMagicConfigs.MotionMagicExpo_kA = 0.0;
         motionMagicConfigs.MotionMagicExpo_kV = 0.01;
@@ -49,7 +49,7 @@ public class Elevator extends SubsystemBase implements Lifecycle {
                                 .withForwardSoftLimitEnable(true)
                                 .withForwardSoftLimitThreshold(0.0)
                                 .withReverseSoftLimitEnable(true)
-                                .withReverseSoftLimitThreshold(-150.0)
+                                .withReverseSoftLimitThreshold(-43)
                 );
 
         left.getConfigurator().apply(configuration);
@@ -58,9 +58,18 @@ public class Elevator extends SubsystemBase implements Lifecycle {
         left.setPosition(0);
     }
 
+    @Override
+    public void teleopInit() {
+        this.currentSetpoint = this.getCurrentPosition();
+    }
+
     private void moveToPosition(ElevatorSetpoint setpoint) {
-        this.currentSetpoint = setpoint.val;
-        left.setControl(motionMagicV.withPosition(setpoint.val));
+        moveToEncoderPosition(setpoint.val);
+    }
+
+    private void moveToEncoderPosition(double encoderPosition) {
+        this.currentSetpoint = encoderPosition;
+        left.setControl(motionMagicV.withPosition(encoderPosition));
     }
 
     /**
@@ -85,15 +94,6 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     }
 
     /**
-     * Moves the elevator to the current setpoint value, primarily used for testing
-     *
-     * @return a command that moves the elevator to the current setpoint value
-     */
-    public Command moveToCurrentSetpoint() {
-        return this.runOnce(() -> left.setControl(motionMagicV.withPosition(currentSetpoint))).withName("Move to Current Setpoint");
-    }
-
-    /**pilibj.RobotBase.runRobot(RobotBase.
      * Applies a neutral output to the elevator motors
      *
      * @return a command that applies a neutral output to the elevator motors
@@ -103,8 +103,8 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     }
 
     public Command holdPositionCommand() {
-        // TODO: Need to test just using static brake
-        return this.runOnce(() -> left.setControl(motionMagicV.withPosition(getCurrentPosition()))).withName("Hold Position");
+//        return this.runOnce(() -> left.setControl(motionMagicV.withPosition(getCurrentPosition()))).withName("Hold Position");
+        return new DefaultHoldPositionCommand();
     }
 
     @Override
@@ -113,7 +113,7 @@ public class Elevator extends SubsystemBase implements Lifecycle {
         builder.setSmartDashboardType("Elevator");
         builder.addDoubleProperty("Current Position", this::getCurrentPosition, null);
         builder.addBooleanProperty("Is In Position", this::isInPosition, null);
-        builder.addDoubleProperty("Current Setpoint", () -> currentSetpoint, (sp) -> currentSetpoint = sp);
+        builder.addDoubleProperty("Current Setpoint", () -> currentSetpoint, this::moveToEncoderPosition);
 
         builder.addDoubleProperty("Open Loop Motor Speed", () -> openLoopMotorSpeed, (speed) -> openLoopMotorSpeed = speed);
         builder.addDoubleProperty("Left Motor Volts", () -> left.getMotorVoltage().getValueAsDouble(), null);
@@ -124,9 +124,9 @@ public class Elevator extends SubsystemBase implements Lifecycle {
 
     public enum ElevatorSetpoint { //TODO: these numbers will probably break things if ran on the bot but I need a robot built before we're able to fix them
         Zero(0), TROUGH(0.0),    // Lowest position
-        P1(0.0),        // POLE 1
-        P2(0.0),        // POLE 2
-        P3(0.0),        // POLE 3
+        L2(-17.25),        // POLE 1
+        L3(-26),        // POLE 2
+        L4(-39),                 // POLE 3
         AlgaeBarge(0.0),        // ALGAE BED
         AlgaeProcessor(0.0),    // ALGAE Processor
         AlgaeReefHigh(0.0),     // ALGAE Reef High
@@ -162,4 +162,15 @@ public class Elevator extends SubsystemBase implements Lifecycle {
         }
     }
 
+    public class DefaultHoldPositionCommand extends Command {
+        public DefaultHoldPositionCommand() {
+            addRequirements(Elevator.this);
+        }
+
+        @Override
+        public void initialize() {
+            double currentPosition = Elevator.this.getCurrentPosition();
+            Elevator.this.moveToEncoderPosition(currentPosition);
+        }
+    }
 }
