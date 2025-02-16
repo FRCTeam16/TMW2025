@@ -29,6 +29,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
 
     private double openLoopUpSpeed = 0.1;
     private double openLoopDownSpeed = 0.1;
+    private double targetPosition = 0;
 
 
     public AlgaeArm() {
@@ -52,7 +53,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
 
     private void setArmPosition(double position) {
         // TODO: Consider translating angles?
-        // TODO: Store and display target position
+        this.targetPosition = position;
         algaeArmMotor.setControl(
                 positionVoltage.withPosition(position)
                         .withFeedForward(calculateGravityCompensation(getEstimatedAngle())));
@@ -94,6 +95,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
     public void initSendable(SendableBuilder builder) {
         builder.setSmartDashboardType("AlgaeArm");
         builder.addDoubleProperty("motorPosition", this::getMotorPosition, this::setArmPosition);
+        builder.addDoubleProperty("targetPosition", () -> this.targetPosition, this::setArmPosition);
         builder.addDoubleProperty("estimatedAngle", () -> this.getEstimatedAngle().in(Degrees), null);
         builder.addBooleanProperty("isInPosition", this::isInPosition, null);
         builder.addDoubleProperty("openLoopUpSpeed", () -> openLoopUpSpeed, (v) -> openLoopUpSpeed = v);
@@ -110,8 +112,9 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
 
     public Command holdPositionCommand() {
         // TODO: Need to run a new hold position on teleop init
-//        return this.run(this::holdPosition).withName("Algae Arm Hold");
-        return this.run(() -> algaeArmMotor.setControl(dutyCycleOut.withOutput(0.0))).withName("Algae Zero DC Hold");
+//        return this.runOnce(this::holdPosition).withName("Algae Arm Hold");
+        return new DefaultHoldPositionCommand();
+//        return this.run(() -> algaeArmMotor.setControl(dutyCycleOut.withOutput(0.0))).withName("Algae Zero DC Hold");
     }
 
     public Command setArmPositionCommand(AlgaeArmPosition position) {
@@ -155,5 +158,15 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
         }
     }
 
+    public class DefaultHoldPositionCommand extends Command {
+        public DefaultHoldPositionCommand() {
+            addRequirements(AlgaeArm.this);
+        }
+
+        @Override
+        public void initialize() {
+            AlgaeArm.this.holdPosition();
+        }
+    }
 }
 
