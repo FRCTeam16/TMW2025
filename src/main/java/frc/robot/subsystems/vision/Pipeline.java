@@ -2,7 +2,7 @@ package frc.robot.subsystems.vision;
 
 public enum Pipeline {
     April(0),
-    Note(1);
+    View(1);
 
 
     public final int pipelineNumber;

@@ -31,6 +31,7 @@ import frc.robot.commands.AlignmentTest;
 import frc.robot.commands.ResetPoseCommand;
 import frc.robot.commands.ZeroYawCommand;
 import frc.robot.commands.auto.PathfindToPoseCommand;
+import frc.robot.commands.vision.PipelineSwitcher;
 import frc.robot.commands.vision.UpdateRobotPoseFromVision;
 import frc.robot.hci.JoystickSwerveSupplier;
 import frc.robot.hci.SwerveSupplier;
@@ -39,6 +40,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Controls;
 import frc.robot.subsystems.Lifecycle;
 import frc.robot.subsystems.Prototype.ComponentPreconfig;
+import frc.robot.subsystems.vision.Pipeline;
 import frc.robot.subsystems.vision.VisionAssist;
 
 public class RobotContainer {
@@ -87,7 +89,7 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        // Note that X is defined as forward according to WPILib convention,
+        // View that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
@@ -161,7 +163,7 @@ public class RobotContainer {
 
     public void bindSysId() {
         // Run SysId routines when holding back/start and X/Y. // these are fine for now
-        // Note that each routine should be run exactly once in a single log.
+        // View that each routine should be run exactly once in a single log.
         joystick.back().and(joystick.y()).whileTrue(drivetrain.getSysIdHelper().sysIdDynamic(Direction.kForward));
         joystick.back().and(joystick.x()).whileTrue(drivetrain.getSysIdHelper().sysIdDynamic(Direction.kReverse));
         joystick.start().and(joystick.y()).whileTrue(drivetrain.getSysIdHelper().sysIdQuasistatic(Direction.kForward));
@@ -170,6 +172,8 @@ public class RobotContainer {
 
     public void bindSmartDashboardButtons() {
         SmartDashboard.putData("Zero Yaw", new ZeroYawCommand());
+        SmartDashboard.putData("Apriltag", new PipelineSwitcher(Pipeline.April));
+        SmartDashboard.putData("Viewfinder", new PipelineSwitcher(Pipeline.View));
 
         SmartDashboard.putData("Test Reset Pose", new ResetPoseCommand());
         Subsystems.visionSubsystem.getLimelights().forEach(limelight ->

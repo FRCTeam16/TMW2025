@@ -11,6 +11,7 @@ import java.util.*;
 public class VisionSubsystem extends SubsystemBase implements Lifecycle {
     private final Map<String, Limelight> limelightLookup = new HashMap<>();
     private final Limelight defaultLimelight;
+    public Object getLimelights;
 
     public VisionSubsystem(Iterable<Limelight> limelights) {
         Limelight tmpLimelight = null;

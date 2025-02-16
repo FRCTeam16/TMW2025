@@ -104,6 +104,7 @@ public class Limelight implements Sendable {
         builder.setSmartDashboardType("Limelight");
         builder.addStringProperty("Name", this::getName, null);
         builder.addDoubleProperty("AprilTagID", this::getAprilTagID, null);
+        builder.addDoubleProperty("CurrentPipeline", ()-> LimelightHelpers.getCurrentPipelineIndex(this.name),(idx) -> LimelightHelpers.setPipelineIndex(this.name, (int)idx));
 
         VisionTypes.TargetInfo targetInfo = this.getTargetInfo();
         builder.addBooleanProperty("TargetInfo/hasTarget", targetInfo::hasTarget, null);
