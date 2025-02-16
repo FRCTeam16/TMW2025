@@ -6,6 +6,7 @@ import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.hardware.TalonFX;
+import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -21,12 +22,16 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
     private final DutyCycleOut dutyCycleOutBottom = new DutyCycleOut(1);
     private final LaserCan laser1 = new LaserCan(1);    // top
     private final LaserCan laser2 = new LaserCan(2);    // bottom
+
+    private final MedianFilter laser1Filter = new MedianFilter(5);
+    private final MedianFilter laser2Filter = new MedianFilter(5);
+
     private final StaticBrake stop = new StaticBrake();
     
 
     //TODO: GET REAL NUMS
-    int laser1SenseDistance = 15;
-    int laser2SenseDistance = 15;
+    int laser1SenseDistance = 30;
+    int laser2SenseDistance = 30;
     double intakeHighSpeed = 0.7;
     double intakeLowSpeed = 0.2;
     double ejectSpeed = -0.3;
@@ -71,26 +76,34 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
 
     private int getLaser1Measurement() {
         Measurement measurement = laser1.getMeasurement();
-        return measurement != null && measurement.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT? measurement.distance_mm : 9999;
+        if (measurement != null && measurement.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT) {
+            return (int) laser1Filter.calculate(measurement.distance_mm);
+        } else {
+            return 9999;
+        }
     }
 
     private int getLaser2Measurement() {
         Measurement measurement = laser2.getMeasurement();
-        return measurement != null && measurement.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT ? measurement.distance_mm : 9999;
+        if (measurement != null && measurement.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT) {
+            return (int) laser2Filter.calculate(measurement.distance_mm);
+        } else {
+            return 9999;
+        }
     }
 
     private boolean coralDetectedAtFirstLaser() {
-        Measurement measurement = laser1.getMeasurement();
-        if (measurement != null) {
-            return measurement.distance_mm < laser1SenseDistance;
+        int measurement = getLaser1Measurement();
+        if (measurement < 9999) {
+            return measurement < laser1SenseDistance;
         }
         return false;
     }
 
     private boolean coralDetectedAtSecondLaser() {
-        Measurement measurement = laser2.getMeasurement();
-        if (measurement != null) {
-            return measurement.distance_mm < laser2SenseDistance;
+        int measurement = getLaser2Measurement();
+        if (measurement < 9999) {
+            return measurement < laser2SenseDistance;
         }
         return false;
     }
@@ -106,7 +119,7 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
     }
 
     public Command intakeCoralCommand() {
-        return new IntakeCoralCommand().withTimeout(COMMAND_TIMEOUT_SECONDS);
+        return new IntakeCoralCommand().withTimeout(10);
     }
 
     public Command shootCoralCommand() {
@@ -124,12 +137,15 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
 
         @Override
         public void initialize() {
+            BSLogger.log("CoralIntakeCommand", "**** STARTING ****");
+            step = 1;   // FIXME: Investigate in debugger
             // Start with fast intake
             CoralIntake.this.intakeFast();
         }
 
         @Override
         public void execute() {
+            BSLogger.log("CoralIntakeCommand", "**** EXECUTING CORAL INTAKE STEP: " + step);
             //default action when intake: runForward(fast)
             if (step == 1) {
                 //if first laser sees coral while default action: change action to action 2
@@ -169,7 +185,8 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
 
         @Override
         public boolean isFinished() {
-            return !coralDetectedAtSecondLaser();
+//            return !coralDetectedAtSecondLaser();
+            return false;
         }
 
         @Override
