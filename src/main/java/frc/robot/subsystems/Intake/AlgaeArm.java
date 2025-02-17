@@ -111,10 +111,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
     }
 
     public Command holdPositionCommand() {
-        // TODO: Need to run a new hold position on teleop init
-//        return this.runOnce(this::holdPosition).withName("Algae Arm Hold");
         return new DefaultHoldPositionCommand();
-//        return this.run(() -> algaeArmMotor.setControl(dutyCycleOut.withOutput(0.0))).withName("Algae Zero DC Hold");
     }
 
     public Command setArmPositionCommand(AlgaeArmPosition position) {
@@ -123,10 +120,10 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
 
     public enum AlgaeArmPosition {
         Start(0.0),
-        ReefLow(7.0),
-        ReefHigh(4.0),
+        ReefLow(5.0),
+        ReefHigh(6.0),
         Processor(0.0),
-        Shooting(0.0);
+        Shooting(3.0);
 
         private final double position;
 

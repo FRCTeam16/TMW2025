@@ -7,12 +7,16 @@ import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.filter.MedianFilter;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.subsystems.Lifecycle;
 import frc.robot.util.BSLogger;
+
+import static edu.wpi.first.units.Units.Millimeters;
 
 public class CoralIntake extends SubsystemBase implements Lifecycle {
     public static final double COMMAND_TIMEOUT_SECONDS = 5.0;
@@ -32,7 +36,8 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
     //TODO: GET REAL NUMS
     int laser1SenseDistance = 30;
     int laser2SenseDistance = 30;
-    double intakeHighSpeed = 0.7;
+    double intakeHighSpeedLeft = 0.25;
+    double intakeHighSpeedRight = -0.25;
     double intakeLowSpeed = 0.2;
     double ejectSpeed = -0.3;
 
@@ -45,7 +50,9 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
     public void initSendable(SendableBuilder builder) {
         super.initSendable(builder);
         builder.setSmartDashboardType("CoralIntake");
-        builder.addDoubleProperty("intakeHighSpeed", () -> intakeHighSpeed, (v) -> intakeHighSpeed = v);
+        builder.addDoubleProperty("intakeHighSpeedLeft", () -> intakeHighSpeedLeft, (v) -> intakeHighSpeedLeft = v);
+        builder.addDoubleProperty("intakeHighSpeedRight", () -> intakeHighSpeedRight, (v) -> intakeHighSpeedRight = v);
+
         builder.addDoubleProperty("intakeLowSpeed", () -> intakeLowSpeed, (v) -> intakeLowSpeed = v);
         builder.addDoubleProperty("ejectSpeed", () -> ejectSpeed, (v) -> ejectSpeed = v);
         builder.addBooleanProperty("coralDetectedAtFirstLaser", this::coralDetectedAtFirstLaser, null);
@@ -55,8 +62,8 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
     }
 
     private void intakeFast() {
-        topMotor.setControl(dutyCycleOutTop.withOutput(intakeHighSpeed));
-        bottomMotor.setControl(dutyCycleOutBottom.withOutput(-intakeHighSpeed));
+        topMotor.setControl(dutyCycleOutTop.withOutput(intakeHighSpeedLeft));
+        bottomMotor.setControl(dutyCycleOutBottom.withOutput(intakeHighSpeedRight));
     }
 
     private void intakeSlow() {
@@ -127,6 +134,13 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
         return new ShootCoralCommand().withTimeout(COMMAND_TIMEOUT_SECONDS);
     }
 
+    public Command shootCoralInTroughCommand() {
+        return Commands.run(() -> {
+            topMotor.setControl(dutyCycleOutTop.withOutput(0.15));
+            bottomMotor.setControl(dutyCycleOutBottom.withOutput(-0.25));
+        });
+    }
+
     public class IntakeCoralCommand extends Command {
         int step = 1;
         boolean shooting = false;
@@ -194,4 +208,5 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
             CoralIntake.this.stop();
         }
     }
+
 }

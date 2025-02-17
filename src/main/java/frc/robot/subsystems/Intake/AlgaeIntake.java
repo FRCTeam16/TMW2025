@@ -16,12 +16,10 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle {
     private final TalonFX algaeIntakeMotor = new TalonFX(Robot.robotConfig.getCanID("algaeIntakeMotor"));
     private final NeutralOut brake = new NeutralOut();
     private final DutyCycleOut intakeDutyCycleOut = new DutyCycleOut(1);
-    // TODO: Investigate StaticBrake
 
     private double forwardSpeed = 0.3;
     private double backwardSpeed = -0.3;
     private double holdSpeed = 0.1;
-    private double clampSpeed = 0.5;    // TODO: we can remove clamping speed control once more testing is done
 
     public AlgaeIntake() {
         TalonFXConfiguration intakeConfiguration = new TalonFXConfiguration();
@@ -31,20 +29,17 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle {
     }
 
     public void setForwardSpeed(double speed) {
-        this.forwardSpeed = clampSpeed(speed);
+        this.forwardSpeed = speed;
     }
 
     public void setBackwardSpeed(double speed) {
-        this.backwardSpeed = clampSpeed(speed);
+        this.backwardSpeed = speed;
     }
 
     public void setHoldSpeed(double speed) {
-        this.holdSpeed = clampSpeed(speed);
+        this.holdSpeed = speed;
     }
 
-    private double clampSpeed(double speed) {
-        return MathUtil.clamp(speed, -clampSpeed, clampSpeed);
-    }
 
     @Override
     public void initSendable(SendableBuilder builder) {
@@ -52,25 +47,23 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle {
         builder.setSmartDashboardType("AlgaeIntake");
         builder.addDoubleProperty("forwardSpeed", () -> forwardSpeed, this::setForwardSpeed);
         builder.addDoubleProperty("backwardSpeed", () -> backwardSpeed, this::setBackwardSpeed);
-        builder.addDoubleProperty("clampSpeed", () -> clampSpeed, (v) -> clampSpeed = v);
         builder.addDoubleProperty("holdSpeed", () -> holdSpeed, this::setHoldSpeed);
     }
 
     public Command intakeCommand() {
-        return this.runOnce(() -> algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(forwardSpeed))).withName("Algae Intake");
+        return this.run(() -> algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(forwardSpeed))).withName("Algae Intake");
     }
 
     public Command ejectCommand() {
-        return this.runOnce(() -> algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(backwardSpeed))).withName("Algae Eject");
+        return this.run(() -> algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(backwardSpeed))).withName("Algae Eject");
     }
 
     public Command holdAlgaeCommand() {
-        // TODO: Investigate StaticBrake instead of small output
-        return this.runOnce(() -> algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(holdSpeed))).withName("Algae Hold");
+        return this.run(() -> algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(holdSpeed))).withName("Algae Hold");
     }
 
     public Command stopCommand() {
-        return this.runOnce(() -> algaeIntakeMotor.setControl(brake)).withName("Algae Stop");
+        return this.run(() -> algaeIntakeMotor.setControl(brake)).withName("Algae Stop");
     }
 
 }

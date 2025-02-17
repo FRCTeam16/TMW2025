@@ -57,8 +57,6 @@ public class RobotContainer {
 
     VisionAssist visionAssist = new VisionAssist(drive); // TODO: make real subsystemfile
 
-    
-
     private final Telemetry logger = new Telemetry(MaxSpeed.in(MetersPerSecond));
 
     private final Joystick driveStick = Controls.left;
@@ -67,10 +65,8 @@ public class RobotContainer {
 
     private final JoystickButton prototypeButton = new JoystickButton(driveStick, 1); // for prototype subsystem
     private final JoystickButton visionAssistButton = new JoystickButton(driveStick, 2);
-    
 
     public final CommandSwerveDrivetrain drivetrain;
-
     private final SwerveSupplier swerveSupplier;
 
     private Constants.JoystickMode joystickMode = JoystickMode.none;
@@ -93,8 +89,6 @@ public class RobotContainer {
         // View that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
-            // Drivetrain will execute this command periodically
-
                 drivetrain.applyRequest(() -> {
                 if(!visionAssistButton.getAsBoolean()){ // use default swerve request unless visionAssist button pressed
                     return drive.withVelocityX(swerveSupplier.supplyX()) // Drive forward with negative Y (forward)
@@ -133,10 +127,10 @@ public class RobotContainer {
                 joystick.b().onTrue(Subsystems.Climberproto2.stop());
             }
             case AlgaeProto -> {
-                joystick.x().onTrue(Subsystems.algaeIntake.intakeCommand()).onFalse(Subsystems.algaeIntake.holdAlgaeCommand());
-                joystick.b().onTrue(Subsystems.algaeIntake.ejectCommand()).onFalse(Subsystems.algaeIntake.stopCommand());
-                joystick.a().onTrue(Subsystems.algaeArm.setArmPositionCommand(AlgaeArm.AlgaeArmPosition.ReefLow));
-                joystick.y().onTrue(Subsystems.algaeArm.setArmPositionCommand(AlgaeArm.AlgaeArmPosition.ReefHigh));
+                joystick.y().onTrue(Subsystems.algaeIntake.intakeCommand()).onFalse(Subsystems.algaeIntake.holdAlgaeCommand());
+                joystick.x().onTrue(Subsystems.algaeIntake.ejectCommand()).onFalse(Subsystems.algaeIntake.stopCommand());
+//                joystick.a().onTrue(Subsystems.algaeArm.setArmPositionCommand(AlgaeArm.AlgaeArmPosition.ReefLow));
+//                joystick.y().onTrue(Subsystems.algaeArm.setArmPositionCommand(AlgaeArm.AlgaeArmPosition.ReefHigh));
             }
             case none -> {
 
@@ -157,10 +151,12 @@ public class RobotContainer {
 
         drivetrain.registerTelemetry(logger::telemeterize);
 
+        bindSysId();
+
         joystick.povLeft().and(joystick.a()).onTrue(Subsystems.coralIntake.intakeCoralCommand());
         joystick.povLeft().and(joystick.b()).onTrue(Subsystems.coralIntake.stopCommand());
-        joystick.povLeft().and(joystick.y()).whileTrue(Subsystems.coralIntake.ejectCommand());
-        joystick.povLeft().and(joystick.x()).whileTrue(Subsystems.coralIntake.shootCoralCommand());
+//        joystick.povLeft().and(joystick.y()).whileTrue(Subsystems.coralIntake.ejectCommand());
+//        joystick.povLeft().and(joystick.x()).whileTrue(Subsystems.coralIntake.shootCoralCommand());
 
     }
 
@@ -175,8 +171,8 @@ public class RobotContainer {
 
     public void bindSmartDashboardButtons() {
         SmartDashboard.putData("Zero Yaw", new ZeroYawCommand());
-        SmartDashboard.putData("Apriltag", new PipelineSwitcher(Pipeline.April));
-        SmartDashboard.putData("Viewfinder", new PipelineSwitcher(Pipeline.View));
+        SmartDashboard.putData("Set LLs to Apriltag", new PipelineSwitcher(Pipeline.April));
+        SmartDashboard.putData("Set LLs to Viewfinder", new PipelineSwitcher(Pipeline.View));
 
         SmartDashboard.putData("Test Reset Pose", new ResetPoseCommand());
         Subsystems.visionSubsystem.getLimelights().forEach(limelight ->

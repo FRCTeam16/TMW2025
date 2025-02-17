@@ -6,21 +6,24 @@ import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.TalonFX;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
+import frc.robot.util.BSLogger;
 
 public class Elevator extends SubsystemBase implements Lifecycle {
     public static final double GRAVITY_VOLTS = -0.5;
+    public static final double ELEVATOR_POSITION_THRESHOLD = 0.1;
     private final TalonFX left = new TalonFX(Robot.robotConfig.getCanID("elevatorLeftMotor"));
     private final TalonFX right = new TalonFX(Robot.robotConfig.getCanID("elevatorRightMotor"));
+
     private final NeutralOut neutralOut = new NeutralOut();
-    private final PositionVoltage positionVoltage = new PositionVoltage(0);
     private final DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
     private final MotionMagicVoltage motionMagicV = new MotionMagicVoltage(0).withFeedForward(Units.Volts.of(GRAVITY_VOLTS));
-    private final StaticBrake staticBrake = new StaticBrake();
+
     private double openLoopMotorSpeed = -0.2;
     private double currentSetpoint = 0;
 
@@ -56,6 +59,7 @@ public class Elevator extends SubsystemBase implements Lifecycle {
 
         // Zero motor position at startup
         left.setPosition(0);
+        left.setControl(neutralOut);
     }
 
     @Override
@@ -82,7 +86,7 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     }
 
     public boolean isInPosition() {
-        return Math.abs(getCurrentPosition() - currentSetpoint) < 0.1;
+        return Math.abs(getCurrentPosition() - currentSetpoint) < ELEVATOR_POSITION_THRESHOLD;
     }
 
     public Command openLoopUpCommand() {
@@ -102,11 +106,6 @@ public class Elevator extends SubsystemBase implements Lifecycle {
         return this.runOnce(() -> left.setControl(neutralOut)).withName("Open Loop Stop");
     }
 
-    public Command holdPositionCommand() {
-//        return this.runOnce(() -> left.setControl(motionMagicV.withPosition(getCurrentPosition()))).withName("Hold Position");
-        return new DefaultHoldPositionCommand();
-    }
-
     @Override
     public void initSendable(SendableBuilder builder) {
         super.initSendable(builder);
@@ -123,17 +122,15 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     }
 
     public enum ElevatorSetpoint { //TODO: these numbers will probably break things if ran on the bot but I need a robot built before we're able to fix them
-        Zero(0), TROUGH(0.0),    // Lowest position
-        L2(-17.25),        // POLE 1
-        L3(-26),        // POLE 2
-        L4(-39),                 // POLE 3
-        AlgaeBarge(0.0),        // ALGAE BED
-        AlgaeProcessor(0.0),    // ALGAE Processor
-        AlgaeReefHigh(0.0),     // ALGAE Reef High
-        AlgaeReefLow(0.0),      // ALGAE Reef Low
-        twoPi(2 * Math.PI);
-
-        // -150 soft lim during testing
+        Zero(0),
+        TROUGH(-16.5),
+        L2(-17.25),
+        L3(-26),
+        L4(-39),
+        AlgaeBarge(-38.5),
+        AlgaeProcessor(0.0),
+        AlgaeReefHigh(-14.0),
+        AlgaeReefLow(-5.0);
 
         public final double val;
 
@@ -171,6 +168,15 @@ public class Elevator extends SubsystemBase implements Lifecycle {
         public void initialize() {
             double currentPosition = Elevator.this.getCurrentPosition();
             Elevator.this.moveToEncoderPosition(currentPosition);
+        }
+
+        @Override
+        public void execute() {
+            if (Elevator.this.isInPosition() &&
+                    MathUtil.isNear(0.0, Elevator.this.getCurrentPosition(), 0.25)) {
+                BSLogger.log("Elevator", "Elevator is at zero position, relaxing");
+                Elevator.this.left.setControl(neutralOut);
+            }
         }
     }
 }
