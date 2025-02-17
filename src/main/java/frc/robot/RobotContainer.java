@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.JoystickMode;
 import frc.robot.commands.AlignmentTest;
@@ -38,6 +39,7 @@ import frc.robot.hci.SwerveSupplier;
 import frc.robot.hci.XBoxSwerveSupplier;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Controls;
+import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake.AlgaeArm;
 import frc.robot.subsystems.Lifecycle;
 import frc.robot.subsystems.Prototype.ComponentPreconfig;
@@ -63,13 +65,24 @@ public class RobotContainer {
     private final Joystick steerStick = Controls.right;
     private final CommandXboxController joystick = Controls.joystick;
 
-    private final JoystickButton prototypeButton = new JoystickButton(driveStick, 1); // for prototype subsystem
     private final JoystickButton visionAssistButton = new JoystickButton(driveStick, 2);
+    private final JoystickButton intakeCoral = new JoystickButton(driveStick, 2);
+    private final JoystickButton shootCoral = new JoystickButton(driveStick, 1);
+
+    private final JoystickButton intakeAlgae = new JoystickButton(steerStick, 2);
+    private final JoystickButton shootAlgae = new JoystickButton(steerStick, 1);
+
+    private final POVButton elevatorDown = new POVButton(driveStick, 180);
+    private final POVButton elevatorL2 = new POVButton(driveStick, 270);
+    private final POVButton elevatorL3 = new POVButton(driveStick, 90);
+    private final POVButton elevatorL4 = new POVButton(driveStick, 0);
+
+
 
     public final CommandSwerveDrivetrain drivetrain;
     private final SwerveSupplier swerveSupplier;
 
-    private Constants.JoystickMode joystickMode = JoystickMode.none;
+    private Constants.JoystickMode joystickMode = JoystickMode.CompBot;
 
     public RobotContainer() {
         Subsystems.getInstance(); // Ensure subsystems are initialized
@@ -101,6 +114,18 @@ public class RobotContainer {
         );
 
         switch (this.joystickMode) {
+            case CompBot -> {
+                intakeCoral.onTrue(Subsystems.coralIntake.intakeCoralCommand());
+                shootCoral.whileTrue(Subsystems.coralIntake.shootCoralCommand());
+
+                intakeAlgae.onTrue(Subsystems.algaeIntake.intakeCommand()).onFalse(Subsystems.algaeIntake.holdAlgaeCommand());
+                shootAlgae.onTrue(Subsystems.algaeIntake.ejectCommand()).onFalse(Subsystems.algaeIntake.stopCommand());
+
+                elevatorDown.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.Zero));
+                elevatorL2.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L2));
+                elevatorL3.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L3));
+                elevatorL4.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4));
+            }
             case JoshPrototype -> {
                 // Josh Prototype Controls
                 joystick.b().onTrue(Subsystems.joshPrototype.stop());
@@ -151,10 +176,10 @@ public class RobotContainer {
 
         drivetrain.registerTelemetry(logger::telemeterize);
 
-        bindSysId();
+//        bindSysId();
 
-        joystick.povLeft().and(joystick.a()).onTrue(Subsystems.coralIntake.intakeCoralCommand());
-        joystick.povLeft().and(joystick.b()).onTrue(Subsystems.coralIntake.stopCommand());
+//        joystick.povLeft().and(joystick.a()).onTrue(Subsystems.coralIntake.intakeCoralCommand());
+//        joystick.povLeft().and(joystick.b()).onTrue(Subsystems.coralIntake.stopCommand());
 //        joystick.povLeft().and(joystick.y()).whileTrue(Subsystems.coralIntake.ejectCommand());
 //        joystick.povLeft().and(joystick.x()).whileTrue(Subsystems.coralIntake.shootCoralCommand());
 

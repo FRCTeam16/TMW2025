@@ -10,8 +10,10 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
+import frc.robot.Subsystems;
 import frc.robot.util.BSLogger;
 
 public class Elevator extends SubsystemBase implements Lifecycle {
@@ -60,6 +62,8 @@ public class Elevator extends SubsystemBase implements Lifecycle {
         // Zero motor position at startup
         left.setPosition(0);
         left.setControl(neutralOut);
+
+        this.setDefaultCommand(new DefaultHoldPositionCommand(this));
     }
 
     @Override
@@ -140,42 +144,41 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     }
 
 
-    public class ElevatorMoveToPositionCommand extends Command {
+    public static class ElevatorMoveToPositionCommand extends Command {
         private final ElevatorSetpoint setpoint;
 
         public ElevatorMoveToPositionCommand(ElevatorSetpoint setpoint) {
             this.setpoint = setpoint;
-            addRequirements(Elevator.this);
+            addRequirements(Subsystems.elevator);
         }
 
         @Override
         public void initialize() {
-            Elevator.this.moveToPosition(this.setpoint);
+            Subsystems.elevator.moveToPosition(this.setpoint);
         }
 
         @Override
         public boolean isFinished() {
-            return Elevator.this.isInPosition();
+            return Subsystems.elevator.isInPosition();
         }
     }
 
     public class DefaultHoldPositionCommand extends Command {
-        public DefaultHoldPositionCommand() {
-            addRequirements(Elevator.this);
+        public DefaultHoldPositionCommand(Elevator elevator) {
+            addRequirements(elevator);
         }
 
         @Override
         public void initialize() {
-            double currentPosition = Elevator.this.getCurrentPosition();
-            Elevator.this.moveToEncoderPosition(currentPosition);
+            double currentPosition = Subsystems.elevator.getCurrentPosition();
+            Subsystems.elevator.moveToEncoderPosition(currentPosition);
         }
 
         @Override
         public void execute() {
-            if (Elevator.this.isInPosition() &&
-                    MathUtil.isNear(0.0, Elevator.this.getCurrentPosition(), 0.25)) {
-                BSLogger.log("Elevator", "Elevator is at zero position, relaxing");
-                Elevator.this.left.setControl(neutralOut);
+            if (Subsystems.elevator.isInPosition() &&
+                    MathUtil.isNear(0.0, Subsystems.elevator.getCurrentPosition(), 0.25)) {
+                Subsystems.elevator.left.setControl(neutralOut);
             }
         }
     }
