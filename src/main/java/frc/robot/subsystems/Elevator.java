@@ -28,6 +28,7 @@ public class Elevator extends SubsystemBase implements Lifecycle {
 
     private double openLoopMotorSpeed = -0.2;
     private double currentSetpoint = 0;
+    private boolean lazyHold;
 
 
     public Elevator() {
@@ -93,6 +94,10 @@ public class Elevator extends SubsystemBase implements Lifecycle {
         return Math.abs(getCurrentPosition() - currentSetpoint) < ELEVATOR_POSITION_THRESHOLD;
     }
 
+    void setLazyHold(boolean lazyHold) {
+        this.lazyHold = lazyHold;
+    }
+
     public Command openLoopUpCommand() {
         return this.runOnce(() -> left.setControl(dutyCycleOut.withOutput(openLoopMotorSpeed))).withName("Open Loop Up");
     }
@@ -123,6 +128,7 @@ public class Elevator extends SubsystemBase implements Lifecycle {
         builder.addDoubleProperty("Left Motor DutyCycle", () -> left.getDutyCycle().getValueAsDouble(), null);
         builder.addDoubleProperty("Left Motor Current", () -> left.getStatorCurrent().getValueAsDouble(), null);
         builder.addDoubleProperty("Right Motor Current", () -> right.getStatorCurrent().getValueAsDouble(), null);
+        builder.addBooleanProperty("Lazy Mode", () -> lazyHold, this::setLazyHold);
     }
 
     public enum ElevatorSetpoint { //TODO: these numbers will probably break things if ran on the bot but I need a robot built before we're able to fix them
@@ -179,7 +185,13 @@ public class Elevator extends SubsystemBase implements Lifecycle {
             if (Subsystems.elevator.isInPosition() &&
                     MathUtil.isNear(0.0, Subsystems.elevator.getCurrentPosition(), 0.25)) {
                 Subsystems.elevator.left.setControl(neutralOut);
+                Subsystems.elevator.setLazyHold(true);
             }
+        }
+
+        @Override
+        public void end(boolean interrupted) {
+            Subsystems.elevator.setLazyHold(false);
         }
     }
 }

@@ -1,14 +1,4 @@
-# TMW2025
-
-REEFSCAPE
-
-## Robot Config Variants
-You can register a new robot variant configuration, see `src/main/java/frc/robot/generated/README.md` for details.
-
-## PathPlanner Reef Coords
-Use the gradle target `runGenerateReefCoords` to generate the reef coordinates for the path planner. 
-The output will be in the `src/main/deploy/pathplanner/paths/{color}CoordPath_{timestamp}.path` file
-and shown on standard out. 
+# TMW2025 REEFSCAPE
 
 ## 2025 Robot Control Specs
 D-pad modifier:
@@ -40,3 +30,13 @@ D-pad modifier:
     
 Top-of-sticks Controls:
     Every command executable via the top of the sicks will use 
+
+
+## Robot Config Variants
+You can register a new robot variant configuration, see `src/main/java/frc/robot/generated/README.md` for details.
+
+## Tools
+### PathPlanner Reef Coords
+Use the gradle target `runGenerateReefCoords` to generate the reef coordinates for the path planner.
+The output will be in the `src/main/deploy/pathplanner/paths/{color}CoordPath_{timestamp}.path` file
+and shown on standard out. 

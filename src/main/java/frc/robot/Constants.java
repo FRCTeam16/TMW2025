@@ -19,6 +19,9 @@ public class Constants {
         ElevatorProto,
         climberProto,
         AlgaeProto,
+        PathTesting,
+        SysId,
+        CoralTesting,
         none
     }
     public static final boolean JoshPrototype = false;

@@ -38,7 +38,7 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
     int laser2SenseDistance = 30;
     double intakeHighSpeedLeft = 0.25;
     double intakeHighSpeedRight = -0.25;
-    double intakeLowSpeed = 0.2;
+    double intakeLowSpeed = 0.05;
     double ejectSpeed = -0.3;
 
 

@@ -1,4 +1,4 @@
-package frc.robot.hci;
+package frc.robot.hci.swerve;
 
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;

@@ -5,46 +5,29 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static frc.robot.Constants.MaxAngularRate;
 import static frc.robot.Constants.MaxSpeed;
 
 import java.util.Objects;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.path.PathConstraints;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.POVButton;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.JoystickMode;
-import frc.robot.commands.AlignmentTest;
-import frc.robot.commands.ResetPoseCommand;
-import frc.robot.commands.ZeroYawCommand;
-import frc.robot.commands.auto.PathfindToPoseCommand;
-import frc.robot.commands.vision.PipelineSwitcher;
-import frc.robot.commands.vision.UpdateRobotPoseFromVision;
-import frc.robot.hci.JoystickSwerveSupplier;
-import frc.robot.hci.SwerveSupplier;
-import frc.robot.hci.XBoxSwerveSupplier;
+import frc.robot.hci.control.ControlBinding;
+import frc.robot.hci.control.ControlBindingFactory;
+import frc.robot.hci.swerve.JoystickSwerveSupplier;
+import frc.robot.hci.swerve.SwerveSupplier;
+import frc.robot.hci.swerve.XBoxSwerveSupplier;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Controls;
-import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.Intake.AlgaeArm;
 import frc.robot.subsystems.Lifecycle;
-import frc.robot.subsystems.Prototype.ComponentPreconfig;
-import frc.robot.subsystems.vision.Pipeline;
 import frc.robot.subsystems.vision.VisionAssist;
 
 public class RobotContainer {
@@ -68,52 +51,10 @@ public class RobotContainer {
 
     private final JoystickButton visionAssistButton = new JoystickButton(driveStick, 2);
 
-    // Debug/Testing controls CompTest
-    private final JoystickButton intakeCoral = new JoystickButton(driveStick, 2);
-    private final JoystickButton shootCoral = new JoystickButton(driveStick, 1);
-
-    private final JoystickButton intakeAlgae = new JoystickButton(steerStick, 2);
-    private final JoystickButton shootAlgae = new JoystickButton(steerStick, 1);
-
-    private final POVButton elevatorDown = new POVButton(driveStick, 180);
-    private final POVButton elevatorL2 = new POVButton(driveStick, 270);
-    private final POVButton elevatorL3 = new POVButton(driveStick, 90);
-    private final POVButton elevatorL4 = new POVButton(driveStick, 0);
-
-    //
-    // Comp Controls
-    // 
-    private final Trigger requestL1 = joystick.a();
-    private final Trigger requestL2 = joystick.b();
-    private final Trigger requestL3 = joystick.x();
-    private final Trigger requestL4 = joystick.y();
-    
-
-    private final Trigger zeroElevator = joystick.start();
-    private final Trigger algaeArmZero = joystick.back();
-
-
-    private final Trigger highAlgaePickup = joystick.leftBumper();
-    private final Trigger lowAlgaePickup = joystick.rightBumper();
-    private final Trigger leftBranchScore = joystick.leftTrigger();
-    private final Trigger rightBranchScore = joystick.rightTrigger();
-
-
-    //private final Trigger climberUp //tbd
-    //private final Trigger climberDown //tbd
-
-
-
-
-
-
-
-
-
     public final CommandSwerveDrivetrain drivetrain;
     private final SwerveSupplier swerveSupplier;
-
     private Constants.JoystickMode joystickMode = JoystickMode.CompBotDev;
+    private ControlBinding controlBinding;
 
     public RobotContainer() {
         Subsystems.getInstance(); // Ensure subsystems are initialized
@@ -125,7 +66,6 @@ public class RobotContainer {
         if (RobotBase.isSimulation()) {
             drivetrain.resetPose(new Pose2d(3, 3, Rotation2d.fromDegrees(0)));
         }
-
         configureBindings();
     }
 
@@ -144,119 +84,8 @@ public class RobotContainer {
             ).withName("Default Teleop")
         );
 
-        switch (this.joystickMode) {
-            case CompBot -> {
-                requestL1.onTrue(Commands.print("Request L1"));
-                requestL2.onTrue(Commands.print("Request L2"));
-                requestL3.onTrue(Commands.print("Request L3"));
-                requestL4.onTrue(Commands.print("Request L4"));
-            }
-            case CompBotDev -> {
-                intakeCoral.onTrue(Subsystems.coralIntake.intakeCoralCommand());
-                shootCoral.whileTrue(Subsystems.coralIntake.shootCoralCommand());
-
-                intakeAlgae.onTrue(Subsystems.algaeIntake.intakeCommand()).onFalse(Subsystems.algaeIntake.holdAlgaeCommand());
-                shootAlgae.onTrue(Subsystems.algaeIntake.ejectCommand()).onFalse(Subsystems.algaeIntake.stopCommand());
-
-                elevatorDown.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.Zero));
-                elevatorL2.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L2));
-                elevatorL3.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L3));
-                elevatorL4.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4));
-            }
-            case JoshPrototype -> {
-                // Josh Prototype Controls
-                joystick.b().onTrue(Subsystems.joshPrototype.stop());
-                joystick.y().onTrue(Subsystems.joshPrototype.eject()).onFalse(Subsystems.joshPrototype.stop());
-                joystick.a().onTrue(Subsystems.joshPrototype.ingest()).onFalse(Subsystems.joshPrototype.stop());
-            }
-            case AustinGearboxPrototype -> {
-                Subsystems.austinGearPrototype.InjectControls(ComponentPreconfig.ABXYpreconf);
-            }
-            case AlignmentTest -> {
-                joystick.x().whileTrue(new AlignmentTest(AlignmentTest.TargetSide.LEFT));
-                joystick.b().whileTrue(new AlignmentTest(AlignmentTest.TargetSide.RIGHT));
-            }
-            case ElevatorProto -> {
-                joystick.a().onTrue(Subsystems.elevator.openLoopDownCommand()).onFalse(Subsystems.elevator.openLoopStopCommand());
-                joystick.y().onTrue(Subsystems.elevator.openLoopUpCommand()).onFalse(Subsystems.elevator.openLoopStopCommand());
-            }
-            case climberProto -> { // dual integrated motors
-                joystick.rightBumper().and(joystick.a()).onTrue(Subsystems.Climberproto1.runForward()).onFalse(Subsystems.Climberproto1.stop());
-                joystick.rightBumper().and(joystick.y()).onTrue(Subsystems.Climberproto1.runBackward()).onFalse(Subsystems.Climberproto1.stop());
-                joystick.leftBumper().and(joystick.a()).onTrue(Subsystems.Climberproto2.runForward()).onFalse(Subsystems.Climberproto2.stop());
-                joystick.leftBumper().and(joystick.y()).onTrue(Subsystems.Climberproto2.runBackward()).onFalse(Subsystems.Climberproto2.stop());
-                joystick.b().onTrue(Subsystems.Climberproto1.stop());
-                joystick.b().onTrue(Subsystems.Climberproto2.stop());
-            }
-            case AlgaeProto -> {
-                joystick.y().onTrue(Subsystems.algaeIntake.intakeCommand()).onFalse(Subsystems.algaeIntake.holdAlgaeCommand());
-                joystick.x().onTrue(Subsystems.algaeIntake.ejectCommand()).onFalse(Subsystems.algaeIntake.stopCommand());
-//                joystick.a().onTrue(Subsystems.algaeArm.setArmPositionCommand(AlgaeArm.AlgaeArmPosition.ReefLow));
-//                joystick.y().onTrue(Subsystems.algaeArm.setArmPositionCommand(AlgaeArm.AlgaeArmPosition.ReefHigh));
-            }
-            case none -> {
-
-            }
-        }
-
-        // Debug Testing
-        Pose2d targetPose = new Pose2d(3.39, 4.05, Rotation2d.fromDegrees(180));
-        PathConstraints pathConstraints = new PathConstraints(1.0, 1.0, 1.0, 1.0);
-        Command cmd = Commands.runOnce(() -> AutoBuilder.pathfindToPose(targetPose, pathConstraints).schedule(), Subsystems.swerveSubsystem);
-        joystick.rightBumper().onTrue(cmd).onFalse(Commands.run(cmd::cancel));
-        // Debug Testing// Debug Testing
-
-        // reset the field-centric heading on left bumper press
-        joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
-
-        bindSmartDashboardButtons();
-
+        controlBinding = ControlBindingFactory.createControlBinding(this.joystickMode, driveStick, steerStick, joystick);
         drivetrain.registerTelemetry(logger::telemeterize);
-
-//        bindSysId();
-
-//        joystick.povLeft().and(joystick.a()).onTrue(Subsystems.coralIntake.intakeCoralCommand());
-//        joystick.povLeft().and(joystick.b()).onTrue(Subsystems.coralIntake.stopCommand());
-//        joystick.povLeft().and(joystick.y()).whileTrue(Subsystems.coralIntake.ejectCommand());
-//        joystick.povLeft().and(joystick.x()).whileTrue(Subsystems.coralIntake.shootCoralCommand());
-
-    }
-
-    public void bindSysId() {
-        // Run SysId routines when holding back/start and X/Y. // these are fine for now
-        // View that each routine should be run exactly once in a single log.
-        joystick.back().and(joystick.y()).whileTrue(drivetrain.getSysIdHelper().sysIdDynamic(Direction.kForward));
-        joystick.back().and(joystick.x()).whileTrue(drivetrain.getSysIdHelper().sysIdDynamic(Direction.kReverse));
-        joystick.start().and(joystick.y()).whileTrue(drivetrain.getSysIdHelper().sysIdQuasistatic(Direction.kForward));
-        joystick.start().and(joystick.x()).whileTrue(drivetrain.getSysIdHelper().sysIdQuasistatic(Direction.kReverse));
-    }
-
-    public void bindSmartDashboardButtons() {
-        SmartDashboard.putData("Zero Yaw", new ZeroYawCommand());
-        SmartDashboard.putData("Set LLs to Apriltag", new PipelineSwitcher(Pipeline.April));
-        SmartDashboard.putData("Set LLs to Viewfinder", new PipelineSwitcher(Pipeline.View));
-
-        SmartDashboard.putData("Test Reset Pose", new ResetPoseCommand());
-        Subsystems.visionSubsystem.getLimelights().forEach(limelight ->
-                SmartDashboard.putData("Test Reset Pose from " + limelight.getName(),
-                UpdateRobotPoseFromVision.resetFromLimelightPoseEstimator(limelight.getName())));
-
-        // Debug Testing
-        SmartDashboard.putData("Pathfind", new PathfindToPoseCommand());
-        SmartDashboard.putData("ResetPoseTest", Commands.runOnce(
-            () ->{
-                // Locking robot code when called from a command
-                System.out.println("PRE RESET");
-//                drivetrain.resetPose(new Pose2d(7, 6, Rotation2d.fromDegrees(0)));
-                Robot.poseUpdates.add(new Pose2d(7, 6, Rotation2d.fromDegrees(0)));
-                System.out.println("POST RESET");
-            },
-                Subsystems.swerveSubsystem)
-                .withName("RESET POSE TEST")
-                .withTimeout(5.0)
-                .ignoringDisable(true)
-        );
-        // Debug Testing
     }
 
     public Command getAutonomousCommand() {

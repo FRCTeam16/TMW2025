@@ -1,4 +1,4 @@
-package frc.robot.hci;
+package frc.robot.hci.swerve;
 
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -19,12 +19,14 @@ public class XBoxSwerveSupplier implements SwerveSupplier {
 
     @Override
     public LinearVelocity supplyX() {
-        return MetersPerSecond.of(-controller.getLeftY()).times(Constants.MaxSpeed.in(MetersPerSecond));
+        double base = -controller.getLeftY() * (RobotBase.isSimulation() ? -1 : 1);
+        return MetersPerSecond.of(base).times(Constants.MaxSpeed.in(MetersPerSecond));
     }
 
     @Override
     public LinearVelocity supplyY() {
-        return MetersPerSecond.of(-controller.getLeftX()).times(Constants.MaxSpeed.in(MetersPerSecond));
+        double base = -controller.getLeftX() * (RobotBase.isSimulation() ? -1 : 1);
+        return MetersPerSecond.of(base).times(Constants.MaxSpeed.in(MetersPerSecond));
     }
 
     @Override
