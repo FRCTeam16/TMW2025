@@ -1,6 +1,5 @@
 package frc.robot.subsystems.Prototype;
 
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -10,7 +9,6 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.Controls;
 
 public class ComponentPreconfig {
-
     static public final Consumer<PrototypeComponent> ABXYpreconf = (proto) -> {
                 Controls.joystick.b().onTrue(proto.stop());
                 Controls.joystick.a().onTrue(proto.runForward()).onFalse(proto.stop());
@@ -18,9 +16,23 @@ public class ComponentPreconfig {
                 Controls.joystick.x().onTrue(proto.updateIds()); //IDs are ran through elastic
     };
 
-    static public final BiConsumer<PrototypeComponent, String> PreElasticConfig = (proto, elasticName) -> {
-        selectedButton(elasticName).onTrue(getCommandOfString(elasticName, proto));
-    };
+    static public final Consumer<PrototypeComponent> getElasticOnTrueComand(String elasticName){
+        return (proto) -> {
+            selectedButton(elasticName).onTrue(getCommandOfString(elasticName, proto));
+        };
+    }
+
+    static public final Consumer<PrototypeComponent> getElasticOnFalseComand(String elasticName){
+        return (proto) -> {
+            selectedButton(elasticName).onTrue(getCommandOfString(elasticName, proto));
+        };
+    }
+
+    static public final Consumer<PrototypeComponent> getElasticOnTrueOnFalseComand(String elasticName1, String elasticName2){
+        return (proto) -> {
+            selectedButton(elasticName1).onTrue(getCommandOfString(elasticName1, proto)).onFalse(getCommandOfString(elasticName1, proto));
+        };
+    }
 
     private static Trigger selectedButton(String ComponentName) {
         String selectedButton = SmartDashboard.getString(ComponentName + "/button", null);

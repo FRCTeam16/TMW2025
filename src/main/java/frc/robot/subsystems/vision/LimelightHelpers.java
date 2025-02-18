@@ -644,7 +644,7 @@ public class LimelightHelpers {
     /**
      * Converts a Pose2d object to an array of doubles in the format [x, y, z, roll, pitch, yaw].
      * Translation components are in meters, rotation components are in degrees.
-     * Note: z, roll, and pitch will be 0 since Pose2d only contains x, y, and yaw.
+     * View: z, roll, and pitch will be 0 since Pose2d only contains x, y, and yaw.
      * 
      * @param pose The Pose2d object to convert
      * @return A 6-element array containing [x, y, 0, 0, 0, yaw]

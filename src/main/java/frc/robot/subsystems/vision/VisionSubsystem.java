@@ -1,6 +1,7 @@
 package frc.robot.subsystems.vision;
 
 import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.Lifecycle;
 import frc.robot.util.BSLogger;
@@ -10,6 +11,7 @@ import java.util.*;
 public class VisionSubsystem extends SubsystemBase implements Lifecycle {
     private final Map<String, Limelight> limelightLookup = new HashMap<>();
     private final Limelight defaultLimelight;
+    public Object getLimelights;
 
     public VisionSubsystem(Iterable<Limelight> limelights) {
         Limelight tmpLimelight = null;
@@ -18,6 +20,7 @@ public class VisionSubsystem extends SubsystemBase implements Lifecycle {
             if (tmpLimelight == null) {
                 tmpLimelight = limelight;
             }
+            SmartDashboard.putData("Subsystems/VisionSubsystem/" + limelight.getName(), limelight);
         }
         if (tmpLimelight != null) {
             this.defaultLimelight = tmpLimelight;

@@ -8,12 +8,14 @@ import java.util.function.Consumer;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
-public class Limelight {
+public class Limelight implements Sendable {
     public static final Distance DEFAULT_HEIGHT_TO_TARGET = Meters.of(0.5);
     private final String name;
     private final VisionTypes.LimelightInfo info;
@@ -95,6 +97,20 @@ public class Limelight {
             case ForceOn -> LimelightHelpers::setLEDMode_ForceOn;
         };
         selector.accept(this.name);
+    }
+
+    @Override
+    public void initSendable(SendableBuilder builder) {
+        builder.setSmartDashboardType("Limelight");
+        builder.addStringProperty("Name", this::getName, null);
+        builder.addDoubleProperty("AprilTagID", this::getAprilTagID, null);
+        builder.addDoubleProperty("CurrentPipeline", ()-> LimelightHelpers.getCurrentPipelineIndex(this.name),(idx) -> LimelightHelpers.setPipelineIndex(this.name, (int)idx));
+
+        VisionTypes.TargetInfo targetInfo = this.getTargetInfo();
+        builder.addBooleanProperty("TargetInfo/hasTarget", targetInfo::hasTarget, null);
+        builder.addDoubleProperty("TargetInfo/xOffset", targetInfo::xOffset, null);
+        builder.addDoubleProperty("TargetInfo/yOffset", targetInfo::yOffset, null);
+        builder.addDoubleProperty("TargetInfo/latency", targetInfo::latency, null);
     }
 
     public HashMap<Integer, Double> getTagMap(){

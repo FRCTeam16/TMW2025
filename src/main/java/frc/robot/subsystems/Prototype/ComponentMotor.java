@@ -10,9 +10,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import frc.robot.Subsystems;
 import frc.robot.subsystems.Lifecycle;
-import edu.wpi.first.wpilibj2.command.button.Trigger.*;
 
 public class ComponentMotor implements Lifecycle, Subsystem, PrototypeComponent {
     public enum direction{
@@ -86,8 +84,12 @@ public class ComponentMotor implements Lifecycle, Subsystem, PrototypeComponent 
         });
     }
 
-    public void InjectControls(Consumer<PrototypeComponent> config){
-        config.accept(this);
+
+    @SuppressWarnings("unchecked")  //  when java assigns Consumer<PrototypeComponent> to the array configs[] it'll not save that its <PrototypeComponent> so this isn't realy type safe
+    public void InjectControls(Consumer<PrototypeComponent>... configs){
+        for(Consumer<PrototypeComponent> config : configs){
+            config.accept(this);
+        }
     }
 
     public void ClosedLoop(Consumer<PrototypeComponent> setup,Consumer<PrototypeComponent> periodic){

@@ -1,6 +1,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.async.AsyncManager;
 import frc.robot.auto.AutoManager;
 import frc.robot.subsystems.*;
@@ -10,9 +11,7 @@ import frc.robot.subsystems.Intake.AlgaeIntake;
 import frc.robot.subsystems.Intake.CoralIntake;
 import frc.robot.subsystems.Prototype.JoshPrototype;
 import frc.robot.subsystems.Prototype.ComponentMotor;
-import frc.robot.subsystems.Prototype.ComponentPreconfig;
 import frc.robot.subsystems.Prototype.PrototypeComponent;
-import frc.robot.subsystems.vision.Limelight;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
 import java.util.ArrayList;
@@ -73,11 +72,11 @@ public class Subsystems {
         registerSmartDashboardEntries();
     }
 
+    @SuppressWarnings("unchecked") // for inject Controls
     private void createPrototypeSubsystems() {
         joshPrototype = new JoshPrototype();
         austinGearPrototype = new ComponentMotor("austinGearPrototype", 51);
         elevator = new Elevator();
-        algaeIntake = new AlgaeIntake();
 
 
 
@@ -94,9 +93,10 @@ public class Subsystems {
 //        );
 
 
-        Climberproto1 = new ComponentMotor("ClimberProto3", 50, (m) -> {m.setDirection(ComponentMotor.direction.inverse);});
-        Climberproto1.InjectControls(ComponentPreconfig.ABXYpreconf);
-        Climberproto2 = new ComponentMotor( "ClimberProto4", 51, (m) -> {m.setDirection(ComponentMotor.direction.corresponding);});
+        //Climberproto1 = new ComponentMotor("ClimberProto3", 50, (m) -> {m.setDirection(ComponentMotor.direction.inverse);});
+        //Climberproto1.InjectControls(ComponentPreconfig.ABXYpreconf);
+        //Climberproto2 = new ComponentMotor( "ClimberProto4", 51, (m) -> {m.setDirection(ComponentMotor.direction.corresponding);});
+        
 
         lifecycleSubsystems.add(visionSubsystem);
         lifecycleSubsystems.add(ledSubsystem);
@@ -136,6 +136,9 @@ public class Subsystems {
         SmartDashboard.putData("Subsystems/AlgaeIntake", algaeIntake);
         SmartDashboard.putData("Subsystems/AlgaeArm", algaeArm);
         SmartDashboard.putData("Subsystems/CoralIntake", coralIntake);
+        SmartDashboard.putData("Subsystems/Vision", visionSubsystem);
+
+        SmartDashboard.putData("CommandScheduler", CommandScheduler.getInstance());
     }
 
     public static Subsystems getInstance() {

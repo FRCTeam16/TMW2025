@@ -23,21 +23,29 @@ public class JoystickSwerveSupplier implements SwerveSupplier {
         this.isRedAlliance = GameInfo.isRedAlliance();
     }
 
+    private double applyDeadband(double value, double deadband) {
+        if (Math.abs(value) > deadband) {
+            return value;
+        } else {
+            return 0.0;
+        }
+    }
+
     @Override
     public LinearVelocity supplyX() {
-        double base = -driveStick.getY() * (isRedAlliance ? -1 : 1);
+        double base = applyDeadband(driveStick.getY(), 0.08) * (isRedAlliance ? -1 : 1);
         return MetersPerSecond.of(base).times(Constants.MaxSpeed.in(MetersPerSecond));
     }
 
     @Override
     public LinearVelocity supplyY() {
-        double base = -driveStick.getX() * (isRedAlliance ? -1 : 1);
+        double base = applyDeadband(driveStick.getX(), 0.05) * (isRedAlliance ? -1 : 1);
         return MetersPerSecond.of(base).times(Constants.MaxSpeed.in(MetersPerSecond));
     }
 
     @Override
     public AngularVelocity supplyRotationalRate() {
-        double base = -steerStick.getX() * (isRedAlliance ? -1 : 1);
+        double base = applyDeadband(steerStick.getX(), 0.05) * (isRedAlliance ? -1 : 1);
         return RadiansPerSecond.of(base).times(Constants.MaxAngularRate.in(RadiansPerSecond));
     }
 }

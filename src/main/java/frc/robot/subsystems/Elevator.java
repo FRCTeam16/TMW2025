@@ -2,103 +2,112 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.NeutralOut;
-import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.TalonFX;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.util.sendable.SendableBuilder;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
+import frc.robot.Subsystems;
 import frc.robot.util.BSLogger;
 
-import static edu.wpi.first.units.Units.Radian;
-
 public class Elevator extends SubsystemBase implements Lifecycle {
-    // We may end up having a cancoder for the elevator, I'll assume we have them for now then make adjestments later if need be
+    public static final double GRAVITY_VOLTS = -0.5;
+    public static final double ELEVATOR_POSITION_THRESHOLD = 0.1;
+    private final TalonFX left = new TalonFX(Robot.robotConfig.getCanID("elevatorLeftMotor"));
+    private final TalonFX right = new TalonFX(Robot.robotConfig.getCanID("elevatorRightMotor"));
 
-    //  left.getPosition().getValue().in(Radian); is the equivalent to the CANcoder elevatorPose.getPosition().getValue().in(Radian);|
-
-    private final CANcoder elevatorPose = new CANcoder(61);
-    private final NeutralOut brake = new NeutralOut();
-    private final PositionVoltage positionVoltage = new PositionVoltage(0);
-    private TalonFX left;
-    private TalonFX right;
-    private double currentPoseAsRad;
+    private final NeutralOut neutralOut = new NeutralOut();
     private final DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
-    private double openLoopMotorSpeed = 0.2;
+    private final MotionMagicVoltage motionMagicV = new MotionMagicVoltage(0).withFeedForward(Units.Volts.of(GRAVITY_VOLTS));
+
+    private double openLoopMotorSpeed = -0.2;
     private double currentSetpoint = 0;
 
+
     public Elevator() {
-        if (false) {
-            left = new TalonFX(Robot.robotConfig.getCanID("elevatorLeftMotor"));
-            right = new TalonFX(Robot.robotConfig.getCanID("elevatorRightMotor"));
-            right.setControl(new Follower(left.getDeviceID(), true));
+        right.setControl(new Follower(left.getDeviceID(), true));
 
-            Slot0Configs slot0 = new Slot0Configs();
-            slot0.kP = 0.1;
-            slot0.kI = 0.0;
-            slot0.kD = 0.0;
-            slot0.kG = 0.0;
+        Slot0Configs slot0 = new Slot0Configs();
+        slot0.kP = 2.5; //2.5
+        slot0.kI = 0.0;
+        slot0.kD = 0.0;
+        slot0.kG = GRAVITY_VOLTS; // -0.75
 
-            MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs();
-            motionMagicConfigs.MotionMagicCruiseVelocity = 1;
-            motionMagicConfigs.MotionMagicAcceleration = 1;
-            motionMagicConfigs.MotionMagicJerk = 1;
-            motionMagicConfigs.MotionMagicExpo_kA = 0.0;
-            motionMagicConfigs.MotionMagicExpo_kV = 0.0;
+        MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs();
+        motionMagicConfigs.MotionMagicCruiseVelocity = 40; //80;
+        motionMagicConfigs.MotionMagicAcceleration = 60; // 140;
+        motionMagicConfigs.MotionMagicJerk = 0;
+        motionMagicConfigs.MotionMagicExpo_kA = 0.0;
+        motionMagicConfigs.MotionMagicExpo_kV = 0.01;
 
-            TalonFXConfiguration configuration = new TalonFXConfiguration().withSlot0(slot0).withMotionMagic(motionMagicConfigs);
+        TalonFXConfiguration configuration = new TalonFXConfiguration()
+                .withSlot0(slot0)
+                .withMotionMagic(motionMagicConfigs)
+                .withSoftwareLimitSwitch(
+                        new SoftwareLimitSwitchConfigs()
+                                .withForwardSoftLimitEnable(true)
+                                .withForwardSoftLimitThreshold(0.0)
+                                .withReverseSoftLimitEnable(true)
+                                .withReverseSoftLimitThreshold(-43)
+                );
 
-            left.getConfigurator().apply(configuration);
+        left.getConfigurator().apply(configuration);
 
-            // Zero motor position at startup
-            left.setPosition(0);
-        }
+        // Zero motor position at startup
+        left.setPosition(0);
+        left.setControl(neutralOut);
+
+        this.setDefaultCommand(new DefaultHoldPositionCommand(this));
+    }
+
+    @Override
+    public void teleopInit() {
+        this.currentSetpoint = this.getCurrentPosition();
     }
 
     private void moveToPosition(ElevatorSetpoint setpoint) {
-        this.currentSetpoint = setpoint.val;
-        left.setControl(positionVoltage.withPosition(setpoint.val));
+        moveToEncoderPosition(setpoint.val);
     }
 
+    private void moveToEncoderPosition(double encoderPosition) {
+        this.currentSetpoint = encoderPosition;
+        left.setControl(motionMagicV.withPosition(encoderPosition));
+    }
+
+    /**
+     * Returns the position of the elevator in motor rotations
+     *
+     * @return the position of the elevator in motor rotations
+     */
     private double getCurrentPosition() {
-        // FIXME when robot is wired
-        // return left.getPosition().getValueAsDouble();
-        return 0;
+        return left.getPosition().getValueAsDouble();
     }
 
     public boolean isInPosition() {
-        return Math.abs(getCurrentPosition() - currentSetpoint) < 0.1;
+        return Math.abs(getCurrentPosition() - currentSetpoint) < ELEVATOR_POSITION_THRESHOLD;
     }
 
-
     public Command openLoopUpCommand() {
-        return this.runOnce(() -> {
-            left.setControl(dutyCycleOut.withOutput(openLoopMotorSpeed));
-        });
+        return this.runOnce(() -> left.setControl(dutyCycleOut.withOutput(openLoopMotorSpeed))).withName("Open Loop Up");
     }
 
     public Command openLoopDownCommand() {
-        return this.runOnce(() -> {
-            left.setControl(dutyCycleOut.withOutput(-openLoopMotorSpeed));
-        });
+        return this.runOnce(() -> left.setControl(dutyCycleOut.withOutput(-openLoopMotorSpeed))).withName("Open Loop Down");
     }
 
+    /**
+     * Applies a neutral output to the elevator motors
+     *
+     * @return a command that applies a neutral output to the elevator motors
+     */
     public Command openLoopStopCommand() {
-        return this.runOnce(() -> {
-            left.setControl(brake);
-        });
-    }
-
-    public Command holdPositionCommand() {
-        return this.runOnce(() -> {
-            left.setControl(positionVoltage.withPosition(getCurrentPosition()));
-        });
+        return this.runOnce(() -> left.setControl(neutralOut)).withName("Open Loop Stop");
     }
 
     @Override
@@ -107,20 +116,25 @@ public class Elevator extends SubsystemBase implements Lifecycle {
         builder.setSmartDashboardType("Elevator");
         builder.addDoubleProperty("Current Position", this::getCurrentPosition, null);
         builder.addBooleanProperty("Is In Position", this::isInPosition, null);
-        builder.addDoubleProperty("Current Setpoint", () -> currentSetpoint, (sp) -> currentSetpoint = sp);
+        builder.addDoubleProperty("Current Setpoint", () -> currentSetpoint, this::moveToEncoderPosition);
+
         builder.addDoubleProperty("Open Loop Motor Speed", () -> openLoopMotorSpeed, (speed) -> openLoopMotorSpeed = speed);
+        builder.addDoubleProperty("Left Motor Volts", () -> left.getMotorVoltage().getValueAsDouble(), null);
+        builder.addDoubleProperty("Left Motor DutyCycle", () -> left.getDutyCycle().getValueAsDouble(), null);
+        builder.addDoubleProperty("Left Motor Current", () -> left.getStatorCurrent().getValueAsDouble(), null);
+        builder.addDoubleProperty("Right Motor Current", () -> right.getStatorCurrent().getValueAsDouble(), null);
     }
 
     public enum ElevatorSetpoint { //TODO: these numbers will probably break things if ran on the bot but I need a robot built before we're able to fix them
-        Zero(0), TROUGH(0.0),    // Lowest position
-        P1(0.0),        // POLE 1
-        P2(0.0),        // POLE 2
-        P3(0.0),        // POLE 3
-        AlgaeBarge(0.0),        // ALGAE BED
-        AlgaeProcessor(0.0),    // ALGAE Processor
-        AlgaeReefHigh(0.0),     // ALGAE Reef High
-        AlgaeReefLow(0.0),      // ALGAE Reef Low
-        twoPi(2 * Math.PI);
+        Zero(0),
+        TROUGH(-16.5),
+        L2(-17.25),
+        L3(-26),
+        L4(-39),
+        AlgaeBarge(-38.5),
+        AlgaeProcessor(0.0),
+        AlgaeReefHigh(-14.0),
+        AlgaeReefLow(-5.0);
 
         public final double val;
 
@@ -130,23 +144,42 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     }
 
 
-    public class ElevatorMoveToPositionCommand extends Command {
+    public static class ElevatorMoveToPositionCommand extends Command {
         private final ElevatorSetpoint setpoint;
 
         public ElevatorMoveToPositionCommand(ElevatorSetpoint setpoint) {
             this.setpoint = setpoint;
-            addRequirements(Elevator.this);
+            addRequirements(Subsystems.elevator);
         }
 
         @Override
         public void initialize() {
-            Elevator.this.moveToPosition(this.setpoint);
+            Subsystems.elevator.moveToPosition(this.setpoint);
         }
 
         @Override
         public boolean isFinished() {
-            return Elevator.this.isInPosition();
+            return Subsystems.elevator.isInPosition();
         }
     }
 
+    public class DefaultHoldPositionCommand extends Command {
+        public DefaultHoldPositionCommand(Elevator elevator) {
+            addRequirements(elevator);
+        }
+
+        @Override
+        public void initialize() {
+            double currentPosition = Subsystems.elevator.getCurrentPosition();
+            Subsystems.elevator.moveToEncoderPosition(currentPosition);
+        }
+
+        @Override
+        public void execute() {
+            if (Subsystems.elevator.isInPosition() &&
+                    MathUtil.isNear(0.0, Subsystems.elevator.getCurrentPosition(), 0.25)) {
+                Subsystems.elevator.left.setControl(neutralOut);
+            }
+        }
+    }
 }

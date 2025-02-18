@@ -18,8 +18,6 @@ import static edu.wpi.first.units.Units.Radians;
 public class AlgaeArm extends SubsystemBase implements Lifecycle {
 
     public static final double ALLOWED_POSITION_ERROR = 0.1;
-    private static final double GEAR_RATIO = 100.0; // Adjust based on actual gearing
-    private static final double STARTING_ANGLE_DEGREES = 0.0; // Assume horizontal start
 
     private final TalonFX algaeArmMotor = new TalonFX(Robot.robotConfig.getCanID("algaeArmMotor"));
 
@@ -31,21 +29,31 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
 
     private double openLoopUpSpeed = 0.1;
     private double openLoopDownSpeed = 0.1;
+    private double targetPosition = 0;
 
 
     public AlgaeArm() {
         armConfiguration = new TalonFXConfiguration();
-        armConfiguration.Slot0.kP = 0;
+        armConfiguration.Slot0.kP = 0.6;
         armConfiguration.Slot0.kI = 0;
         armConfiguration.Slot0.kD = 0;
+        armConfiguration.Slot0.kG = -0.49; // Gravity compensation
         armConfiguration.MotionMagic.MotionMagicCruiseVelocity = 0;
         armConfiguration.MotionMagic.MotionMagicAcceleration = 0;
         algaeArmMotor.getConfigurator().apply(armConfiguration);
         algaeArmMotor.setNeutralMode(NeutralModeValue.Brake);
+
+        this.setDefaultCommand(this.holdPositionCommand());
+    }
+
+    @Override
+    public void teleopInit() {
+        this.setDefaultCommand(this.holdPositionCommand());
     }
 
     private void setArmPosition(double position) {
         // TODO: Consider translating angles?
+        this.targetPosition = position;
         algaeArmMotor.setControl(
                 positionVoltage.withPosition(position)
                         .withFeedForward(calculateGravityCompensation(getEstimatedAngle())));
@@ -55,8 +63,8 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
         // Convert encoder ticks to rotations
         double rotations = getMotorPosition();
 
-        // Convert to degrees
-        double degrees = STARTING_ANGLE_DEGREES + (rotations * 360.0 / GEAR_RATIO);
+        // Convert rotations to degrees
+        double degrees = 90.0 - (rotations / 8.6) * 90.0;
 
         return Degrees.of(degrees);
     }
@@ -70,7 +78,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
         setArmPosition(currentPosition);
     }
 
-    public void setPosition(AlgaeArmPosition position) {
+    private void setPosition(AlgaeArmPosition position) {
         setArmPosition(position.getPosition());
     }
 
@@ -86,7 +94,8 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
     @Override
     public void initSendable(SendableBuilder builder) {
         builder.setSmartDashboardType("AlgaeArm");
-        builder.addDoubleProperty("motorPosition", this::getMotorPosition, null);
+        builder.addDoubleProperty("motorPosition", this::getMotorPosition, this::setArmPosition);
+        builder.addDoubleProperty("targetPosition", () -> this.targetPosition, this::setArmPosition);
         builder.addDoubleProperty("estimatedAngle", () -> this.getEstimatedAngle().in(Degrees), null);
         builder.addBooleanProperty("isInPosition", this::isInPosition, null);
         builder.addDoubleProperty("openLoopUpSpeed", () -> openLoopUpSpeed, (v) -> openLoopUpSpeed = v);
@@ -94,23 +103,27 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
     }
 
     public Command openLoopUpCommand() {
-        return this.runOnce(() -> {
-            algaeArmMotor.setControl(dutyCycleOut.withOutput(openLoopUpSpeed));
-        });
+        return this.run(() -> algaeArmMotor.setControl(dutyCycleOut.withOutput(openLoopUpSpeed))).withName("Open Loop Up");
     }
 
     public Command openLoopDownCommand() {
-        return this.runOnce(() -> {
-            algaeArmMotor.setControl(dutyCycleOut.withOutput(openLoopDownSpeed));
-        });
+        return this.run(() -> algaeArmMotor.setControl(dutyCycleOut.withOutput(openLoopDownSpeed))).withName("Open Loop Down");
+    }
+
+    public Command holdPositionCommand() {
+        return new DefaultHoldPositionCommand();
+    }
+
+    public Command setArmPositionCommand(AlgaeArmPosition position) {
+        return new SetArmPositionCommand(position);
     }
 
     public enum AlgaeArmPosition {
         Start(0.0),
-        ReefLow(0.0),
-        ReefHigh(0.0),
+        ReefLow(5.0),
+        ReefHigh(6.0),
         Processor(0.0),
-        Shooting(0.0);
+        Shooting(3.0);
 
         private final double position;
 
@@ -142,5 +155,15 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
         }
     }
 
+    public class DefaultHoldPositionCommand extends Command {
+        public DefaultHoldPositionCommand() {
+            addRequirements(AlgaeArm.this);
+        }
+
+        @Override
+        public void initialize() {
+            AlgaeArm.this.holdPosition();
+        }
+    }
 }
 
