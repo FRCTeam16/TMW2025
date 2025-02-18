@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.JoystickMode;
 import frc.robot.commands.AlignmentTest;
@@ -66,6 +67,8 @@ public class RobotContainer {
     private final CommandXboxController joystick = Controls.joystick;
 
     private final JoystickButton visionAssistButton = new JoystickButton(driveStick, 2);
+
+    // Debug/Testing controls CompTest
     private final JoystickButton intakeCoral = new JoystickButton(driveStick, 2);
     private final JoystickButton shootCoral = new JoystickButton(driveStick, 1);
 
@@ -77,12 +80,40 @@ public class RobotContainer {
     private final POVButton elevatorL3 = new POVButton(driveStick, 90);
     private final POVButton elevatorL4 = new POVButton(driveStick, 0);
 
+    //
+    // Comp Controls
+    // 
+    private final Trigger requestL1 = joystick.a();
+    private final Trigger requestL2 = joystick.b();
+    private final Trigger requestL3 = joystick.x();
+    private final Trigger requestL4 = joystick.y();
+    
+
+    private final Trigger zeroElevator = joystick.start();
+    private final Trigger algaeArmZero = joystick.back();
+
+
+    private final Trigger highAlgaePickup = joystick.leftBumper();
+    private final Trigger lowAlgaePickup = joystick.rightBumper();
+    private final Trigger leftBranchScore = joystick.leftTrigger();
+    private final Trigger rightBranchScore = joystick.rightTrigger();
+
+
+    //private final Trigger climberUp //tbd
+    //private final Trigger climberDown //tbd
+
+
+
+
+
+
+
 
 
     public final CommandSwerveDrivetrain drivetrain;
     private final SwerveSupplier swerveSupplier;
 
-    private Constants.JoystickMode joystickMode = JoystickMode.CompBot;
+    private Constants.JoystickMode joystickMode = JoystickMode.CompBotDev;
 
     public RobotContainer() {
         Subsystems.getInstance(); // Ensure subsystems are initialized
@@ -115,6 +146,12 @@ public class RobotContainer {
 
         switch (this.joystickMode) {
             case CompBot -> {
+                requestL1.onTrue(Commands.print("Request L1"));
+                requestL2.onTrue(Commands.print("Request L2"));
+                requestL3.onTrue(Commands.print("Request L3"));
+                requestL4.onTrue(Commands.print("Request L4"));
+            }
+            case CompBotDev -> {
                 intakeCoral.onTrue(Subsystems.coralIntake.intakeCoralCommand());
                 shootCoral.whileTrue(Subsystems.coralIntake.shootCoralCommand());
 

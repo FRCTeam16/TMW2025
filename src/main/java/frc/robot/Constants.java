@@ -12,6 +12,7 @@ public class Constants {
 
     public enum JoystickMode {
         CompBot,
+        CompBotDev,
         JoshPrototype,
         AustinGearboxPrototype,
         AlignmentTest,
