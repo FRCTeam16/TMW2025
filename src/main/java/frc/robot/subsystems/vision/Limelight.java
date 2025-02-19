@@ -47,8 +47,21 @@ public class Limelight implements Sendable {
         return this.name;
     }
 
+
+    public void setPipeline(Pipeline pipeline) {
+        this.setPipelineIndex(pipeline.pipelineNumber);
+    }
+
     public void setPipelineIndex(int pipelineIndex) {
         LimelightHelpers.setPipelineIndex(this.name, pipelineIndex);
+    }
+
+    public int getPipelineIndex() {
+        return (int) LimelightHelpers.getCurrentPipelineIndex(this.name);
+    }
+
+    public Optional<Pipeline> getPipeline() {
+        return Pipeline.fromPipelineIndex(this.getPipelineIndex());
     }
 
     public double getAprilTagID() {

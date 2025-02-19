@@ -4,6 +4,9 @@ import frc.robot.Subsystems;
 import frc.robot.subsystems.vision.Limelight;
 import frc.robot.subsystems.vision.Pipeline;
 
+/**
+ * A command that switches the pipeline of all limelights in the vision subsystem
+ */
 public class PipelineSwitcher extends Command {
     private final Pipeline pipeline;
     
@@ -14,11 +17,8 @@ public class PipelineSwitcher extends Command {
     @Override
     public void initialize() {
        Subsystems.visionSubsystem.getLimelights().forEach(limelight -> {
-        limelight.setPipelineIndex(this.pipeline.pipelineNumber);
-
+        limelight.setPipeline(pipeline);
        }) ;
-
-       
     }
        @Override
        public boolean isFinished() {
