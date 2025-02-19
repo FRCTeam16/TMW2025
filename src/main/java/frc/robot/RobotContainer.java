@@ -53,7 +53,7 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain;
     private final SwerveSupplier swerveSupplier;
-    private Constants.JoystickMode joystickMode = JoystickMode.CompBotDev;
+    private Constants.JoystickMode joystickMode = JoystickMode.CompBot;
     private ControlBinding controlBinding;
 
     public RobotContainer() {

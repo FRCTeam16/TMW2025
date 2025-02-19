@@ -8,9 +8,13 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.subsystems.Lifecycle;
+import frc.robot.util.BSLogger;
+
+import java.util.function.Supplier;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
@@ -43,7 +47,6 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
         algaeArmMotor.getConfigurator().apply(armConfiguration);
         algaeArmMotor.setNeutralMode(NeutralModeValue.Brake);
 
-
         this.setDefaultCommand(this.holdPositionCommand());
     }
 
@@ -74,6 +77,11 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
         return Math.cos(angle.in(Radians)) * armConfiguration.Slot0.kG;
     }
 
+    private void runOpenLoop(double speed) {
+        BSLogger.log("AlgaeArm", "Running open loop with speed: " + speed);
+        algaeArmMotor.setControl(dutyCycleOut.withOutput(speed));
+    }
+
     public void holdPosition() {
         double currentPosition = getMotorPosition();
         setArmPosition(currentPosition);
@@ -85,7 +93,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
 
     public boolean isInPosition() {
         // TODO: Use algaeArmMotor.getClosedLoopError() if using magic motion
-        return Math.abs(getMotorPosition()) < ALLOWED_POSITION_ERROR;
+        return Math.abs(getMotorPosition() - targetPosition) < ALLOWED_POSITION_ERROR;
     }
 
     public double getMotorPosition() {
@@ -103,12 +111,8 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
         builder.addDoubleProperty("openLoopDownSpeed", () -> openLoopDownSpeed, (v) -> openLoopDownSpeed = v);
     }
 
-    public Command openLoopUpCommand() {
-        return this.run(() -> algaeArmMotor.setControl(dutyCycleOut.withOutput(openLoopUpSpeed))).withName("Open Loop Up");
-    }
-
-    public Command openLoopDownCommand() {
-        return this.run(() -> algaeArmMotor.setControl(dutyCycleOut.withOutput(openLoopDownSpeed))).withName("Open Loop Down");
+    public Command openLoopCommand(Supplier<Double> speed) {
+        return Commands.run(() -> runOpenLoop(speed.get()));
     }
 
     public Command holdPositionCommand() {

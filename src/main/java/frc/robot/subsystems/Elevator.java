@@ -10,11 +10,11 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.Subsystems;
-import frc.robot.util.BSLogger;
+
+import java.util.function.Supplier;
 
 public class Elevator extends SubsystemBase implements Lifecycle {
     public static final double GRAVITY_VOLTS = -0.5;
@@ -72,6 +72,10 @@ public class Elevator extends SubsystemBase implements Lifecycle {
         this.currentSetpoint = this.getCurrentPosition();
     }
 
+    private void setOpenLoop(double speed) {
+        left.setControl(dutyCycleOut.withOutput(speed));
+    }
+
     private void moveToPosition(ElevatorSetpoint setpoint) {
         moveToEncoderPosition(setpoint.val);
     }
@@ -98,12 +102,20 @@ public class Elevator extends SubsystemBase implements Lifecycle {
         this.lazyHold = lazyHold;
     }
 
+    public Command openLoopCommand(Supplier<Double> speed) {
+//        return this.run(() -> this.runOpenLoop(speed.get()));
+        return this.run(() -> {
+            System.out.println("Elevator runOpenLoop speed: " + speed.get());
+            this.setOpenLoop(speed.get());
+        }   );
+    }
+
     public Command openLoopUpCommand() {
-        return this.runOnce(() -> left.setControl(dutyCycleOut.withOutput(openLoopMotorSpeed))).withName("Open Loop Up");
+        return this.run(() -> this.setOpenLoop(openLoopMotorSpeed)).withName("Open Loop Up");
     }
 
     public Command openLoopDownCommand() {
-        return this.runOnce(() -> left.setControl(dutyCycleOut.withOutput(-openLoopMotorSpeed))).withName("Open Loop Down");
+        return this.run(() -> this.setOpenLoop(-openLoopMotorSpeed)).withName("Open Loop Down");
     }
 
     /**
