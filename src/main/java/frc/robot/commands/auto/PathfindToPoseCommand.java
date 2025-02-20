@@ -8,17 +8,34 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Subsystems;
 
 public class PathfindToPoseCommand extends Command {
+    private final Pose2d targetPose;
     Command pathCommand = null;
-    public PathfindToPoseCommand() {
+    private PathConstraints pathConstraints = new PathConstraints(1.0, 1.0, 1.0, 1.0);
+
+    public PathfindToPoseCommand(Pose2d targetPose) {
+        this.targetPose = targetPose;
         addRequirements(Subsystems.swerveSubsystem);
+    }
+
+    public PathfindToPoseCommand withConstraints(PathConstraints constraints) {
+        this.pathConstraints = constraints;
+        return this;
     }
 
     @Override
     public void initialize() {
-        Pose2d targetPose = new Pose2d(3.0, 2.25, Rotation2d.fromDegrees(45));
-        PathConstraints pathConstraints = new PathConstraints(1.0, 1.0, 1.0, 1.0);
         pathCommand = AutoBuilder.pathfindToPose(targetPose, pathConstraints);
-        pathCommand.schedule();
+        pathCommand.initialize();
+    }
+
+    @Override
+    public void execute() {
+        pathCommand.execute();
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        pathCommand.end(interrupted);
     }
 
     @Override

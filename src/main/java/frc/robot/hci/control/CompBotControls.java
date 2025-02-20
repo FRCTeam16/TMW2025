@@ -4,16 +4,32 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Robot;
 import frc.robot.Subsystems;
 import frc.robot.commands.ZeroYawCommand;
+import frc.robot.subsystems.scoring.AlgaePickRequest;
+import frc.robot.subsystems.scoring.AutoScoreCoralCommand;
+import frc.robot.subsystems.scoring.CoralScoringRequest;
+import frc.robot.subsystems.scoring.ScoringGoals;
 import frc.robot.commands.vision.PipelineSwitcher;
 import frc.robot.subsystems.vision.Pipeline;
 
 import java.util.function.Supplier;
 
 public class CompBotControls extends ControlBinding {
+
+    //
+    // Driver Controls
+    //
+    private final Trigger doAlgaePick = new Trigger(steerStick::getTrigger);
+    private final Trigger alignWithBarge = new JoystickButton(steerStick, 2);
+
+    private final Trigger doScore = new Trigger(driveStick::getTrigger);    // if in barge or processor zone score algae, otherwise score coral
+    private final Trigger alignWithProcessor = new JoystickButton(driveStick, 2);
+    private final Trigger alignWithLeftStation = new JoystickButton(driveStick, 3);
+    private final Trigger alignWithRightStation = new JoystickButton(driveStick, 4);
 
     //
     // Operator Controls
@@ -53,25 +69,33 @@ public class CompBotControls extends ControlBinding {
         bindSmartDashboardCommands();
     }
 
-    private void bindOperatorControls() {
-        requestL1.onTrue(Commands.print("Request L1"));
-        requestL2.onTrue(Commands.print("Request L2"));
-        requestL3.onTrue(Commands.print("Request L3"));
-        requestL4.onTrue(Commands.print("Request L4"));
+    private void bindDriverControls() {
+        doAlgaePick.whileTrue(Subsystems.scoreSubsystem.pickAlgaeCmd());
+        alignWithBarge.whileTrue(Commands.print("Auto Align with Barge"));
 
-        requestHighAlgaePick.onTrue(Commands.print("Request High Algae Pick"));
-        requestLowAlgaePick.onTrue(Commands.print("Request Low Algae Pick"));
-        requestLeftBranchScore.onTrue(Commands.print("Request Left Branch Score"));
-        requestRightBranchScore.onTrue(Commands.print("Request Right Branch Score"));
+        doScore.whileTrue(new AutoScoreCoralCommand());
+        alignWithProcessor.whileTrue(Commands.print("Auto Align with Processor"));
+        alignWithLeftStation.whileTrue(Commands.print("Auto Align with Left Station"));
+        alignWithRightStation.whileTrue(Commands.print("Auto Align with Right Station"));
+
+    }
+
+    private void bindOperatorControls() {
+        requestL1.onTrue(Subsystems.scoreSubsystem.requestCoralScoreCmd(new CoralScoringRequest().withReefLevel(ScoringGoals.CoralGoals.ReefLevels.L1)));
+        requestL2.onTrue(Subsystems.scoreSubsystem.requestCoralScoreCmd(new CoralScoringRequest().withReefLevel(ScoringGoals.CoralGoals.ReefLevels.L2)));
+        requestL3.onTrue(Subsystems.scoreSubsystem.requestCoralScoreCmd(new CoralScoringRequest().withReefLevel(ScoringGoals.CoralGoals.ReefLevels.L3)));
+        requestL4.onTrue(Subsystems.scoreSubsystem.requestCoralScoreCmd(new CoralScoringRequest().withReefLevel(ScoringGoals.CoralGoals.ReefLevels.L4)));
+        requestLeftBranchScore.onTrue(Subsystems.scoreSubsystem.requestCoralScoreCmd(new CoralScoringRequest().withBranchScore(ScoringGoals.CoralGoals.BranchScore.LEFT)));
+        requestRightBranchScore.onTrue(Subsystems.scoreSubsystem.requestCoralScoreCmd(new CoralScoringRequest().withBranchScore(ScoringGoals.CoralGoals.BranchScore.RIGHT)));
+
+        requestHighAlgaePick.onTrue(Subsystems.scoreSubsystem.requestAlgaeScoreCmd(new AlgaePickRequest().withAlgaePick(ScoringGoals.AlgaeGoals.AlgaePick.HIGH)));
+        requestLowAlgaePick.onTrue(Subsystems.scoreSubsystem.requestAlgaeScoreCmd(new AlgaePickRequest().withAlgaePick(ScoringGoals.AlgaeGoals.AlgaePick.LOW)));
 
         manualAlgaeToggleButton.toggleOnTrue(Subsystems.algaeArm.openLoopCommand(manualAlgaeArmControl));
         manualElevatorToggleButton.toggleOnTrue(Subsystems.elevator.openLoopCommand(manualElevatorControl));
 
         zeroElevator.onTrue(Commands.print("Zero Elevator"));
         zeroAlgaeArm.onTrue(Commands.print("Zero Algae Arm"));
-    }
-
-    private void bindDriverControls() {
     }
 
     private void bindSmartDashboardCommands() {

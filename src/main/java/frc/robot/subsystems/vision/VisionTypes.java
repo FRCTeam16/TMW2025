@@ -24,24 +24,21 @@ public class VisionTypes {
         }
     }
 
-    public record CameraDistanceValues(Distance heightToCamera, Distance heightToTarget, Angle cameraAngle) {}
+    public record CameraDistanceValues(Distance heightToCamera, Distance heightToTarget, Angle cameraAngle) {
 
-    public record TargetInfo(boolean hasTarget, double xOffset, double yOffset, double latency, VisionTypes.CameraDistanceValues cameraDistanceValues) {
-
-        public Distance calculateDistance() {
-            return calculateDistance(this.cameraDistanceValues.heightToTarget);
-        }
-
-        public Distance calculateDistance(Distance heightToTarget) {
-            if (this.hasTarget) {
-                double goalRadians = this.cameraDistanceValues.cameraAngle.plus(Degrees.of(this.yOffset)).in(Radians);
+        public Distance calculateDistance(TargetInfo targetInfo, Distance heightToTarget) {
+            if (targetInfo.hasTarget) {
+                double goalRadians = this.cameraAngle.plus(Degrees.of(targetInfo.yOffset)).in(Radians);
                 // TODO: Unit test this
-                return heightToTarget.minus(this.cameraDistanceValues.heightToCamera).div(Math.tan(goalRadians));
+                return heightToTarget.minus(this.heightToCamera).div(Math.tan(goalRadians));
 //                return (heightToTarget.in(Inches) - this.cameraDistanceValues.heightToCamera.in(Inches)) / Math.tan(goalRadians);
             } else {
                 return Inches.of(-1);
             }
         }
+    }
+
+    public record TargetInfo(boolean hasTarget, double xOffset, double yOffset, double targetArea, int aprilTagID) {
     }
 
     public record PoseInfo(Pose2d pose, double latency) {

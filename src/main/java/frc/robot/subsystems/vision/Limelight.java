@@ -81,8 +81,8 @@ public class Limelight implements Sendable {
                 LimelightHelpers.getTV(this.name),
                 LimelightHelpers.getTX(this.name),
                 LimelightHelpers.getTY(this.name),
-                LimelightHelpers.getTX(this.name),
-                this.cameraDistanceValues
+                LimelightHelpers.getTA(this.name),
+                (int) getAprilTagID()
         );
     }
 
@@ -123,7 +123,7 @@ public class Limelight implements Sendable {
         builder.addBooleanProperty("TargetInfo/hasTarget", targetInfo::hasTarget, null);
         builder.addDoubleProperty("TargetInfo/xOffset", targetInfo::xOffset, null);
         builder.addDoubleProperty("TargetInfo/yOffset", targetInfo::yOffset, null);
-        builder.addDoubleProperty("TargetInfo/latency", targetInfo::latency, null);
+        builder.addDoubleProperty("TargetInfo/targetArea", targetInfo::targetArea, null);
     }
 
     public HashMap<Integer, Double> getTagMap(){

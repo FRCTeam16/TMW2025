@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.async.AsyncManager;
 import frc.robot.auto.AutoManager;
+import frc.robot.subsystems.scoring.ScoreSubsystem;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.DMS.LEDSubsystem;
 import frc.robot.subsystems.Intake.AlgaeArm;
@@ -52,6 +53,7 @@ public class Subsystems {
     public static AutoManager autoManager;
     private static Subsystems instance;
     public static VisionOdometryUpdater visionOdometryUpdater;
+    public static ScoreSubsystem scoreSubsystem;
 
     public Subsystems() {
         swerveSubsystem = Robot.robotConfig.createDrivetrain();
@@ -117,6 +119,8 @@ public class Subsystems {
         autoManager.initialize();
 
         visionOdometryUpdater = new VisionOdometryUpdater(visionSubsystem, swerveSubsystem);
+
+        scoreSubsystem = new ScoreSubsystem();
     }
 
     private void registerLifecycleSubsystems() {
@@ -127,6 +131,7 @@ public class Subsystems {
         lifecycleSubsystems.add(algaeIntake);
         lifecycleSubsystems.add(algaeArm);
         lifecycleSubsystems.add(coralIntake);
+        lifecycleSubsystems.add(scoreSubsystem);
     }
 
     private void registerSmartDashboardEntries() {
@@ -137,6 +142,7 @@ public class Subsystems {
         SmartDashboard.putData("Subsystems/AlgaeArm", algaeArm);
         SmartDashboard.putData("Subsystems/CoralIntake", coralIntake);
         SmartDashboard.putData("Subsystems/Vision", visionSubsystem);
+        SmartDashboard.putData("Subsystems/Score", scoreSubsystem);
 
         SmartDashboard.putData("CommandScheduler", CommandScheduler.getInstance());
     }

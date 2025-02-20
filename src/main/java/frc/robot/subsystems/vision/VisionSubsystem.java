@@ -2,7 +2,6 @@ package frc.robot.subsystems.vision;
 
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DataLogManager;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.Lifecycle;
 import frc.robot.util.BSLogger;
@@ -50,6 +49,18 @@ public class VisionSubsystem extends SubsystemBase implements Lifecycle {
         }
     }
 
+    /**
+     * Determines the best target info from all limelights
+     *
+     * @return target info
+     */
+    public Optional<VisionTypes.TargetInfo> getTargetInfo() {
+        return getLimelights().stream()
+                .map(Limelight::getTargetInfo)
+                .max(Comparator.comparing(VisionTypes.TargetInfo::targetArea));
+
+    }
+
     @Override
     public void initSendable(SendableBuilder builder) {
         super.initSendable(builder);
@@ -69,8 +80,10 @@ public class VisionSubsystem extends SubsystemBase implements Lifecycle {
             builder.addBooleanProperty(base + "/TargetInfo/hasTarget", targetInfo::hasTarget, null);
             builder.addDoubleProperty(base + "/TargetInfo/xOffset", targetInfo::xOffset, null);
             builder.addDoubleProperty(base + "/TargetInfo/yOffset", targetInfo::yOffset, null);
-            builder.addDoubleProperty(base + "/TargetInfo/latency", targetInfo::latency, null);
+            builder.addDoubleProperty(base + "/TargetInfo/targetArea", targetInfo::targetArea, null);
 
         }
     }
+
+
 }

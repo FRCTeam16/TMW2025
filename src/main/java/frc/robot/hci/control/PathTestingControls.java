@@ -34,7 +34,10 @@ public class PathTestingControls extends ControlBinding {
                         UpdateRobotPoseFromVision.resetFromLimelightPoseEstimator(limelight.getName())));
 
 
-        SmartDashboard.putData("Pathfind", new PathfindToPoseCommand());
+        SmartDashboard.putData("Pathfind", new PathfindToPoseCommand(
+                new Pose2d(3.39, 4.05, Rotation2d.fromDegrees(180)))
+                .withConstraints(
+                        new PathConstraints(1.0, 1.0, 1.0, 1.0)));
         SmartDashboard.putData("ResetPoseTest", Commands.runOnce(
                                 () ->{
                                     // Locking robot code when called from a command
