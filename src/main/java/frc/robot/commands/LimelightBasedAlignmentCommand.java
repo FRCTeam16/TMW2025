@@ -9,21 +9,24 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Subsystems;
 import frc.robot.subsystems.vision.LimelightHelpers;
+import frc.robot.subsystems.vision.VisionTypes;
 import frc.robot.util.PIDHelper;
+
+import java.util.Optional;
 
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.Constants.MaxAngularRate;
 
-public class AlignmentTest extends Command {
-    private SwerveRequest.RobotCentric alignDrive = new SwerveRequest.RobotCentric();
+public class LimelightBasedAlignmentCommand extends Command {
+    private final SwerveRequest.RobotCentric alignDrive = new SwerveRequest.RobotCentric();
     PIDController translationPID = new PIDController(0.1, 0, 0);
     PIDHelper translationPIDHelper = new PIDHelper("AlignmentTest");
 
-    private final Angle targetAngle;
+    private final Angle targetAngle;    // offset angle to align
     private final String selectedLimelightName;
     private final TargetSide targetSide;
 
-    public AlignmentTest(TargetSide targetSide) {
+    public LimelightBasedAlignmentCommand(TargetSide targetSide) {
         this.addRequirements(Subsystems.swerveSubsystem);
         this.targetSide = targetSide;
         if (targetSide == TargetSide.LEFT) {
@@ -42,21 +45,26 @@ public class AlignmentTest extends Command {
 
     @Override
     public void execute() {
-        AngularVelocity rotationRate = calculateRobotRotation();
-
-        if (!LimelightHelpers.getTV(this.selectedLimelightName))  {
-            // No target found
-            Subsystems.swerveSubsystem.setControl(
-                    alignDrive.withVelocityX(0)
-                            .withRotationalRate(rotationRate)
-                            .withVelocityY(0));
+        Optional<VisionTypes.TargetInfo> targetInfo = Subsystems.visionSubsystem.getTargetInfo();
+        if (targetInfo.isEmpty()) {
+            noopDrive();
             return;
         }
+
+        // Lock angle and calculate translation speed
+        AngularVelocity rotationRate = calculateRobotRotation();
         LinearVelocity yDriveSpeed = calculateRobotYTranslationSpeed();
         Subsystems.swerveSubsystem.setControl(
                 alignDrive.withVelocityX(0)
                         .withRotationalRate(rotationRate)
                         .withVelocityY(yDriveSpeed));
+    }
+
+    private void noopDrive() {
+        Subsystems.swerveSubsystem.setControl(
+                alignDrive.withVelocityX(0)
+                        .withRotationalRate(DegreesPerSecond.of(0))
+                        .withVelocityY(0));
     }
 
     private AngularVelocity calculateRobotRotation() {

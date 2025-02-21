@@ -105,9 +105,7 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     }
 
     public Command openLoopCommand(Supplier<Double> speed) {
-        return this.run(() -> {
-            this.setOpenLoop(speed.get());
-        }   );
+        return this.run(() -> this.setOpenLoop(speed.get())).withName("Elevator Manual Control");
     }
 
     @Deprecated
@@ -204,9 +202,7 @@ public class Elevator extends SubsystemBase implements Lifecycle {
 
         @Override
         public void execute() {
-            /**
-             * If we are near the bottom and not moving, apply a neutral output to the motors
-             */
+            // If we are near the bottom and not moving, apply a neutral output to the motors
             if (Subsystems.elevator.isInPosition() &&
                     MathUtil.isNear(0.0, Subsystems.elevator.getCurrentPosition(), 0.25)) {
                 Subsystems.elevator.left.setControl(neutralOut);

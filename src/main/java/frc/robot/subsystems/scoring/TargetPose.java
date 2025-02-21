@@ -1,7 +1,5 @@
 package frc.robot.subsystems.scoring;
 
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.*;
 import frc.robot.Subsystems;
 import frc.robot.subsystems.vision.VisionTypes;
@@ -15,7 +13,6 @@ import java.util.Optional;
 public class TargetPose {
     private static final double SCORING_DISTANCE = 0.5; // robot meters from tag
     private static final double OFFSET_DISTANCE = 0.4; // robot horizontal offset from tag
-    AprilTagFieldLayout fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);   // US regionals use welded
 
     TimeExpiringValue<Integer> targetTag = new TimeExpiringValue<>(500);
 
@@ -30,11 +27,15 @@ public class TargetPose {
      * @return The desired scoring pose
      */
     public Optional<Pose2d> getScoringPoseForTag(boolean isLeft) {
-        Integer aprilTagID = targetTag.get().orElse(null);
-        if (aprilTagID == null) {
+        int aprilTagID = targetTag.get().orElse(-1);
+        return getScoringPoseForTag(aprilTagID, isLeft);
+    }
+
+    public static Optional<Pose2d> getScoringPoseForTag(int aprilTagID, boolean isLeft) {
+        if (aprilTagID < 0) {
             return Optional.empty();
         }
-        Pose3d tagPose = fieldLayout.getTagPose(aprilTagID).orElse(null); // Get pose for tag ID 1
+        Pose3d tagPose = Subsystems.visionSubsystem.getTagPose(aprilTagID).orElse(null); // Get pose for tag ID 1
         if (tagPose == null) {
             return Optional.empty();
         }

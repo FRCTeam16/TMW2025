@@ -21,7 +21,6 @@ public class Limelight implements Sendable {
     private final VisionTypes.LimelightInfo info;
 
     private final VisionTypes.CameraDistanceValues cameraDistanceValues;
-    public  HashMap<Integer, Double> getTagFacingAngle = new HashMap<>();
 
     public Limelight(VisionTypes.LimelightInfo info) {
         this.name = LimelightHelpers.sanitizeName(info.name());
@@ -35,8 +34,6 @@ public class Limelight implements Sendable {
 
         // TODO: Add robotspace coordinates for camera
         // https://docs.limelightvision.io/docs/docs-limelight/apis/limelight-lib#6-special-apriltag-functionality
-
-        updateTagList();
     }
 
     public VisionTypes.LimelightInfo getInfo() {
@@ -124,41 +121,5 @@ public class Limelight implements Sendable {
         builder.addDoubleProperty("TargetInfo/xOffset", targetInfo::xOffset, null);
         builder.addDoubleProperty("TargetInfo/yOffset", targetInfo::yOffset, null);
         builder.addDoubleProperty("TargetInfo/targetArea", targetInfo::targetArea, null);
-    }
-
-    public HashMap<Integer, Double> getTagMap(){
-        return getTagFacingAngle;
-    }
-
-    private void updateTagList(){
-        this.getTagFacingAngle.put(17, 45.0);
-        this.getTagFacingAngle.put(18, 0.0);
-        this.getTagFacingAngle.put(19, 315.0);
-        this.getTagFacingAngle.put(20, 225.0);
-        this.getTagFacingAngle.put(21, 180.0);
-        this.getTagFacingAngle.put(22, 135.0);
-
-        this.getTagFacingAngle.put(11, 45.0);
-        this.getTagFacingAngle.put(10, 0.0);
-        this.getTagFacingAngle.put(9, 315.0);
-        this.getTagFacingAngle.put(8, 225.0);
-        this.getTagFacingAngle.put(7, 180.0);
-        this.getTagFacingAngle.put(6, 135.0);
-
-        this.getTagFacingAngle.put(12, 225.0);
-        this.getTagFacingAngle.put(13, 135.0);
-
-        this.getTagFacingAngle.put(14, 0.0);
-        this.getTagFacingAngle.put(15, 0.0);
-
-        this.getTagFacingAngle.put(16, 270.0);
-
-        this.getTagFacingAngle.put(4, 180.0);
-        this.getTagFacingAngle.put(5, 180.0);
-
-        this.getTagFacingAngle.put(3, 90.0);
-
-        this.getTagFacingAngle.put(2, 45.0);
-        this.getTagFacingAngle.put(1, 315.0);
     }
 }

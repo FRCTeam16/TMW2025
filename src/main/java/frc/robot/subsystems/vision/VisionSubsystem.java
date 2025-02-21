@@ -1,5 +1,8 @@
 package frc.robot.subsystems.vision;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -11,7 +14,7 @@ import java.util.*;
 public class VisionSubsystem extends SubsystemBase implements Lifecycle {
     private final Map<String, Limelight> limelightLookup = new HashMap<>();
     private final Limelight defaultLimelight;
-    public Object getLimelights;
+    private final AprilTagFieldLayout fieldLayout;
 
     public VisionSubsystem(Iterable<Limelight> limelights) {
         Limelight tmpLimelight = null;
@@ -27,6 +30,8 @@ public class VisionSubsystem extends SubsystemBase implements Lifecycle {
             this.defaultLimelight = null;
             BSLogger.log("VisionSubsystem", "No Limelights were added to the VisionSubsystem");
         }
+        fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);   // US regionals use welded
+
     }
 
 
@@ -86,4 +91,12 @@ public class VisionSubsystem extends SubsystemBase implements Lifecycle {
     }
 
 
+    /**
+     * Looks up a tag pose3d by tag ID
+     * @param aprilTagID
+     * @return
+     */
+    public Optional<Pose3d> getTagPose(int aprilTagID) {
+        return this.fieldLayout.getTagPose(aprilTagID);
+    }
 }

@@ -45,7 +45,6 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
         algaeArmMotor.getConfigurator().apply(armConfiguration);
         algaeArmMotor.setNeutralMode(NeutralModeValue.Brake);
 
-        Command defaultCmd = this.holdPositionCommand();
         this.setDefaultCommand(this.holdPositionCommand());
     }
 
@@ -118,7 +117,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
     }
 
     public Command openLoopCommand(Supplier<Double> speed) {
-        return this.run(() -> runOpenLoop(speed.get()));
+        return this.run(() -> runOpenLoop(speed.get())).withName("AlgaeArm Manual Control");
     }
 
     public Command holdPositionCommand() {

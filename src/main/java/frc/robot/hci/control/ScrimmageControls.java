@@ -3,23 +3,37 @@ package frc.robot.hci.control;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Robot;
 import frc.robot.Subsystems;
+import frc.robot.commands.PathfindToScoringPositionCommand;
 import frc.robot.subsystems.Elevator;
+
+import java.util.function.Supplier;
 
 public class ScrimmageControls extends ControlBinding {
     private final JoystickButton intakeCoral = new JoystickButton(driveStick, 2);
     private final JoystickButton shootCoral = new JoystickButton(driveStick, 1);
+    private final JoystickButton alignLeft = new JoystickButton(driveStick, 3);
+    private final JoystickButton alignRight = new JoystickButton(driveStick, 4);
 
     private final JoystickButton intakeAlgae = new JoystickButton(steerStick, 2);
     private final JoystickButton shootAlgae = new JoystickButton(steerStick, 1);
+
 
     private final Trigger elevatorDown = joystick.rightTrigger();
     private final Trigger elevatorL1 = joystick.x();
     private final Trigger elevatorL2 = joystick.a();
     private final Trigger elevatorL3 = joystick.b();
     private final Trigger elevatorL4 = joystick.y();
+
+
+    private final Trigger manualAlgaeToggleButton = joystick.leftStick();
+    private final Supplier<Double> manualAlgaeArmControl = deadband(joystick::getLeftY, 0.05);
+    private final Trigger manualElevatorToggleButton = joystick.rightStick();
+    private final Supplier<Double> manualElevatorControl = Robot.isReal() ?
+            deadband(joystick::getRightY, 0.05) :
+            deadband(joystick::getRightTriggerAxis, 0.05);  // simulation mode is flipped
 
 
     public ScrimmageControls(Joystick driveStick, Joystick steerStick, CommandXboxController joystick) {
@@ -42,5 +56,14 @@ public class ScrimmageControls extends ControlBinding {
         elevatorL2.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L2));
         elevatorL3.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L3));
         elevatorL4.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4));
+
+        manualAlgaeToggleButton.toggleOnTrue(Subsystems.algaeArm.openLoopCommand(manualAlgaeArmControl));
+        manualElevatorToggleButton.toggleOnTrue(Subsystems.elevator.openLoopCommand(manualElevatorControl));
+
+
+        alignLeft.whileTrue(new PathfindToScoringPositionCommand(true));
+        alignRight.whileTrue(new PathfindToScoringPositionCommand(false));
+//        alignLeft.whileTrue(new LimelightBasedAlignmentCommand(LimelightBasedAlignmentCommand.TargetSide.LEFT));
+//        alignRight.whileTrue(new LimelightBasedAlignmentCommand(LimelightBasedAlignmentCommand.TargetSide.RIGHT));
     }
 }

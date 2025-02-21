@@ -8,7 +8,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.subsystems.Lifecycle;
@@ -17,7 +16,7 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
     public static final double COMMAND_TIMEOUT_SECONDS = 5.0;
     public static final int INVALID_LASER_MEASUREMENT = 9999;
     private final TalonFX topMotor = new TalonFX(Robot.robotConfig.getCanID("coralIntakeLeftMotor"));
-    private final TalonFX bottomMotor  = new TalonFX(Robot.robotConfig.getCanID("coralIntakeRightMotor"));;
+    private final TalonFX bottomMotor  = new TalonFX(Robot.robotConfig.getCanID("coralIntakeRightMotor"));
     private final DutyCycleOut dutyCycleOutTop = new DutyCycleOut(1);
     private final DutyCycleOut dutyCycleOutBottom = new DutyCycleOut(1);
     private final LaserCan laser1 = new LaserCan(1);    // top
