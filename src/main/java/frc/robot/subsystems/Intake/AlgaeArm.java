@@ -5,6 +5,7 @@ import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -25,15 +26,13 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
 
     private final TalonFX algaeArmMotor = new TalonFX(Robot.robotConfig.getCanID("algaeArmMotor"));
 
-    //    private static final double TICKS_PER_ROTATION = 2048.0; // TalonFX integrated encoder
     private final TalonFXConfiguration armConfiguration;
 
     private final DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
-    private final PositionVoltage positionVoltage = new PositionVoltage(0);
+    private final PositionVoltage positionVoltage = new PositionVoltage(0).withSlot(0);
 
-    private double openLoopUpSpeed = 0.1;
-    private double openLoopDownSpeed = 0.1;
     private double targetPosition = 0;
+    private double openLoopMax = 0.5;
 
 
     public AlgaeArm() {
@@ -56,13 +55,17 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
     }
 
     private void setArmPosition(double position) {
-        // TODO: Consider translating angles?
+        // TODO: Consider a method to allow pass in of translated angles?
+        BSLogger.log("AlgaeArm", "Setting position to: " + position + " | Estimated angle: " + getEstimatedAngle());
         this.targetPosition = position;
         algaeArmMotor.setControl(
                 positionVoltage.withPosition(position)
                         .withFeedForward(calculateGravityCompensation(getEstimatedAngle())));
     }
 
+    /**
+     * Estimates the angle of the arm based on the current encoder position
+     */
     public Angle getEstimatedAngle() {
         // Convert encoder ticks to rotations
         double rotations = getMotorPosition();
@@ -79,7 +82,8 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
 
     private void runOpenLoop(double speed) {
         BSLogger.log("AlgaeArm", "Running open loop with speed: " + speed);
-        algaeArmMotor.setControl(dutyCycleOut.withOutput(speed));
+        double clampedSpeed = MathUtil.clamp(speed, -openLoopMax, openLoopMax);
+        algaeArmMotor.setControl(dutyCycleOut.withOutput(clampedSpeed));
     }
 
     public void holdPosition() {
@@ -92,7 +96,10 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
     }
 
     public boolean isInPosition() {
-        // TODO: Use algaeArmMotor.getClosedLoopError() if using magic motion
+        // TODO: Test using algaeArmMotor.getClosedLoopError() if using magic motion
+//        if (ControlModeValue.DutyCycleOut == algaeArmMotor.getControlMode().getValue()) {
+//            return algaeArmMotor.getClosedLoopError().getValueAsDouble() < ALLOWED_POSITION_ERROR;
+//        }
         return Math.abs(getMotorPosition() - targetPosition) < ALLOWED_POSITION_ERROR;
     }
 
@@ -107,8 +114,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
         builder.addDoubleProperty("targetPosition", () -> this.targetPosition, this::setArmPosition);
         builder.addDoubleProperty("estimatedAngle", () -> this.getEstimatedAngle().in(Degrees), null);
         builder.addBooleanProperty("isInPosition", this::isInPosition, null);
-        builder.addDoubleProperty("openLoopUpSpeed", () -> openLoopUpSpeed, (v) -> openLoopUpSpeed = v);
-        builder.addDoubleProperty("openLoopDownSpeed", () -> openLoopDownSpeed, (v) -> openLoopDownSpeed = v);
+        builder.addDoubleProperty("openLoopMax", () -> openLoopMax, (v) -> openLoopMax = v);
     }
 
     public Command openLoopCommand(Supplier<Double> speed) {
@@ -116,7 +122,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
     }
 
     public Command holdPositionCommand() {
-        return new DefaultHoldPositionCommand();
+        return Commands.run(this::holdPosition).withName("Hold AlgaeArm Position");
     }
 
     public Command setArmPositionCommand(AlgaeArmPosition position) {
@@ -160,15 +166,5 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
         }
     }
 
-    public class DefaultHoldPositionCommand extends Command {
-        public DefaultHoldPositionCommand() {
-            addRequirements(AlgaeArm.this);
-        }
-
-        @Override
-        public void initialize() {
-            AlgaeArm.this.holdPosition();
-        }
-    }
 }
 
