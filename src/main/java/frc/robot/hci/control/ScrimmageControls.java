@@ -31,7 +31,7 @@ public class ScrimmageControls extends ControlBinding {
         // reset the field-centric heading on left bumper press
         joystick.leftBumper().onTrue(Subsystems.swerveSubsystem.runOnce(Subsystems.swerveSubsystem::seedFieldCentric));
 
-        intakeCoral.onTrue(Subsystems.coralIntake.intakeCoralCommand());
+        intakeCoral.whileTrue(Subsystems.coralIntake.intakeCoralCommand());
         shootCoral.whileTrue(Subsystems.coralIntake.shootCoralCommand());
 
         intakeAlgae.onTrue(Subsystems.algaeIntake.intakeCommand()).onFalse(Subsystems.algaeIntake.holdAlgaeCommand());

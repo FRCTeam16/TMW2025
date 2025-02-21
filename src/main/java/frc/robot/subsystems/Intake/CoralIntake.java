@@ -3,23 +3,19 @@ package frc.robot.subsystems.Intake;
 import au.grapplerobotics.LaserCan;
 import au.grapplerobotics.interfaces.LaserCanInterface.Measurement;
 import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.filter.MedianFilter;
-import edu.wpi.first.units.Units;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.subsystems.Lifecycle;
-import frc.robot.util.BSLogger;
-
-import static edu.wpi.first.units.Units.Millimeters;
 
 public class CoralIntake extends SubsystemBase implements Lifecycle {
     public static final double COMMAND_TIMEOUT_SECONDS = 5.0;
+    public static final int INVALID_LASER_MEASUREMENT = 9999;
     private final TalonFX topMotor = new TalonFX(Robot.robotConfig.getCanID("coralIntakeLeftMotor"));
     private final TalonFX bottomMotor  = new TalonFX(Robot.robotConfig.getCanID("coralIntakeRightMotor"));;
     private final DutyCycleOut dutyCycleOutTop = new DutyCycleOut(1);
@@ -61,12 +57,12 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
         builder.addIntegerProperty("laser2 Dist", this::getLaser2Measurement, null);
     }
 
-    private void intakeFast() {
+    void intakeFast() {
         topMotor.setControl(dutyCycleOutTop.withOutput(intakeHighSpeedLeft));
         bottomMotor.setControl(dutyCycleOutBottom.withOutput(intakeHighSpeedRight));
     }
 
-    private void intakeSlow() {
+    void intakeSlow() {
         topMotor.setControl(dutyCycleOutTop.withOutput(intakeLowSpeed));
         bottomMotor.setControl(dutyCycleOutBottom.withOutput(-intakeLowSpeed));
     }
@@ -76,7 +72,7 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
         bottomMotor.setControl(dutyCycleOutBottom.withOutput(-ejectSpeed));
     }
 
-    private void stop() {
+    void stop() {
         topMotor.setControl(stop);
         bottomMotor.setControl(stop);
     }
@@ -86,7 +82,7 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
         if (measurement != null && measurement.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT) {
             return (int) laser1Filter.calculate(measurement.distance_mm);
         } else {
-            return 9999;
+            return INVALID_LASER_MEASUREMENT;
         }
     }
 
@@ -95,21 +91,21 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
         if (measurement != null && measurement.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT) {
             return (int) laser2Filter.calculate(measurement.distance_mm);
         } else {
-            return 9999;
+            return INVALID_LASER_MEASUREMENT;
         }
     }
 
-    private boolean coralDetectedAtFirstLaser() {
+    boolean coralDetectedAtFirstLaser() {
         int measurement = getLaser1Measurement();
-        if (measurement < 9999) {
+        if (measurement < INVALID_LASER_MEASUREMENT) {
             return measurement < laser1SenseDistance;
         }
         return false;
     }
 
-    private boolean coralDetectedAtSecondLaser() {
+    boolean coralDetectedAtSecondLaser() {
         int measurement = getLaser2Measurement();
-        if (measurement < 9999) {
+        if (measurement < INVALID_LASER_MEASUREMENT) {
             return measurement < laser2SenseDistance;
         }
         return false;
@@ -126,7 +122,7 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
     }
 
     public Command intakeCoralCommand() {
-        return new IntakeCoralCommand().withTimeout(10);
+        return new IntakeCoralCommand();
     }
 
     public Command shootCoralCommand() {
@@ -135,56 +131,10 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
     }
 
     public Command shootCoralInTroughCommand() {
-        return Commands.run(() -> {
+        return this.run(() -> {
             topMotor.setControl(dutyCycleOutTop.withOutput(0.15));
             bottomMotor.setControl(dutyCycleOutBottom.withOutput(-0.25));
         });
-    }
-
-    public class IntakeCoralCommand extends Command {
-        int step = 1;
-        boolean shooting = false;
-
-        public IntakeCoralCommand() {
-            addRequirements(CoralIntake.this);
-        }
-
-        @Override
-        public void initialize() {
-            BSLogger.log("CoralIntakeCommand", "**** STARTING ****");
-            step = 1;   // FIXME: Investigate in debugger
-            // Start with fast intake
-            CoralIntake.this.intakeFast();
-        }
-
-        @Override
-        public void execute() {
-            BSLogger.log("CoralIntakeCommand", "**** EXECUTING CORAL INTAKE STEP: " + step);
-            //default action when intake: runForward(fast)
-            if (step == 1) {
-                //if first laser sees coral while default action: change action to action 2
-                if (coralDetectedAtFirstLaser()) {
-                    BSLogger.log("CoralIntakeCommand", "Coral detected at first laser");
-                    CoralIntake.this.intakeSlow();
-                    step = 2;
-                }
-            }
-
-            //second action when intake: runForward(slow)
-            if (step == 2) {
-                //if second laser sees coral while second action: change action to action 3
-                if (coralDetectedAtSecondLaser()) {
-                    BSLogger.log("CoralIntakeCommand", "Coral detected at second laser");
-                    CoralIntake.this.stop();
-                    step = 3;
-                }
-            }
-        }
-
-        @Override
-        public boolean isFinished() {
-            return coralDetectedAtSecondLaser() || step == 3;
-        }
     }
 
     private class ShootCoralCommand extends Command {
@@ -195,12 +145,6 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
         @Override
         public void initialize() {
             CoralIntake.this.intakeFast();
-        }
-
-        @Override
-        public boolean isFinished() {
-//            return !coralDetectedAtSecondLaser();
-            return false;
         }
 
         @Override

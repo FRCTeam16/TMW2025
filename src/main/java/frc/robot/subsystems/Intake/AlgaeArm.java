@@ -9,7 +9,6 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.subsystems.Lifecycle;
@@ -46,6 +45,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
         algaeArmMotor.getConfigurator().apply(armConfiguration);
         algaeArmMotor.setNeutralMode(NeutralModeValue.Brake);
 
+        Command defaultCmd = this.holdPositionCommand();
         this.setDefaultCommand(this.holdPositionCommand());
     }
 
@@ -118,11 +118,11 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
     }
 
     public Command openLoopCommand(Supplier<Double> speed) {
-        return Commands.run(() -> runOpenLoop(speed.get()));
+        return this.run(() -> runOpenLoop(speed.get()));
     }
 
     public Command holdPositionCommand() {
-        return Commands.run(this::holdPosition).withName("Hold AlgaeArm Position");
+        return this.run(this::holdPosition).withName("Hold AlgaeArm Position");
     }
 
     public Command setArmPositionCommand(AlgaeArmPosition position) {

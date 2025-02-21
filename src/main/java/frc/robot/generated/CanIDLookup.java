@@ -23,7 +23,9 @@ public class CanIDLookup {
             "climberHand", 21,
             "climberPivot", 22,
             "elevatorLeftMotor", 30,
-            "elevatorRightMotor", 31
+            "elevatorRightMotor", 31,
+            "funnelPivotMotor", 32,
+            "funnelConveyorMotor", 33
     );
 
 

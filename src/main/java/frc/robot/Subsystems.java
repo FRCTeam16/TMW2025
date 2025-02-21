@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.async.AsyncManager;
 import frc.robot.auto.AutoManager;
+import frc.robot.subsystems.Intake.FunnelSubsystem;
 import frc.robot.subsystems.scoring.ScoreSubsystem;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.DMS.LEDSubsystem;
@@ -33,6 +34,7 @@ public class Subsystems {
     public static AlgaeIntake algaeIntake;
     public static AlgaeArm algaeArm;
     public static CoralIntake coralIntake;
+    public static FunnelSubsystem funnelSubsystem;
 
     public static JoshPrototype joshPrototype;
     public static PrototypeComponent austinGearPrototype;
@@ -64,9 +66,10 @@ public class Subsystems {
         algaeIntake = new AlgaeIntake();
         algaeArm = new AlgaeArm();
         coralIntake = new CoralIntake();
+        funnelSubsystem = new FunnelSubsystem();
 
         // Prototype support
-        createPrototypeSubsystems();
+//        createPrototypeSubsystems();
         createUtilitySubsystems();
 
         // Bookkeeping and registrations
@@ -78,11 +81,8 @@ public class Subsystems {
     private void createPrototypeSubsystems() {
         joshPrototype = new JoshPrototype();
         austinGearPrototype = new ComponentMotor("austinGearPrototype", 51);
-        elevator = new Elevator();
 
-
-
-//         fourMotorElevator = new ComposedPrototype( (components) -> {
+        //         fourMotorElevator = new ComposedPrototype( (components) -> {
 //                PrototypeGeneric.filterByType(components, PrototypeGenericMotor.class).get(0).setDirection(PrototypeGenericMotor.direction.corresponding);
 //                PrototypeGeneric.filterByType(components, PrototypeGenericMotor.class).get(1).setDirection(PrototypeGenericMotor.direction.corresponding);
 //                PrototypeGeneric.filterByType(components, PrototypeGenericMotor.class).get(2).setDirection(PrototypeGenericMotor.direction.inverse);
@@ -98,15 +98,6 @@ public class Subsystems {
         //Climberproto1 = new ComponentMotor("ClimberProto3", 50, (m) -> {m.setDirection(ComponentMotor.direction.inverse);});
         //Climberproto1.InjectControls(ComponentPreconfig.ABXYpreconf);
         //Climberproto2 = new ComponentMotor( "ClimberProto4", 51, (m) -> {m.setDirection(ComponentMotor.direction.corresponding);});
-        
-
-        lifecycleSubsystems.add(visionSubsystem);
-        lifecycleSubsystems.add(ledSubsystem);
-
-        createUtilitySubsystems();
-
-        // Add SD registrations
-        registerSmartDashboardEntries();
     }
 
     private void createUtilitySubsystems() {
@@ -132,6 +123,7 @@ public class Subsystems {
         lifecycleSubsystems.add(algaeArm);
         lifecycleSubsystems.add(coralIntake);
         lifecycleSubsystems.add(scoreSubsystem);
+        lifecycleSubsystems.add(funnelSubsystem);
     }
 
     private void registerSmartDashboardEntries() {
@@ -143,6 +135,7 @@ public class Subsystems {
         SmartDashboard.putData("Subsystems/CoralIntake", coralIntake);
         SmartDashboard.putData("Subsystems/Vision", visionSubsystem);
         SmartDashboard.putData("Subsystems/Score", scoreSubsystem);
+        SmartDashboard.putData("Subsystems/Funnel", funnelSubsystem);
 
         SmartDashboard.putData("CommandScheduler", CommandScheduler.getInstance());
     }

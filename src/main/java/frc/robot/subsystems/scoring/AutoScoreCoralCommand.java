@@ -34,8 +34,7 @@ public class AutoScoreCoralCommand extends Command {
 
         if (!request.isValid() || optionalTargetPose.isEmpty()) {
             invalidStateAlert.set(true);
-            sequence = Commands.runOnce(() -> {
-            });
+            sequence = Commands.none();
             finished = true;
             return;
         }
