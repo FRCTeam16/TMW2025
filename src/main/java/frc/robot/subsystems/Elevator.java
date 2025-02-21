@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.Subsystems;
+import frc.robot.util.BSLogger;
 
 import java.util.function.Supplier;
 
@@ -29,41 +30,39 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     private double openLoopMotorSpeed = -0.2;
     private double currentSetpoint = 0;
     private boolean lazyHold;
+    private double openLoopMax = 0.3;
 
 
     public Elevator() {
         right.setControl(new Follower(left.getDeviceID(), true));
 
-        Slot0Configs slot0 = new Slot0Configs();
-        slot0.kP = 2.5; //2.5
-        slot0.kI = 0.0;
-        slot0.kD = 0.0;
-        slot0.kG = GRAVITY_VOLTS; // -0.75
+        Slot0Configs slot0 = new Slot0Configs()
+                .withKP(2.5)
+                .withKG(GRAVITY_VOLTS);
 
-        MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs();
-        motionMagicConfigs.MotionMagicCruiseVelocity = 40; //80;
-        motionMagicConfigs.MotionMagicAcceleration = 60; // 140;
-        motionMagicConfigs.MotionMagicJerk = 0;
-        motionMagicConfigs.MotionMagicExpo_kA = 0.0;
-        motionMagicConfigs.MotionMagicExpo_kV = 0.01;
+        MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs()
+                .withMotionMagicCruiseVelocity(40)  // 80
+                .withMotionMagicAcceleration(60)     // 140
+                .withMotionMagicJerk(0)
+                .withMotionMagicExpo_kA(0.0)
+                .withMotionMagicExpo_kV(0.01);
+
+        SoftwareLimitSwitchConfigs softwareLimitSwitchConfigs = new SoftwareLimitSwitchConfigs()
+                .withForwardSoftLimitEnable(true)
+                .withForwardSoftLimitThreshold(0.0)
+                .withReverseSoftLimitEnable(true)
+                .withReverseSoftLimitThreshold(-43);
 
         TalonFXConfiguration configuration = new TalonFXConfiguration()
                 .withSlot0(slot0)
                 .withMotionMagic(motionMagicConfigs)
-                .withSoftwareLimitSwitch(
-                        new SoftwareLimitSwitchConfigs()
-                                .withForwardSoftLimitEnable(true)
-                                .withForwardSoftLimitThreshold(0.0)
-                                .withReverseSoftLimitEnable(true)
-                                .withReverseSoftLimitThreshold(-43)
-                );
+                .withSoftwareLimitSwitch(softwareLimitSwitchConfigs);
 
         left.getConfigurator().apply(configuration);
 
         // Zero motor position at startup
         left.setPosition(0);
         left.setControl(neutralOut);
-
         this.setDefaultCommand(new DefaultHoldPositionCommand(this));
     }
 
@@ -73,7 +72,8 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     }
 
     private void setOpenLoop(double speed) {
-        left.setControl(dutyCycleOut.withOutput(speed));
+        double clampedSpeed =MathUtil.clamp(speed, -openLoopMax, openLoopMax);
+        left.setControl(dutyCycleOut.withOutput(clampedSpeed));
     }
 
     private void moveToPosition(ElevatorSetpoint setpoint) {
@@ -81,21 +81,23 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     }
 
     private void moveToEncoderPosition(double encoderPosition) {
+        BSLogger.log("Elevator", "Moving to position: " + encoderPosition);
         this.currentSetpoint = encoderPosition;
         left.setControl(motionMagicV.withPosition(encoderPosition));
     }
 
     /**
      * Returns the position of the elevator in motor rotations
-     *
-     * @return the position of the elevator in motor rotations
      */
     private double getCurrentPosition() {
         return left.getPosition().getValueAsDouble();
     }
 
     public boolean isInPosition() {
-        return Math.abs(getCurrentPosition() - currentSetpoint) < ELEVATOR_POSITION_THRESHOLD;
+        double currentPos = getCurrentPosition();
+        double error = Math.abs(currentPos - currentSetpoint);
+        return error < ELEVATOR_POSITION_THRESHOLD &&
+                left.getVelocity().getValueAsDouble() < 0.1;
     }
 
     void setLazyHold(boolean lazyHold) {
@@ -103,17 +105,17 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     }
 
     public Command openLoopCommand(Supplier<Double> speed) {
-//        return this.run(() -> this.runOpenLoop(speed.get()));
         return this.run(() -> {
-            System.out.println("Elevator runOpenLoop speed: " + speed.get());
             this.setOpenLoop(speed.get());
         }   );
     }
 
+    @Deprecated
     public Command openLoopUpCommand() {
         return this.run(() -> this.setOpenLoop(openLoopMotorSpeed)).withName("Open Loop Up");
     }
 
+    @Deprecated
     public Command openLoopDownCommand() {
         return this.run(() -> this.setOpenLoop(-openLoopMotorSpeed)).withName("Open Loop Down");
     }
@@ -136,6 +138,7 @@ public class Elevator extends SubsystemBase implements Lifecycle {
         builder.addDoubleProperty("Current Setpoint", () -> currentSetpoint, this::moveToEncoderPosition);
 
         builder.addDoubleProperty("Open Loop Motor Speed", () -> openLoopMotorSpeed, (speed) -> openLoopMotorSpeed = speed);
+        builder.addDoubleProperty("Open Loop Max", () -> openLoopMax, (max) -> openLoopMax = max);
         builder.addDoubleProperty("Left Motor Volts", () -> left.getMotorVoltage().getValueAsDouble(), null);
         builder.addDoubleProperty("Left Motor DutyCycle", () -> left.getDutyCycle().getValueAsDouble(), null);
         builder.addDoubleProperty("Left Motor Current", () -> left.getStatorCurrent().getValueAsDouble(), null);
@@ -143,7 +146,14 @@ public class Elevator extends SubsystemBase implements Lifecycle {
         builder.addBooleanProperty("Lazy Mode", () -> lazyHold, this::setLazyHold);
     }
 
-    public enum ElevatorSetpoint { //TODO: these numbers will probably break things if ran on the bot but I need a robot built before we're able to fix them
+    /**
+     * Returns true if the elevator is above a default position
+     */
+    public boolean isElevatorUp() {
+        return getCurrentPosition() < -2;
+    }
+
+    public enum ElevatorSetpoint {
         Zero(0),
         TROUGH(-16.5),
         L2(-17.25),
@@ -194,6 +204,9 @@ public class Elevator extends SubsystemBase implements Lifecycle {
 
         @Override
         public void execute() {
+            /**
+             * If we are near the bottom and not moving, apply a neutral output to the motors
+             */
             if (Subsystems.elevator.isInPosition() &&
                     MathUtil.isNear(0.0, Subsystems.elevator.getCurrentPosition(), 0.25)) {
                 Subsystems.elevator.left.setControl(neutralOut);
