@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.Constants.JoystickMode;
+import frc.robot.hci.control.ControlBindingFactory.JoystickMode;
 import frc.robot.hci.control.ControlBinding;
 import frc.robot.hci.control.ControlBindingFactory;
 import frc.robot.hci.swerve.JoystickSwerveSupplier;
@@ -53,7 +53,7 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain;
     private final SwerveSupplier swerveSupplier;
-    private Constants.JoystickMode joystickMode = JoystickMode.CompBot;
+    private JoystickMode joystickMode = ControlBindingFactory.JoystickMode.Scrimmage;
     private ControlBinding controlBinding;
 
     public RobotContainer() {

@@ -2,14 +2,14 @@ package frc.robot.hci.control;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.Constants;
 
 public class ControlBindingFactory {
 
-    public static ControlBinding createControlBinding(Constants.JoystickMode mode, Joystick driveStick, Joystick steerStick, CommandXboxController joystick) {
+    public static ControlBinding createControlBinding(JoystickMode mode, Joystick driveStick, Joystick steerStick, CommandXboxController joystick) {
         Class<? extends ControlBinding> bindingClass = switch (mode) {
             case CompBot -> CompBotControls.class;
             case CompBotDev -> CompBotDevControls.class;
+            case Scrimmage -> ScrimmageControls.class;
             case JoshPrototype -> JoshPrototypeControls.class;
             case AustinGearboxPrototype -> AustinGearboxPrototypeControls.class;
             case AlignmentTest -> AlignmentTestControls.class;
@@ -30,5 +30,21 @@ public class ControlBindingFactory {
         } catch (Exception e) {
             throw new RuntimeException("Failed to create control binding", e);
         }
+    }
+
+    public enum JoystickMode {
+        CompBot,
+        CompBotDev,
+        Scrimmage,
+        JoshPrototype,
+        AustinGearboxPrototype,
+        AlignmentTest,
+        ElevatorProto,
+        climberProto,
+        AlgaeProto,
+        PathTesting,
+        SysId,
+        CoralTesting,
+        none
     }
 }
