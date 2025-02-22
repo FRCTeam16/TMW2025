@@ -9,6 +9,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
@@ -31,6 +32,9 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     private double currentSetpoint = 0;
     private boolean lazyHold;
     private double openLoopMax = 0.3;
+
+    private Alert coralObstructionAlert = new Alert("Coral is obstructing elevator path", Alert.AlertType.kError);
+
 
 
     public Elevator() {
@@ -69,6 +73,16 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     @Override
     public void teleopInit() {
         this.currentSetpoint = this.getCurrentPosition();
+    }
+
+    @Override
+    public void periodic() {
+        coralObstructionAlert.set(isElevatorObstructedByCoral());
+    }
+
+    boolean isElevatorObstructedByCoral() {
+        return Subsystems.coralIntake.coralDetectedAtSecondLaser() &&
+                !Subsystems.coralIntake.coralDetectedAtFirstLaser();
     }
 
     private void setOpenLoop(double speed) {
@@ -180,6 +194,10 @@ public class Elevator extends SubsystemBase implements Lifecycle {
 
         @Override
         public void initialize() {
+            if (Subsystems.elevator.isElevatorObstructedByCoral()) {
+                this.cancel();
+                return;
+            }
             Subsystems.elevator.moveToPosition(this.setpoint);
         }
 

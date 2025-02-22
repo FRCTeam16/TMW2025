@@ -31,7 +31,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
     private final PositionVoltage positionVoltage = new PositionVoltage(0).withSlot(0);
 
     private double targetPosition = 0;
-    private double openLoopMax = 0.5;
+    private double openLoopMax = 0.3;
 
 
     public AlgaeArm() {
@@ -55,7 +55,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
 
     private void setArmPosition(double position) {
         // TODO: Consider a method to allow pass in of translated angles?
-        BSLogger.log("AlgaeArm", "Setting position to: " + position + " | Estimated angle: " + getEstimatedAngle());
+//        BSLogger.log("AlgaeArm", "Setting position to: " + position + " | Estimated angle: " + getEstimatedAngle());
         this.targetPosition = position;
         algaeArmMotor.setControl(
                 positionVoltage.withPosition(position)

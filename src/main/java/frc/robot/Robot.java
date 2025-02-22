@@ -5,6 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -23,6 +24,8 @@ public class Robot extends TimedRobot {
   private final RobotContainer m_robotContainer;
   public static Queue<Pose2d> poseUpdates = new java.util.LinkedList<>();
 
+  private Alert resetPoseAlert = new Alert("Reset robot pose", Alert.AlertType.kInfo);
+
   public Robot() {
     m_robotContainer = new RobotContainer();
     CanBridge.runTCP();
@@ -33,10 +36,10 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
     SmartDashboard.putNumber("Yaw", Subsystems.swerveSubsystem.getPigeon2().getYaw().getValueAsDouble());
 
-
     if (!poseUpdates.isEmpty()) {
       Pose2d pose = poseUpdates.poll();
-      System.out.println("Resetting pose to: " + pose);
+      BSLogger.log("Robot", "Resetting pose to: " + pose);
+//      resetPoseAlert.set(true);
       Subsystems.swerveSubsystem.resetPose(pose);
     }
   }

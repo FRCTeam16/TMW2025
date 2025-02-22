@@ -94,7 +94,7 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
         }
     }
 
-    boolean coralDetectedAtFirstLaser() {
+    public boolean coralDetectedAtFirstLaser() {
         int measurement = getLaser1Measurement();
         if (measurement < INVALID_LASER_MEASUREMENT) {
             return measurement < laser1SenseDistance;
@@ -102,7 +102,7 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
         return false;
     }
 
-    boolean coralDetectedAtSecondLaser() {
+    public boolean coralDetectedAtSecondLaser() {
         int measurement = getLaser2Measurement();
         if (measurement < INVALID_LASER_MEASUREMENT) {
             return measurement < laser2SenseDistance;

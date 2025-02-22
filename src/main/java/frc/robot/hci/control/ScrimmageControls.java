@@ -1,6 +1,7 @@
 package frc.robot.hci.control;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -19,6 +20,9 @@ public class ScrimmageControls extends ControlBinding {
 
     private final JoystickButton intakeAlgae = new JoystickButton(steerStick, 2);
     private final JoystickButton shootAlgae = new JoystickButton(steerStick, 1);
+
+    private final Trigger startConveyor = joystick.leftBumper();
+    private final Trigger stopConveyor = joystick.rightBumper();
 
 
     private final Trigger elevatorDown = joystick.rightTrigger();
@@ -52,7 +56,7 @@ public class ScrimmageControls extends ControlBinding {
         shootAlgae.onTrue(Subsystems.algaeIntake.ejectCommand()).onFalse(Subsystems.algaeIntake.stopCommand());
 
         elevatorDown.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.Zero));
-        elevatorL1.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.Zero));
+        elevatorL1.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.TROUGH));
         elevatorL2.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L2));
         elevatorL3.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L3));
         elevatorL4.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4));
@@ -65,5 +69,16 @@ public class ScrimmageControls extends ControlBinding {
         alignRight.whileTrue(new PathfindToScoringPositionCommand(false));
 //        alignLeft.whileTrue(new LimelightBasedAlignmentCommand(LimelightBasedAlignmentCommand.TargetSide.LEFT));
 //        alignRight.whileTrue(new LimelightBasedAlignmentCommand(LimelightBasedAlignmentCommand.TargetSide.RIGHT));
+
+        startConveyor.whileTrue(Subsystems.funnelSubsystem.startConveyorCommand());
+        stopConveyor.whileTrue(Subsystems.funnelSubsystem.stopConveyorCommand());
+
+        bindDebugControls();
+    }
+
+    void bindDebugControls() {
+        SmartDashboard.putData("Move Funnel to 5", Subsystems.funnelSubsystem.movePivotToPosition(5));
+        SmartDashboard.putData("Move Funnel to 0", Subsystems.funnelSubsystem.movePivotToPosition(0));
+
     }
 }
