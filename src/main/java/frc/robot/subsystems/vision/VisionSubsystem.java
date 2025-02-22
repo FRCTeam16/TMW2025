@@ -76,7 +76,6 @@ public class VisionSubsystem extends SubsystemBase implements Lifecycle {
         for (int idx=0; idx<this.getLimelights().size();idx++) {
             Limelight limelight = this.getLimelights().get(idx);
             String base = "Limelights/" + limelight.getName();
-//            builder.addStringProperty(base + "/name", limelight::getName, null);
             builder.addDoubleProperty(base+"/aprilTag", limelight::getAprilTagID, null);
             builder.addDoubleProperty(base + "/pipeline", () ->
                             LimelightHelpers.getCurrentPipelineIndex(limelight.getName()),

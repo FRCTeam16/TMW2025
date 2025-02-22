@@ -86,7 +86,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.
-     * <p>red
+     * <p>
      * This constructs the underlying hardware devices, so users should not construct
      * the devices themselves. If they need the devices, they can access them through
      * getters in the classes.

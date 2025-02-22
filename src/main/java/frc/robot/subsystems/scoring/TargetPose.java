@@ -14,8 +14,8 @@ import static edu.wpi.first.units.Units.Degrees;
  * Class to calculate the target pose for scoring
  */
 public class TargetPose {
-    private static final double SCORING_DISTANCE = 0.5; // robot meters from tag
-    private static final double OFFSET_DISTANCE = 0.2; // robot horizontal offset from tag
+    private static final double SCORING_DISTANCE = -1.0; // robot meters from tag
+    private static final double OFFSET_DISTANCE = 0.25; // robot horizontal offset from tag
 
     TimeExpiringValue<Integer> targetTag = new TimeExpiringValue<>(500);
 

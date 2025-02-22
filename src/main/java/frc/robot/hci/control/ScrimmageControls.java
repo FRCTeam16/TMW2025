@@ -12,6 +12,7 @@ import frc.robot.Subsystems;
 import frc.robot.commands.DriveRobotCentricCommand;
 import frc.robot.commands.LimelightBasedAlignmentCommand;
 import frc.robot.commands.PathfindToScoringPositionCommand;
+import frc.robot.commands.TestTargetPoseCalc;
 import frc.robot.commands.vision.PipelineSwitcher;
 import frc.robot.commands.vision.UpdateRobotPoseFromVision;
 import frc.robot.subsystems.Elevator;
@@ -42,12 +43,18 @@ public class ScrimmageControls extends ControlBinding {
     private final Trigger elevatorL4 = joystick.y();
 
 
+    private final Trigger algaeHighElevator = joystick.povUp();
+    private final Trigger algaeLowElevator = joystick.povDown();
+
+
     private final Trigger manualAlgaeToggleButton = joystick.leftStick();
     private final Supplier<Double> manualAlgaeArmControl = deadband(joystick::getLeftY, 0.05);
     private final Trigger manualElevatorToggleButton = joystick.rightStick();
     private final Supplier<Double> manualElevatorControl = Robot.isReal() ?
             deadband(joystick::getRightY, 0.05) :
             deadband(joystick::getRightTriggerAxis, 0.05);  // simulation mode is flipped
+
+    private final Trigger resetPose = joystick.leftTrigger();
 
 
     public ScrimmageControls(Joystick driveStick, Joystick steerStick, CommandXboxController joystick) {
@@ -70,6 +77,9 @@ public class ScrimmageControls extends ControlBinding {
         elevatorL2.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L2));
         elevatorL3.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L3));
         elevatorL4.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4));
+
+        algaeHighElevator.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.AlgaeReefHigh));
+        algaeLowElevator.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.AlgaeReefLow));
 
         manualAlgaeToggleButton.toggleOnTrue(Subsystems.algaeArm.openLoopCommand(manualAlgaeArmControl));
         manualElevatorToggleButton.toggleOnTrue(Subsystems.elevator.openLoopCommand(manualElevatorControl));
@@ -100,6 +110,10 @@ public class ScrimmageControls extends ControlBinding {
     void bindDebugControls() {
         SmartDashboard.putData("Move Funnel to 5", Subsystems.funnelSubsystem.movePivotToPosition(5));
         SmartDashboard.putData("Move Funnel to 0", Subsystems.funnelSubsystem.movePivotToPosition(0));
+
+        SmartDashboard.putData("TestTargetCalc", new TestTargetPoseCalc().ignoringDisable(true));
+
+        resetPose.whileTrue(UpdateRobotPoseFromVision.resetFromMainPoseEstimator());
 
     }
 }

@@ -33,6 +33,8 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     private boolean lazyHold;
     private double openLoopMax = 0.3;
 
+    private double encoderOffset = 0;
+
     private Alert coralObstructionAlert = new Alert("Coral is obstructing elevator path", Alert.AlertType.kError);
 
 
@@ -45,8 +47,8 @@ public class Elevator extends SubsystemBase implements Lifecycle {
                 .withKG(GRAVITY_VOLTS);
 
         MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs()
-                .withMotionMagicCruiseVelocity(40)  // 80
-                .withMotionMagicAcceleration(60)     // 140
+                .withMotionMagicCruiseVelocity(70)  // 80
+                .withMotionMagicAcceleration(100)     // 140
                 .withMotionMagicJerk(0)
                 .withMotionMagicExpo_kA(0.0)
                 .withMotionMagicExpo_kV(0.01);
@@ -96,6 +98,10 @@ public class Elevator extends SubsystemBase implements Lifecycle {
 
     private void moveToEncoderPosition(double encoderPosition) {
         BSLogger.log("Elevator", "Moving to position: " + encoderPosition);
+        if (!MathUtil.isNear(0, encoderPosition, 0.05)) {
+            encoderPosition += encoderOffset;
+            BSLogger.log("Elevator", "Moving to adjusted position: " + encoderPosition);
+        }
         this.currentSetpoint = encoderPosition;
         left.setControl(motionMagicV.withPosition(encoderPosition));
     }
@@ -149,6 +155,7 @@ public class Elevator extends SubsystemBase implements Lifecycle {
         builder.addBooleanProperty("Is In Position", this::isInPosition, null);
         builder.addDoubleProperty("Current Setpoint", () -> currentSetpoint, this::moveToEncoderPosition);
         builder.addBooleanProperty("Coral Obstruction", this::isElevatorObstructedByCoral, null);
+        builder.addDoubleProperty("Encoder Offset", () -> encoderOffset, (v) -> encoderOffset = v);
 
         builder.addDoubleProperty("Open Loop Motor Speed", () -> openLoopMotorSpeed, (speed) -> openLoopMotorSpeed = speed);
         builder.addDoubleProperty("Open Loop Max", () -> openLoopMax, (max) -> openLoopMax = max);
@@ -169,13 +176,13 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     public enum ElevatorSetpoint {
         Zero(0),
         TROUGH(-16.5),
-        L2(-17.25),
-        L3(-26),
-        L4(-39),
+        L2(-19.05),
+        L3(-27.0),
+        L4(-40.8),
         AlgaeBarge(-38.5),
         AlgaeProcessor(0.0),
-        AlgaeReefHigh(-14.0),
-        AlgaeReefLow(-5.0);
+        AlgaeReefHigh(-15.8),
+        AlgaeReefLow(-6.0);
 
         public final double val;
 
