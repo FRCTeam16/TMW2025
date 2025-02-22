@@ -1,14 +1,20 @@
 package frc.robot.hci.control;
 
+import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Robot;
+import frc.robot.RobotContainer;
 import frc.robot.Subsystems;
+import frc.robot.commands.DriveRobotCentricCommand;
 import frc.robot.commands.PathfindToScoringPositionCommand;
+import frc.robot.commands.vision.PipelineSwitcher;
+import frc.robot.commands.vision.UpdateRobotPoseFromVision;
 import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.vision.Pipeline;
 
 import java.util.function.Supplier;
 
@@ -20,9 +26,6 @@ public class ScrimmageControls extends ControlBinding {
 
     private final JoystickButton intakeAlgae = new JoystickButton(steerStick, 2);
     private final JoystickButton shootAlgae = new JoystickButton(steerStick, 1);
-
-    private final Trigger startConveyor = joystick.leftBumper();
-    private final Trigger stopConveyor = joystick.rightBumper();
 
 
     private final Trigger elevatorDown = joystick.rightTrigger();
@@ -38,6 +41,9 @@ public class ScrimmageControls extends ControlBinding {
     private final Supplier<Double> manualElevatorControl = Robot.isReal() ?
             deadband(joystick::getRightY, 0.05) :
             deadband(joystick::getRightTriggerAxis, 0.05);  // simulation mode is flipped
+
+    private final JoystickButton robotCentric = new JoystickButton(steerStick, 3);
+    private final SwerveRequest.RobotCentric robotCentricRequest = new SwerveRequest.RobotCentric();
 
 
     public ScrimmageControls(Joystick driveStick, Joystick steerStick, CommandXboxController joystick) {
@@ -70,10 +76,21 @@ public class ScrimmageControls extends ControlBinding {
 //        alignLeft.whileTrue(new LimelightBasedAlignmentCommand(LimelightBasedAlignmentCommand.TargetSide.LEFT));
 //        alignRight.whileTrue(new LimelightBasedAlignmentCommand(LimelightBasedAlignmentCommand.TargetSide.RIGHT));
 
-        startConveyor.whileTrue(Subsystems.funnelSubsystem.startConveyorCommand());
-        stopConveyor.whileTrue(Subsystems.funnelSubsystem.stopConveyorCommand());
 
+        robotCentric.whileTrue(new DriveRobotCentricCommand());
+
+        bindCommonButtons();
         bindDebugControls();
+    }
+
+    void bindCommonButtons() {
+        SmartDashboard.putData("Reset Pose From Vision",
+                UpdateRobotPoseFromVision.resetFromMainPoseEstimator().ignoringDisable(true));
+//        SmartDashboard.putData("Tare Swerve Pose",
+//                () -> Subsystems.swerveSubsystem.tareEverything());
+
+        SmartDashboard.putData("Set LLs to Apriltag", new PipelineSwitcher(Pipeline.April));
+        SmartDashboard.putData("Set LLs to Viewfinder", new PipelineSwitcher(Pipeline.View));
     }
 
     void bindDebugControls() {

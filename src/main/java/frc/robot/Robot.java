@@ -27,7 +27,7 @@ public class Robot extends TimedRobot {
   private Alert resetPoseAlert = new Alert("Reset robot pose", Alert.AlertType.kInfo);
 
   public Robot() {
-    m_robotContainer = new RobotContainer();
+    m_robotContainer = RobotContainer.getInstance();
     CanBridge.runTCP();
   }
 

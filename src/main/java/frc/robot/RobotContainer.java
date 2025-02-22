@@ -31,7 +31,7 @@ import frc.robot.subsystems.Lifecycle;
 import frc.robot.subsystems.vision.VisionAssist;
 
 public class RobotContainer {
-
+    private RobotContainer instance;
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
 //            .withDeadband(MaxSpeed.in(MetersPerSecond) * 0.125)
@@ -55,8 +55,13 @@ public class RobotContainer {
     private final SwerveSupplier swerveSupplier;
     private JoystickMode joystickMode = ControlBindingFactory.JoystickMode.Scrimmage;
     private ControlBinding controlBinding;
+    private boolean robotCentric;
 
-    public RobotContainer() {
+    public static RobotContainer getInstance() {
+        return new RobotContainer();
+    }
+
+    private RobotContainer() {
         Subsystems.getInstance(); // Ensure subsystems are initialized
         drivetrain = Subsystems.swerveSubsystem;
         swerveSupplier = (!RobotBase.isSimulation()) ?
@@ -67,6 +72,9 @@ public class RobotContainer {
             drivetrain.resetPose(new Pose2d(3, 3, Rotation2d.fromDegrees(0)));
         }
         configureBindings();
+
+        // Set up starting config
+        drivetrain.resetPose(new Pose2d(3, 3, Rotation2d.fromDegrees(180)));
     }
 
     private void configureBindings() {
@@ -86,6 +94,10 @@ public class RobotContainer {
 
         controlBinding = ControlBindingFactory.createControlBinding(this.joystickMode, driveStick, steerStick, joystick);
         drivetrain.registerTelemetry(logger::telemeterize);
+    }
+
+    public SwerveSupplier getSwerveSupplier() {
+        return swerveSupplier;
     }
 
     public Command getAutonomousCommand() {

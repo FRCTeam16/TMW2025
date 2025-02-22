@@ -148,6 +148,7 @@ public class Elevator extends SubsystemBase implements Lifecycle {
         builder.addDoubleProperty("Current Position", this::getCurrentPosition, null);
         builder.addBooleanProperty("Is In Position", this::isInPosition, null);
         builder.addDoubleProperty("Current Setpoint", () -> currentSetpoint, this::moveToEncoderPosition);
+        builder.addBooleanProperty("Coral Obstruction", this::isElevatorObstructedByCoral, null);
 
         builder.addDoubleProperty("Open Loop Motor Speed", () -> openLoopMotorSpeed, (speed) -> openLoopMotorSpeed = speed);
         builder.addDoubleProperty("Open Loop Max", () -> openLoopMax, (max) -> openLoopMax = max);
@@ -194,10 +195,10 @@ public class Elevator extends SubsystemBase implements Lifecycle {
 
         @Override
         public void initialize() {
-            if (Subsystems.elevator.isElevatorObstructedByCoral()) {
-                this.cancel();
-                return;
-            }
+//            if (Subsystems.elevator.isElevatorObstructedByCoral()) {
+//                this.cancel();
+//                return;
+//            }
             Subsystems.elevator.moveToPosition(this.setpoint);
         }
 
