@@ -3,11 +3,16 @@ package frc.robot.commands;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.RobotContainer;
 import frc.robot.Subsystems;
+import frc.robot.subsystems.scoring.TargetPose;
+import frc.robot.subsystems.vision.AprilTagAngleLookup;
 import frc.robot.subsystems.vision.LimelightHelpers;
 import frc.robot.subsystems.vision.VisionTypes;
 import frc.robot.util.PIDHelper;
@@ -30,10 +35,10 @@ public class LimelightBasedAlignmentCommand extends Command {
         this.addRequirements(Subsystems.swerveSubsystem);
         this.targetSide = targetSide;
         if (targetSide == TargetSide.LEFT) {
-            this.targetAngle = Degrees.of(-3.0);
-            this.selectedLimelightName = "limelight";
+            this.targetAngle = Degrees.of(18.0);
+            this.selectedLimelightName = "limelight-left";
         } else if (targetSide == TargetSide.RIGHT) {
-            this.targetAngle = Degrees.of(-3.0);
+            this.targetAngle = Degrees.of(-25.0);
             this.selectedLimelightName = "limelight-right";
         } else {
             throw new IllegalArgumentException("Invalid target side");
@@ -52,13 +57,15 @@ public class LimelightBasedAlignmentCommand extends Command {
         }
 
         // Lock angle and calculate translation speed
-        AngularVelocity rotationRate = calculateRobotRotation();
+        AngularVelocity rotationRate = calculateRobotRotation(targetInfo.get());
+        LinearVelocity xDriveSpeed = getVelocityX();
         LinearVelocity yDriveSpeed = calculateRobotYTranslationSpeed();
         Subsystems.swerveSubsystem.setControl(
-                alignDrive.withVelocityX(0)
+                alignDrive.withVelocityX(xDriveSpeed)
                         .withRotationalRate(rotationRate)
                         .withVelocityY(yDriveSpeed));
     }
+
 
     private void noopDrive() {
         Subsystems.swerveSubsystem.setControl(
@@ -67,14 +74,32 @@ public class LimelightBasedAlignmentCommand extends Command {
                         .withVelocityY(0));
     }
 
-    private AngularVelocity calculateRobotRotation() {
-        final Angle robotFacingAngle = Degrees.of(0);    // TODO Need lookup based on AprilTag ID
+    private AngularVelocity calculateRobotRotation(VisionTypes.TargetInfo targetInfo) {
+        int aprilTag = targetInfo.aprilTagID();
+//        Optional<Angle> aprilTagAngle = AprilTagAngleLookup.getFacingAngle(aprilTag);
+//        if (aprilTagAngle.isEmpty()) {
+//            return DegreesPerSecond.of(0);
+//        }
+
+        Optional<Pose3d> pose3d = Subsystems.visionSubsystem.getTagPose(aprilTag);
+        if (pose3d.isEmpty()) {
+            return DegreesPerSecond.of(0);
+        }
+        Optional<Angle> aprilTagAngle = Optional.of(pose3d.get().toPose2d().getRotation().getMeasure());
+
+        final Angle robotFacingAngle = aprilTagAngle.get().plus(Degrees.of(180));
         // Calculate angular velocity
         return DegreesPerSecond.of(
                         Subsystems.rotationController.calculate(
                                 Subsystems.swerveSubsystem.getPigeon2().getYaw().getValueAsDouble(),
                                 robotFacingAngle.in(Degrees)))
                 .times(MaxAngularRate.in(RadiansPerSecond));
+    }
+
+    private LinearVelocity getVelocityX() {
+        double mps = RobotContainer.getInstance().getSwerveSupplier().supplyX().in(MetersPerSecond);
+        double clamped_mps = MathUtil.clamp(mps, -0.5, 0.5);
+        return MetersPerSecond.of(clamped_mps);
     }
 
     private LinearVelocity calculateRobotYTranslationSpeed() {

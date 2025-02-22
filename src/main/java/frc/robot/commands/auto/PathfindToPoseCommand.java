@@ -9,7 +9,7 @@ import frc.robot.Subsystems;
 public class PathfindToPoseCommand extends Command {
     private final Pose2d targetPose;
     Command pathCommand = null;
-    private PathConstraints pathConstraints = new PathConstraints(1.0, 1.0, 1.0, 1.0);
+    private PathConstraints pathConstraints = new PathConstraints(0.5, 1.0, 1.0, 1.0);
 
     public PathfindToPoseCommand(Pose2d targetPose) {
         this.targetPose = targetPose;

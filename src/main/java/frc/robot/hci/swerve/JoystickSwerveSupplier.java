@@ -45,16 +45,17 @@ public class JoystickSwerveSupplier implements SwerveSupplier {
 
     protected double getBaseX() {
         return applyLimiter(applyDeadband(
-                -driveStick.getY(), 0.08) * (isRedAlliance ? -1 : 1));
+                -driveStick.getY(), 0.08) * (isRedAlliance ? 1 : 1));
     }
 
     protected double getBaseY() {
         return applyLimiter(applyDeadband(
-                -driveStick.getX(), 0.05) * (isRedAlliance ? -1 : 1));
+                -driveStick.getX(), 0.05) * (isRedAlliance ? 1 : 1));
     }
 
     protected double getBaseRotationalRate() {
-        return applyLimiter(applyDeadband(steerStick.getX(), 0.05) * (isRedAlliance ? -1 : 1));
+        return applyLimiter(applyDeadband(
+                -steerStick.getX(), 0.05) * (isRedAlliance ? 1 : 1));
     }
 
 

@@ -10,6 +10,7 @@ import frc.robot.Robot;
 import frc.robot.RobotContainer;
 import frc.robot.Subsystems;
 import frc.robot.commands.DriveRobotCentricCommand;
+import frc.robot.commands.LimelightBasedAlignmentCommand;
 import frc.robot.commands.PathfindToScoringPositionCommand;
 import frc.robot.commands.vision.PipelineSwitcher;
 import frc.robot.commands.vision.UpdateRobotPoseFromVision;
@@ -24,8 +25,14 @@ public class ScrimmageControls extends ControlBinding {
     private final JoystickButton alignLeft = new JoystickButton(driveStick, 3);
     private final JoystickButton alignRight = new JoystickButton(driveStick, 4);
 
+    private final Trigger alignLeftA = joystick.leftBumper();
+    private final Trigger alignRightA = joystick.rightBumper();
+
+
     private final JoystickButton intakeAlgae = new JoystickButton(steerStick, 2);
     private final JoystickButton shootAlgae = new JoystickButton(steerStick, 1);
+
+    private final JoystickButton robotCentric = new JoystickButton(steerStick, 3);
 
 
     private final Trigger elevatorDown = joystick.rightTrigger();
@@ -41,9 +48,6 @@ public class ScrimmageControls extends ControlBinding {
     private final Supplier<Double> manualElevatorControl = Robot.isReal() ?
             deadband(joystick::getRightY, 0.05) :
             deadband(joystick::getRightTriggerAxis, 0.05);  // simulation mode is flipped
-
-    private final JoystickButton robotCentric = new JoystickButton(steerStick, 3);
-    private final SwerveRequest.RobotCentric robotCentricRequest = new SwerveRequest.RobotCentric();
 
 
     public ScrimmageControls(Joystick driveStick, Joystick steerStick, CommandXboxController joystick) {
@@ -71,10 +75,10 @@ public class ScrimmageControls extends ControlBinding {
         manualElevatorToggleButton.toggleOnTrue(Subsystems.elevator.openLoopCommand(manualElevatorControl));
 
 
-        alignLeft.whileTrue(new PathfindToScoringPositionCommand(true));
-        alignRight.whileTrue(new PathfindToScoringPositionCommand(false));
-//        alignLeft.whileTrue(new LimelightBasedAlignmentCommand(LimelightBasedAlignmentCommand.TargetSide.LEFT));
-//        alignRight.whileTrue(new LimelightBasedAlignmentCommand(LimelightBasedAlignmentCommand.TargetSide.RIGHT));
+        alignLeftA.whileTrue(new PathfindToScoringPositionCommand(true));
+        alignRightA.whileTrue(new PathfindToScoringPositionCommand(false));
+        alignLeft.whileTrue(new LimelightBasedAlignmentCommand(LimelightBasedAlignmentCommand.TargetSide.LEFT));
+        alignRight.whileTrue(new LimelightBasedAlignmentCommand(LimelightBasedAlignmentCommand.TargetSide.RIGHT));
 
 
         robotCentric.whileTrue(new DriveRobotCentricCommand());

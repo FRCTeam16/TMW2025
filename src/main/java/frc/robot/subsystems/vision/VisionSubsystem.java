@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.Lifecycle;
 import frc.robot.util.BSLogger;
+import frc.robot.util.GameInfo;
 
 import java.util.*;
 
@@ -97,6 +98,10 @@ public class VisionSubsystem extends SubsystemBase implements Lifecycle {
      * @return
      */
     public Optional<Pose3d> getTagPose(int aprilTagID) {
+        Optional<Pose3d> basePose = this.fieldLayout.getTagPose(aprilTagID);
+        if (GameInfo.isRedAlliance() && basePose.isPresent()) {
+//            this.fieldLayout.setOrigin(AprilTagFieldLayout.OriginPosition.kRedAllianceWallRightSide);
+        }
         return this.fieldLayout.getTagPose(aprilTagID);
     }
 }

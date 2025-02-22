@@ -1,7 +1,10 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Subsystems;
 import frc.robot.commands.auto.PathfindToPoseCommand;
@@ -18,10 +21,14 @@ public class PathfindToScoringPositionCommand extends Command {
     private final boolean isLeft;
     Alert invalidStateAlert = new Alert("Invalid PathfindToScoringPositionCommand Scoring Request", Alert.AlertType.kWarning);
     private PathfindToPoseCommand pathfindToPoseCommand;
+    private final StructPublisher<Pose2d> posePublisher;
+
 
     public PathfindToScoringPositionCommand(boolean isLeft) {
          addRequirements(Subsystems.swerveSubsystem);
          this.isLeft = isLeft;
+         posePublisher = NetworkTableInstance.getDefault()
+                 .getStructTopic("PathfindToScorePose", Pose2d.struct).publish();
     }
 
     @Override
@@ -37,6 +44,9 @@ public class PathfindToScoringPositionCommand extends Command {
             invalidStateAlert.set(true);
             return;
         }
+
+        posePublisher.set(optionalTargetPose.get());
+
         pathfindToPoseCommand = new PathfindToPoseCommand(optionalTargetPose.get());
         pathfindToPoseCommand.initialize();
     }

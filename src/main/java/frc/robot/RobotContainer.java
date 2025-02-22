@@ -29,6 +29,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Controls;
 import frc.robot.subsystems.Lifecycle;
 import frc.robot.subsystems.vision.VisionAssist;
+import frc.robot.util.GameInfo;
 
 public class RobotContainer {
     private RobotContainer instance;
@@ -68,13 +69,18 @@ public class RobotContainer {
                 new JoystickSwerveSupplier(driveStick, steerStick, joystick) :
                 new XBoxSwerveSupplier(joystick);
 
-        if (RobotBase.isSimulation()) {
-            drivetrain.resetPose(new Pose2d(3, 3, Rotation2d.fromDegrees(0)));
-        }
+
         configureBindings();
 
         // Set up starting config
-        drivetrain.resetPose(new Pose2d(3, 3, Rotation2d.fromDegrees(180)));
+        if (GameInfo.isRedAlliance()) {
+            drivetrain.resetPose(new Pose2d(12, 7.3, Rotation2d.fromDegrees(0)));
+//            drivetrain.setOperatorPerspectiveForward(Rotation2d.fromDegrees(180));
+        } else {
+            drivetrain.resetPose(new Pose2d(3, 3, Rotation2d.fromDegrees(180)));
+//            drivetrain.setOperatorPerspectiveForward(Rotation2d.fromDegrees(0));
+        }
+
     }
 
     private void configureBindings() {

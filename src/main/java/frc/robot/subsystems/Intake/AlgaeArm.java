@@ -11,6 +11,7 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
+import frc.robot.Subsystems;
 import frc.robot.subsystems.Lifecycle;
 import frc.robot.util.BSLogger;
 
@@ -127,6 +128,13 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
     public Command setArmPositionCommand(AlgaeArmPosition position) {
         return new SetArmPositionCommand(position);
     }
+
+    public class DefaultHoldAlgaeArmCommand extends Command {
+        public DefaultHoldAlgaeArmCommand() {
+            addRequirements(Subsystems.algaeArm);
+        }
+    }
+
 
     public enum AlgaeArmPosition {
         Start(0.0),

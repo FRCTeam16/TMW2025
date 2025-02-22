@@ -1,9 +1,11 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.util.sendable.Sendable;
@@ -12,6 +14,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Subsystems;
 import frc.robot.subsystems.vision.LimelightPoseEstimator;
 import frc.robot.subsystems.vision.VisionSubsystem;
+import frc.robot.util.BSMath;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,7 +35,7 @@ public class VisionOdometryUpdater implements Sendable {
     /**
      * Maximum distance in meters for a tag to be considered in the pose estimation.
      */
-    public static final double MAX_TAG_DIST_METERS = 1.0;
+    public static final double MAX_TAG_DIST_METERS = 2.0;
 
     private final CommandSwerveDrivetrain drivetrain;
     private final SwerveDrivePoseEstimator mainPoseEstimator;
@@ -55,7 +58,7 @@ public class VisionOdometryUpdater implements Sendable {
                 // TODO add stdev for drive and vision measurements
         );
         this.visionPoseEstimators = visionSubsystem.getLimelights().stream()
-                .map(limelight -> new LimelightPoseEstimator(limelight.getName()))
+                .map(limelight -> new LimelightPoseEstimator(limelight.getName(), false))
                 .toList();
 
         this.posePublisher = NetworkTableInstance.getDefault()
@@ -64,10 +67,8 @@ public class VisionOdometryUpdater implements Sendable {
         this.visionPoseEstimators.forEach(visionPoseEstimator -> 
         SmartDashboard.putData("VisionPoseEstimator-"+visionPoseEstimator.getName(), visionPoseEstimator));
 
-        //
+        // Defaults
         Subsystems.swerveSubsystem.setVisionMeasurementStdDevs(VecBuilder.fill(0.5, 0.5, 99)); // Example tuning values
-
-
     }
 
     /**
@@ -89,11 +90,11 @@ public class VisionOdometryUpdater implements Sendable {
                 .flatMap(Optional::stream)
                 .filter(pose -> pose.avgTagDist < MAX_TAG_DIST_METERS)
                 .forEach(pose -> {
-                    mainPoseEstimator.addVisionMeasurement(pose.pose, pose.timestampSeconds);
+                    double visionStdDev = BSMath.map(pose.avgTagDist, 0, MAX_TAG_DIST_METERS, 0.3, 0.9);
+                    Vector<N3> vector = VecBuilder.fill(visionStdDev, visionStdDev, 99);
+                    mainPoseEstimator.addVisionMeasurement(pose.pose, pose.timestampSeconds, vector);
+//                    mainPoseEstimator.addVisionMeasurement(pose.pose, pose.timestampSeconds);
 
-                    // We need to figure out why this isn't working
-                    // Subsystems.swerveSubsystem.addVisionMeasurement(pose.pose, pose.timestampSeconds);
-                    
                 });
 
         // Publish pose to network tables

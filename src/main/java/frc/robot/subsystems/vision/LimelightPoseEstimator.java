@@ -77,11 +77,9 @@ public class LimelightPoseEstimator implements Sendable  {
         }
         // Filters out pose estimates if the robot is moving too fast
         StatusSignal<AngularVelocity> angularVelocity = Subsystems.swerveSubsystem.getPigeon2().getAngularVelocityZWorld();
-        if (Math.abs(angularVelocity.getValue().in(DegreesPerSecond)) > 720) { // if our angular velocity is greater than 720 degrees per second, ignore vision updates
+        if (Math.abs(angularVelocity.getValue().in(DegreesPerSecond)) > 100) { // if our angular velocity is greater than 720 degrees per second, ignore vision updates
             return Optional.empty();
         }
-
-        // TODO Consider adding global ambiguity checks?
 
         if (poseEstimate.isPresent()) {
             LimelightHelpers.PoseEstimate estimate = poseEstimate.get();
@@ -114,6 +112,9 @@ public class LimelightPoseEstimator implements Sendable  {
      */
     private Optional<LimelightHelpers.PoseEstimate> doMegaTag1Estimate() {
         LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName); // TODO: Check red switch here?
+        if (mt1 == null) {
+            return Optional.empty();
+        }
 
         if (mt1.tagCount == 1 && mt1.rawFiducials.length == 1) {
             if (mt1.rawFiducials[0].ambiguity > .7) {
