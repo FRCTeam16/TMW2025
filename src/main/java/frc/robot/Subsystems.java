@@ -49,6 +49,7 @@ public class Subsystems {
     //
     public static RotationController rotationController;
     public static AsyncManager asyncManager;
+    public static AprilTagUtil aprilTagUtil;
 
     // Warning: This must be created after everything else to ensure all subsystems
     // are registered
@@ -108,6 +109,8 @@ public class Subsystems {
 
         autoManager = new AutoManager();
         autoManager.initialize();
+
+        aprilTagUtil = new AprilTagUtil();
 
         visionOdometryUpdater = new VisionOdometryUpdater(visionSubsystem, swerveSubsystem);
 
