@@ -95,8 +95,9 @@ public class Climber extends SubsystemBase implements Lifecycle {
 
     public enum ClimberPosition {
         UP(0),
+        CLIMB(-15),
         DOWN(75),
-        CLIMB(40);
+        PICKUP(40);
 
         private final double position;
 

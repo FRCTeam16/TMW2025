@@ -78,7 +78,7 @@ public class ScrimmageControls extends ControlBinding {
 
         climberUp.onTrue(new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.UP));
         climberDown.onTrue(new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.DOWN));
-        climberScore.onTrue(new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.CLIMB));
+        climberScore.onTrue(new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.PICKUP));
 
         manualAlgaeToggleButton.toggleOnTrue(Subsystems.algaeArm.openLoopCommand(manualAlgaeArmControl));
         manualElevatorToggleButton.toggleOnTrue(Subsystems.elevator.openLoopCommand(manualElevatorControl));
@@ -108,7 +108,8 @@ public class ScrimmageControls extends ControlBinding {
 
         SmartDashboard.putData("TestTargetCalc", new TestTargetPoseCalc().ignoringDisable(true));
 
-        resetPose.whileTrue(UpdateRobotPoseFromVision.resetFromMainPoseEstimator());
+        resetPose.onTrue(
+                UpdateRobotPoseFromVision.resetFromMainPoseEstimator().ignoringDisable(true));
 
     }
 
