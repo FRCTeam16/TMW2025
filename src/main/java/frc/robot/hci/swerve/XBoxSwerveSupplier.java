@@ -5,6 +5,7 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
+import frc.robot.util.GameInfo;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
@@ -19,13 +20,13 @@ public class XBoxSwerveSupplier implements SwerveSupplier {
 
     @Override
     public LinearVelocity supplyX() {
-        double base = -controller.getLeftY() * (RobotBase.isSimulation() ? -1 : 1);
+        double base = -controller.getLeftY() * (GameInfo.isRedAlliance() ? 1 : 1);
         return MetersPerSecond.of(base).times(Constants.MaxSpeed.in(MetersPerSecond));
     }
 
     @Override
     public LinearVelocity supplyY() {
-        double base = -controller.getLeftX() * (RobotBase.isSimulation() ? -1 : 1);
+        double base = -controller.getLeftX() * (GameInfo.isRedAlliance() ? 1 : 1);
         return MetersPerSecond.of(base).times(Constants.MaxSpeed.in(MetersPerSecond));
     }
 

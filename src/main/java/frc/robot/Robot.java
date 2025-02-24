@@ -4,7 +4,9 @@
 
 package frc.robot;
 
+import au.grapplerobotics.CanBridge;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -14,7 +16,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.generated.RobotConfig;
 import frc.robot.util.BSLogger;
-import au.grapplerobotics.CanBridge;
+import frc.robot.util.GameInfo;
 
 import java.util.Queue;
 
@@ -37,6 +39,21 @@ public class Robot extends TimedRobot {
   }
 
   @Override
+  public void robotInit() {
+
+    // Set up starting config
+    if (GameInfo.isRedAlliance()) {
+      Subsystems.swerveSubsystem.getPigeon2().setYaw(0);
+      Subsystems.swerveSubsystem.resetPose(new Pose2d(14, 7.3, Rotation2d.fromDegrees(0)));
+    } else if (GameInfo.isBlueAlliance()){
+      Subsystems.swerveSubsystem.resetPose(new Pose2d(8, 3, Rotation2d.fromDegrees(180)));
+      Subsystems.swerveSubsystem.getPigeon2().setYaw(180);
+    } else {
+      Subsystems.swerveSubsystem.resetPose(new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
+    }
+  }
+
+  @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
     SmartDashboard.putNumber("Yaw", Subsystems.swerveSubsystem.getPigeon2().getYaw().getValueAsDouble() % 360.0);
@@ -54,7 +71,9 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+
+  }
 
   @Override
   public void disabledPeriodic() {}
