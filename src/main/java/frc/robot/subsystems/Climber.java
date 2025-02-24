@@ -18,10 +18,11 @@ public class Climber extends SubsystemBase implements Lifecycle {
 
     private final TalonFX climberMotor = new TalonFX(Robot.robotConfig.getCanID("climberMotor"));
     private final DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
-    private final PositionVoltage positionVoltage = new PositionVoltage(0).withSlot(0);
+    private final PositionVoltage positionVoltage = new PositionVoltage(0).withSlot(0).withEnableFOC(true);
 
     private double openLoopMotorOutput = 0.5;
     private double currentSetpoint = 0;
+    private double setpointVelocity = 10;
 
     public Climber() {
         TalonFXConfiguration climberConfiguration = new TalonFXConfiguration();
@@ -33,7 +34,7 @@ public class Climber extends SubsystemBase implements Lifecycle {
                 .withForwardSoftLimitEnable(true)
                 .withForwardSoftLimitThreshold(75)
                 .withReverseSoftLimitEnable(true)
-                .withReverseSoftLimitThreshold(-1);
+                .withReverseSoftLimitThreshold(-20);
         climberConfiguration
                 .withMotorOutput(motorOutputConfigs)
                 .withSlot0(slot0Configs)
@@ -54,6 +55,7 @@ public class Climber extends SubsystemBase implements Lifecycle {
         builder.addDoubleProperty("currentSetpoint", () -> currentSetpoint, (v) -> currentSetpoint = v);
         builder.addDoubleProperty("position", this::getPosition, null);
         builder.addBooleanProperty("inPosition", this::isInPosition, null);
+        builder.addDoubleProperty("setpointVelocity", () -> setpointVelocity, (v) -> setpointVelocity = v);
     }
 
     public boolean isInPosition() {
@@ -66,7 +68,8 @@ public class Climber extends SubsystemBase implements Lifecycle {
 
     private void moveToPosition(double position) {
         this.currentSetpoint = position;
-        climberMotor.setControl(positionVoltage.withPosition(position));
+        climberMotor.setControl(
+                positionVoltage.withPosition(position).withVelocity(setpointVelocity));
     }
 
     public Command openLoopUpDefault() {
