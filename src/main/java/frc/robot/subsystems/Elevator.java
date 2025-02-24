@@ -109,7 +109,7 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     /**
      * Returns the position of the elevator in motor rotations
      */
-    private double getCurrentPosition() {
+    public double getCurrentPosition() {
         return left.getPosition().getValueAsDouble();
     }
 

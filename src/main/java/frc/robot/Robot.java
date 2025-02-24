@@ -6,6 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -27,8 +28,12 @@ public class Robot extends TimedRobot {
   private Alert resetPoseAlert = new Alert("Reset robot pose", Alert.AlertType.kInfo);
 
   public Robot() {
+    DataLogManager.start();
     m_robotContainer = RobotContainer.getInstance();
     CanBridge.runTCP();
+
+    // Setup serial communications
+    addPeriodic(Subsystems.ledSubsystem::Report, 0.1);
   }
 
   @Override
@@ -36,8 +41,12 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
     SmartDashboard.putNumber("Yaw", Subsystems.swerveSubsystem.getPigeon2().getYaw().getValueAsDouble() % 360.0);
 
+    // Performs pose resets in the main thread to avoid locking issues
     if (!poseUpdates.isEmpty()) {
       Pose2d pose = poseUpdates.poll();
+      if (pose == null) {
+        return;
+      }
       BSLogger.log("Robot", "Resetting pose to: " + pose);
 //      resetPoseAlert.set(true);
       Subsystems.swerveSubsystem.resetPose(pose);

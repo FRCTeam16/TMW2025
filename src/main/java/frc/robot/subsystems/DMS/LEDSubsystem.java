@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.SerialPort.WriteBufferMode;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Subsystems;
 import frc.robot.subsystems.Lifecycle;
 
 public class LEDSubsystem extends SubsystemBase implements Lifecycle {
@@ -16,7 +17,7 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
     private static final double MOTOR_TEST_TIME = 4.0;
     private static final double RESULTS_DISPLAY_TIME = 10.0;
     private static final int NOCOMM_THRESHOLD = 4;
-    private static final int BUFFER_SIZE = 16;
+    private static final int BUFFER_SIZE = 26;
     private boolean running = true;
     private Timer timer = new Timer();
     private SerialPort serial;
@@ -28,7 +29,6 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
     private int lastComm = 0;
     private int noCommCounter = 0;  // avoid intermittent counter by looking for a set number before reporting this
     private int secondsToClimb = 30;
-
 
 
      enum DMSPhase {
@@ -73,6 +73,8 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
     }
 
     public void SendData(DriveInfo<Double> driveMotor, DriveInfo<Double> steerMotor) {
+
+        // Communications status
         int robotState = 0;
         if (DriverStation.isDisabled()) {
             robotState = 1;
@@ -89,7 +91,7 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
         }
         lastComm = robotState;
 
-
+        // Alliance color
         int allianceColor = 0;
         if (DriverStation.getAlliance().isPresent()) {
             if (DriverStation.getAlliance().get() == Alliance.Red) {
@@ -99,27 +101,40 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
             }
         }
 
+        boolean hasPart = Subsystems.coralIntake.coralDetectedAtFirstLaser();
+        int elevatorPosition = (int) Subsystems.elevator.getCurrentPosition();
 
         byte[] buffer = new byte[BUFFER_SIZE];
 
         buffer[0] = (byte) 254;
-        // DMS info
-        buffer[1] = driveStatus.FL.byteValue();
-        buffer[2] = steerStatus.FL.byteValue();
-        buffer[3] = driveStatus.FR.byteValue();
-        buffer[4] = steerStatus.FR.byteValue();
-        buffer[5] = driveStatus.RL.byteValue();
-        buffer[6] = steerStatus.RL.byteValue();
-        buffer[7] = driveStatus.RR.byteValue();
-        buffer[8] = steerStatus.RR.byteValue();
+        buffer[1] = (byte) robotState; // comm status
+        buffer[2] = (byte) allianceColor;
+        buffer[3] = (byte) (hasPart ? 1 : 0);
+        buffer[4] = (byte) elevatorPosition;
 
-        buffer[9] = (byte) robotState; // comm status
-        buffer[10] = (byte) allianceColor;
-        buffer[11] = (byte) 0;
-        buffer[12] = (byte) 0;
-        buffer[13] = (byte) 0;  // extra
-        buffer[14] = (byte) 0;
-        buffer[15] = (byte) 255;
+        // DMS info
+        buffer[5] = driveStatus.FL.byteValue();
+        buffer[6] = steerStatus.FL.byteValue();
+        buffer[7] = driveStatus.FR.byteValue();
+        buffer[8] = steerStatus.FR.byteValue();
+        buffer[9] = driveStatus.RL.byteValue();
+        buffer[10] = steerStatus.RL.byteValue();
+        buffer[11] = driveStatus.RR.byteValue();
+        buffer[12] = steerStatus.RR.byteValue();
+
+        buffer[13] = (byte) 0; // climber
+        buffer[14] = (byte) 0; // elevatorLeft
+        buffer[15] = (byte) 0; // elevatorRight
+        buffer[16] = (byte) 0; // coralLeft
+        buffer[17] = (byte) 0; // coralRight
+        buffer[18] = (byte) 0; // algaeIntake
+        buffer[19] = (byte) 0; // algaePivotMotor
+        buffer[20] = (byte) 0; // funnelPivotMotor
+        buffer[21] = (byte) 0; // funnelRollers
+        buffer[22] = (byte) 0; // climberExtra
+        buffer[23] = (byte) 0; // extra1
+        buffer[24] = (byte) 0; // extra2
+        buffer[25] = (byte) 255;
 
         this.serial.write(buffer, buffer.length);
         this.serial.flush();
