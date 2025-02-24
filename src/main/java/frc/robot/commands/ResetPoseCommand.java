@@ -3,6 +3,7 @@ package frc.robot.commands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Robot;
 import frc.robot.Subsystems;
 import frc.robot.util.BSLogger;
 
@@ -24,6 +25,7 @@ public class ResetPoseCommand extends Command {
 
     @Override
     public void initialize() {
+        Robot.poseUpdates.add(pose);    // FIXME: null check
         if (pose != null) {
             BSLogger.log("ResetPoseCommand", "Resetting pose to: " + pose);
             Subsystems.swerveSubsystem.resetPose(pose);
@@ -31,6 +33,5 @@ public class ResetPoseCommand extends Command {
             BSLogger.log("RestPoseCommand", "Zeroing Pose");
             Subsystems.swerveSubsystem.tareEverything();
         }
-
     }
 }

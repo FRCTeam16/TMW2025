@@ -1,20 +1,16 @@
 package frc.robot.hci.control;
 
-import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Robot;
-import frc.robot.RobotContainer;
 import frc.robot.Subsystems;
-import frc.robot.commands.DriveRobotCentricCommand;
-import frc.robot.commands.LimelightBasedAlignmentCommand;
-import frc.robot.commands.PathfindToScoringPositionCommand;
-import frc.robot.commands.TestTargetPoseCalc;
+import frc.robot.commands.*;
 import frc.robot.commands.vision.PipelineSwitcher;
 import frc.robot.commands.vision.UpdateRobotPoseFromVision;
+import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.vision.Pipeline;
 
@@ -25,10 +21,6 @@ public class ScrimmageControls extends ControlBinding {
     private final JoystickButton shootCoral = new JoystickButton(driveStick, 1);
     private final JoystickButton alignLeft = new JoystickButton(driveStick, 3);
     private final JoystickButton alignRight = new JoystickButton(driveStick, 4);
-
-    private final Trigger alignLeftA = joystick.leftBumper();
-    private final Trigger alignRightA = joystick.rightBumper();
-
 
     private final JoystickButton intakeAlgae = new JoystickButton(steerStick, 2);
     private final JoystickButton shootAlgae = new JoystickButton(steerStick, 1);
@@ -42,10 +34,12 @@ public class ScrimmageControls extends ControlBinding {
     private final Trigger elevatorL3 = joystick.b();
     private final Trigger elevatorL4 = joystick.y();
 
-
     private final Trigger algaeHighElevator = joystick.povUp();
     private final Trigger algaeLowElevator = joystick.povDown();
 
+    private final Trigger climberUp = joystick.povLeft();
+    private final Trigger climberDown = joystick.rightBumper();
+    private final Trigger climberScore = joystick.leftBumper();
 
     private final Trigger manualAlgaeToggleButton = joystick.leftStick();
     private final Supplier<Double> manualAlgaeArmControl = deadband(joystick::getLeftY, 0.05);
@@ -81,15 +75,15 @@ public class ScrimmageControls extends ControlBinding {
         algaeHighElevator.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.AlgaeReefHigh));
         algaeLowElevator.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.AlgaeReefLow));
 
+        climberUp.onTrue(new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.UP));
+        climberDown.onTrue(new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.DOWN));
+        climberScore.onTrue(new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.CLIMB));
+
         manualAlgaeToggleButton.toggleOnTrue(Subsystems.algaeArm.openLoopCommand(manualAlgaeArmControl));
         manualElevatorToggleButton.toggleOnTrue(Subsystems.elevator.openLoopCommand(manualElevatorControl));
 
-
-        alignLeftA.whileTrue(new PathfindToScoringPositionCommand(true));
-        alignRightA.whileTrue(new PathfindToScoringPositionCommand(false));
-        alignLeft.whileTrue(new LimelightBasedAlignmentCommand(LimelightBasedAlignmentCommand.TargetSide.LEFT));
-        alignRight.whileTrue(new LimelightBasedAlignmentCommand(LimelightBasedAlignmentCommand.TargetSide.RIGHT));
-
+        alignLeft.whileTrue(PathfindFactory.pathfindToVisibleAprilTag(true));
+        alignRight.whileTrue(PathfindFactory.pathfindToVisibleAprilTag(false));
 
         robotCentric.whileTrue(new DriveRobotCentricCommand());
 

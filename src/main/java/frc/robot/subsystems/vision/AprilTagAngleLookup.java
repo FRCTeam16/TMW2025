@@ -1,13 +1,14 @@
 package frc.robot.subsystems.vision;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
-import frc.robot.Subsystems;
 
 import java.util.HashMap;
 import java.util.Optional;
 
+/**
+ * Class to lookup the facing angle of an AprilTag. Angles manually entered.
+ */
 public class AprilTagAngleLookup {
     private static final HashMap<Integer, Double> tagFacingAngles = new HashMap<>();
 
@@ -46,22 +47,5 @@ public class AprilTagAngleLookup {
     public static Optional<Angle> getFacingAngle(int aprilTagId) {
         Double angle = tagFacingAngles.get(aprilTagId);
         return angle == null ? Optional.empty() : Optional.of(Units.Degrees.of(angle));
-    }
-
-    public static Optional<Double> getPerpendicularAngle(int aprilTagId) {
-        var tagPose = Subsystems.visionSubsystem.getTagPose(aprilTagId);
-        if (tagPose.isEmpty()) {
-            return Optional.empty();
-        }
-
-        Rotation2d rotation = tagPose.get().getRotation().toRotation2d();
-        // Add 90 degrees to get perpendicular angle
-        double perpendicular = rotation.getDegrees() + 90.0;
-        // Normalize to 0-360 range
-        perpendicular = perpendicular % 360.0;
-        if (perpendicular < 0) {
-            perpendicular += 360.0;
-        }
-        return Optional.of(perpendicular);
     }
 }

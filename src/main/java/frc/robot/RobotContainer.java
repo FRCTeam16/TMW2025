@@ -54,9 +54,9 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain;
     private final SwerveSupplier swerveSupplier;
-    private JoystickMode joystickMode = ControlBindingFactory.JoystickMode.Scrimmage;
+
+    private JoystickMode joystickMode = JoystickMode.PathTesting;
     private ControlBinding controlBinding;
-    private boolean robotCentric;
 
     public static RobotContainer getInstance() {
         return new RobotContainer();

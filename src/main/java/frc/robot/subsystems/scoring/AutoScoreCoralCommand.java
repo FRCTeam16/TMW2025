@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Subsystems;
-import frc.robot.commands.auto.PathfindToPoseCommand;
+import frc.robot.commands.PathfindToPoseCommand;
 import frc.robot.subsystems.Elevator;
 
 import java.util.Optional;

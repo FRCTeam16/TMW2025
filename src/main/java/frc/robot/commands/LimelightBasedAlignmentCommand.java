@@ -76,18 +76,12 @@ public class LimelightBasedAlignmentCommand extends Command {
 
     private AngularVelocity calculateRobotRotation(VisionTypes.TargetInfo targetInfo) {
         int aprilTag = targetInfo.aprilTagID();
-//        Optional<Angle> aprilTagAngle = AprilTagAngleLookup.getFacingAngle(aprilTag);
-//        if (aprilTagAngle.isEmpty()) {
-//            return DegreesPerSecond.of(0);
-//        }
-
-        Optional<Pose3d> pose3d = Subsystems.visionSubsystem.getTagPose(aprilTag);
-        if (pose3d.isEmpty()) {
+        Optional<Pose2d> pose2d = Subsystems.aprilTagUtil.getTagPose2d(aprilTag);
+        if (pose2d.isEmpty()) {
             return DegreesPerSecond.of(0);
         }
-        Optional<Angle> aprilTagAngle = Optional.of(pose3d.get().toPose2d().getRotation().getMeasure());
-
-        final Angle robotFacingAngle = aprilTagAngle.get().plus(Degrees.of(180));
+        Angle aprilTagAngle = pose2d.get().getRotation().getMeasure();
+        final Angle robotFacingAngle = aprilTagAngle.plus(Degrees.of(180));
         // Calculate angular velocity
         return DegreesPerSecond.of(
                         Subsystems.rotationController.calculate(
