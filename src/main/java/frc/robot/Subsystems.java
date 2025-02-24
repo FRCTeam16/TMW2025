@@ -139,6 +139,7 @@ public class Subsystems {
         SmartDashboard.putData("Subsystems/Vision", visionSubsystem);
         SmartDashboard.putData("Subsystems/Score", scoreSubsystem);
         SmartDashboard.putData("Subsystems/Funnel", funnelSubsystem);
+        SmartDashboard.putData("Subsystems/AprilTagUtil", aprilTagUtil);
 
         SmartDashboard.putData("CommandScheduler", CommandScheduler.getInstance());
     }

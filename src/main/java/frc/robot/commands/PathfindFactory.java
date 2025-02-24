@@ -3,6 +3,7 @@ package frc.robot.commands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Subsystems;
@@ -11,7 +12,7 @@ import frc.robot.subsystems.vision.VisionTypes;
 import java.util.Set;
 
 public class PathfindFactory {
-
+    static Alert noPoseAlert = new Alert("PathfindFactory: Unable to determine pose", Alert.AlertType.kError);
     static StructPublisher<Pose2d> tagPublisher = NetworkTableInstance.getDefault()
             .getStructTopic("Pathing/tagPose", Pose2d.struct).publish();
     static StructPublisher<Pose2d> targetPublisher = NetworkTableInstance.getDefault()
@@ -34,10 +35,12 @@ public class PathfindFactory {
         return Commands.defer(() -> {
             VisionTypes.TargetInfo targetInfo = Subsystems.visionSubsystem.getTargetInfo().orElse(null);
             if (targetInfo == null) {
+                noPoseAlert.set(true);
                 return Commands.none();
             }
             Pose2d targetPose = Subsystems.aprilTagUtil.getScoringPoseForTag(targetInfo.aprilTagID(), isLeft).orElse(null);
             if (targetPose == null) {
+                noPoseAlert.set(true);
                 return Commands.none();
             }
             tagPublisher.set(targetPose);

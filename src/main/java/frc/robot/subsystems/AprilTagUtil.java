@@ -11,8 +11,8 @@ import frc.robot.subsystems.scoring.TargetPose;
 import java.util.Optional;
 
 public class AprilTagUtil implements Sendable {
-    private double scoringDistance = -1.0; // robot meters from tag
-    private double offsetDistance = 0.25; // robot horizontal offset from tag
+    private double scoringDistance = -0.41; // robot meters from tag
+    private double offsetDistance = 0.20; // robot horizontal offset from tag
 
 
     private final AprilTagFieldLayout fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);

@@ -13,6 +13,7 @@ import frc.robot.commands.vision.UpdateRobotPoseFromVision;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.vision.Pipeline;
+import frc.robot.util.BSMath;
 
 import java.util.function.Supplier;
 
@@ -42,7 +43,7 @@ public class ScrimmageControls extends ControlBinding {
     private final Trigger climberScore = joystick.leftBumper();
 
     private final Trigger manualAlgaeToggleButton = joystick.leftStick();
-    private final Supplier<Double> manualAlgaeArmControl = deadband(joystick::getLeftY, 0.05);
+    private final Supplier<Double> manualAlgaeArmControl = algaeArmDampener(); // deadband(joystick::getLeftY, 0.05);
     private final Trigger manualElevatorToggleButton = joystick.rightStick();
     private final Supplier<Double> manualElevatorControl = Robot.isReal() ?
             deadband(joystick::getRightY, 0.05) :
@@ -109,5 +110,11 @@ public class ScrimmageControls extends ControlBinding {
 
         resetPose.whileTrue(UpdateRobotPoseFromVision.resetFromMainPoseEstimator());
 
+    }
+
+    Supplier<Double> algaeArmDampener() {
+        Supplier<Double> dampener = () ->
+                BSMath.map(joystick.getLeftY(), -1, 1, -0.1, 0.1);
+        return deadband(dampener, 0.05);
     }
 }

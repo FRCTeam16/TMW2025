@@ -16,6 +16,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -55,7 +56,7 @@ public class RobotContainer {
     public final CommandSwerveDrivetrain drivetrain;
     private final SwerveSupplier swerveSupplier;
 
-    private JoystickMode joystickMode = JoystickMode.PathTesting;
+    private JoystickMode joystickMode = JoystickMode.Scrimmage;
     private ControlBinding controlBinding;
 
     public static RobotContainer getInstance() {
@@ -80,6 +81,8 @@ public class RobotContainer {
             drivetrain.resetPose(new Pose2d(3, 3, Rotation2d.fromDegrees(180)));
 //            drivetrain.setOperatorPerspectiveForward(Rotation2d.fromDegrees(0));
         }
+
+        SmartDashboard.putString("Joystick Mode", this.joystickMode.toString());
 
     }
 
