@@ -1,7 +1,6 @@
 package frc.robot.commands.dms.MotorTestDMS;
 import frc.robot.Subsystems;
 import frc.robot.subsystems.DMS.DMSDataCollector;
-import com.ctre.phoenix6.hardware.core.CoreTalonFX;
 
 class RunAlgaeArmTestCommand extends AbstractRunMotorTest {
 
@@ -18,13 +17,14 @@ class RunAlgaeArmTestCommand extends AbstractRunMotorTest {
     @Override
         protected
         void stopMotor() {
-            Subsystems.algaeArm.openLoopUpCommand();
+            Subsystems.algaeArm.openLoopDownCommand();
         }
 
     @Override
         protected
         double[] getMotorCurrents() {
-            return new double[]{((TalonFX) Subsystems.algaeArm.getMotorPosition()).getStatorCurrent().getValueAsDouble()};
+           // return new double[]{((TalonFX) Subsystems.algaeArm.getMotorPosition()).getStatorCurrent().getValueAsDouble()};
+           return null;
         }
 
   

@@ -12,13 +12,13 @@ class RunAlgaeIntakeTestCommand extends AbstractRunMotorTest {
     @Override
         protected
         void startMotor() {
-            Subsystems.algaeIntake.setPercentOutput(0.5); 
+            Subsystems.algaeIntake.intakeCommand(); 
         }
 
     @Override
         protected
         void stopMotor() {
-            Subsystems.algaeIntake.setPercentOutput(0.0);
+            Subsystems.algaeIntake.stopCommand();
         }
 
     @Override

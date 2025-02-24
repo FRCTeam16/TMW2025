@@ -1,7 +1,6 @@
 package frc.robot.commands.dms.MotorTestDMS;
 import frc.robot.Subsystems;
 import frc.robot.subsystems.DMS.DMSDataCollector;
-import com.ctre.phoenix6.hardware.core.CoreTalonFX;
 
 class RunElevatorTestCommand extends AbstractRunMotorTest {
 
@@ -24,7 +23,8 @@ class RunElevatorTestCommand extends AbstractRunMotorTest {
     @Override
         protected
         double[] getMotorCurrents() {
-            return new double[]{(() Subsystems.algaeArm.getMotorPosition()).getStatorCurrent().getValueAsDouble()};
+          //  return new double[]{(() Subsystems.algaeArm.getMotorPosition()).getStatorCurrent().getValueAsDouble()};
+        return null;
         }
 
   
