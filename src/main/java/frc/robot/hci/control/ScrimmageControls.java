@@ -40,7 +40,10 @@ public class ScrimmageControls extends ControlBinding {
 
     private final Trigger climberUp = joystick.povLeft();
     private final Trigger climberDown = joystick.rightBumper();
-    private final Trigger climberScore = joystick.leftBumper();
+    private final Trigger climberPickup = joystick.leftBumper();
+    private final Trigger climberClimb = joystick.povRight();
+
+    private final Trigger assignPose = joystick.back();
 
     private final Trigger manualAlgaeToggleButton = joystick.leftStick();
     private final Supplier<Double> manualAlgaeArmControl = algaeArmDampener(); // deadband(joystick::getLeftY, 0.05);
@@ -78,7 +81,8 @@ public class ScrimmageControls extends ControlBinding {
 
         climberUp.onTrue(new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.UP));
         climberDown.onTrue(new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.DOWN));
-        climberScore.onTrue(new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.PICKUP));
+        climberPickup.onTrue(new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.PICKUP));
+        climberClimb.onTrue(new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.CLIMB));
 
         manualAlgaeToggleButton.toggleOnTrue(Subsystems.algaeArm.openLoopCommand(manualAlgaeArmControl));
         manualElevatorToggleButton.toggleOnTrue(Subsystems.elevator.openLoopCommand(manualElevatorControl));
@@ -87,6 +91,11 @@ public class ScrimmageControls extends ControlBinding {
         alignRight.whileTrue(PathfindFactory.pathfindToVisibleAprilTag(false));
 
         robotCentric.whileTrue(new DriveRobotCentricCommand());
+
+        assignPose.onTrue(
+                UpdateRobotPoseFromVision.resetFromMainPoseEstimator().ignoringDisable(true)
+        );
+
 
         bindCommonButtons();
         bindDebugControls();

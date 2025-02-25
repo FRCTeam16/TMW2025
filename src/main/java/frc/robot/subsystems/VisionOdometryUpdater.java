@@ -58,7 +58,7 @@ public class VisionOdometryUpdater implements Sendable {
                 // TODO add stdev for drive and vision measurements
         );
         this.visionPoseEstimators = visionSubsystem.getLimelights().stream()
-                .map(limelight -> new LimelightPoseEstimator(limelight.getName(), true))
+                .map(limelight -> new LimelightPoseEstimator(limelight.getName(), false))
                 .toList();
 
         this.posePublisher = NetworkTableInstance.getDefault()

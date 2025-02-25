@@ -1,10 +1,8 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.configs.MotorOutputConfigs;
-import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -19,6 +17,7 @@ public class Climber extends SubsystemBase implements Lifecycle {
     private final TalonFX climberMotor = new TalonFX(Robot.robotConfig.getCanID("climberMotor"));
     private final DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
     private final PositionVoltage positionVoltage = new PositionVoltage(0).withSlot(0).withEnableFOC(true);
+    private final MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0).withSlot(0).withEnableFOC(true);
 
     private double openLoopMotorOutput = 0.5;
     private double currentSetpoint = 0;
@@ -35,10 +34,16 @@ public class Climber extends SubsystemBase implements Lifecycle {
                 .withForwardSoftLimitThreshold(75)
                 .withReverseSoftLimitEnable(true)
                 .withReverseSoftLimitThreshold(-20);
+        MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs()
+                .withMotionMagicAcceleration(5)
+                .withMotionMagicCruiseVelocity(5);
+
         climberConfiguration
+                .withMotionMagic(motionMagicConfigs)
                 .withMotorOutput(motorOutputConfigs)
                 .withSlot0(slot0Configs)
                 .withSoftwareLimitSwitch(softwareLimitSwitchConfigs);
+
         climberMotor.getConfigurator().apply(climberConfiguration);
         this.setDefaultCommand(this.defaultHoldPositionCommand());
     }
@@ -69,7 +74,8 @@ public class Climber extends SubsystemBase implements Lifecycle {
     private void moveToPosition(double position) {
         this.currentSetpoint = position;
         climberMotor.setControl(
-                positionVoltage.withPosition(position).withVelocity(setpointVelocity));
+                motionMagicVoltage.withPosition(position));
+//                positionVoltage.withPosition(position).withVelocity(setpointVelocity));
     }
 
     public Command openLoopUpDefault() {
@@ -98,7 +104,7 @@ public class Climber extends SubsystemBase implements Lifecycle {
 
     public enum ClimberPosition {
         UP(0),
-        CLIMB(-15),
+        CLIMB(-40),
         DOWN(75),
         PICKUP(40);
 

@@ -47,7 +47,7 @@ public class RobotContainer {
     private final Joystick steerStick = Controls.right;
     private final CommandXboxController joystick = Controls.joystick;
 
-    private final JoystickButton visionAssistButton = new JoystickButton(driveStick, 2);
+//    private final JoystickButton visionAssistButton = new JoystickButton(driveStick, 2);
 
     public final CommandSwerveDrivetrain drivetrain;
     private final SwerveSupplier swerveSupplier;
@@ -80,7 +80,7 @@ public class RobotContainer {
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
                 drivetrain.applyRequest(() -> {
-                if(!visionAssistButton.getAsBoolean()){ // use default swerve request unless visionAssist button pressed
+                if(true/*!visionAssistButton.getAsBoolean()*/){ // use default swerve request unless visionAssist button pressed
                     return drive.withVelocityX(swerveSupplier.supplyX()) // Drive forward with negative Y (forward)
                         .withVelocityY(swerveSupplier.supplyY()) // Drive left with negative X (left)
                         .withRotationalRate(swerveSupplier.supplyRotationalRate()); // Drive counterclockwise with negative X (left)
