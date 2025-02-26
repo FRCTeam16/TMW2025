@@ -43,9 +43,80 @@ public class PathfindFactory {
                 noPoseAlert.set(true);
                 return Commands.none();
             }
-            tagPublisher.set(targetPose);
             targetPublisher.set(targetPose);
             return new PathfindToPoseCommand(targetPose);
+        }, Set.of(Subsystems.swerveSubsystem));
+    }
+
+    public static Command pidDriveToAprilTag(int aprilTagId, boolean isLeft) {
+        return Commands.defer(() -> {
+            Pose2d tagPose = Subsystems.aprilTagUtil.getTagPose2d(aprilTagId).orElse(null);
+            Pose2d targetPose = Subsystems.aprilTagUtil.getScoringPoseForTag(aprilTagId, isLeft).orElse(null);
+            if (targetPose == null) {
+                noPoseAlert.set(true);
+                return Commands.none();
+            }
+            tagPublisher.set(tagPose);
+            targetPublisher.set(targetPose);
+            return new DriveToPoseCommand(targetPose);
+        }, Set.of(Subsystems.swerveSubsystem));
+    }
+
+
+    public static Command pidDriveToVisibleAprilTag(boolean isLeft) {
+        return Commands.defer(() -> {
+            VisionTypes.TargetInfo targetInfo = Subsystems.visionSubsystem.getTargetInfo().orElse(null);
+            if (targetInfo == null) {
+                noPoseAlert.set(true);
+                return Commands.none();
+            }
+            Pose2d tagPose = Subsystems.aprilTagUtil.getTagPose2d(targetInfo.aprilTagID()).orElse(null);
+            Pose2d targetPose = Subsystems.aprilTagUtil.getScoringPoseForTag(targetInfo.aprilTagID(), isLeft).orElse(null);
+            if (targetPose == null) {
+                noPoseAlert.set(true);
+                return Commands.none();
+            }
+            tagPublisher.set(tagPose);
+            targetPublisher.set(targetPose);
+            return new DriveToPoseCommand(targetPose);
+        }, Set.of(Subsystems.swerveSubsystem));
+    }
+
+    public static Command pidDriveProfiledToAprilTag(boolean isLeft) {
+        return Commands.defer(() -> {
+            VisionTypes.TargetInfo targetInfo = Subsystems.visionSubsystem.getTargetInfo().orElse(null);
+            if (targetInfo == null) {
+                noPoseAlert.set(true);
+                return Commands.none();
+            }
+            Pose2d tagPose = Subsystems.aprilTagUtil.getTagPose2d(targetInfo.aprilTagID()).orElse(null);
+            Pose2d targetPose = Subsystems.aprilTagUtil.getScoringPoseForTag(targetInfo.aprilTagID(), isLeft).orElse(null);
+            if (targetPose == null) {
+                noPoseAlert.set(true);
+                return Commands.none();
+            }
+            tagPublisher.set(tagPose);
+            targetPublisher.set(targetPose);
+            return new DriveToPoseProfiledCommand(targetPose);
+        }, Set.of(Subsystems.swerveSubsystem));
+    }
+
+    public static Command limelightDriveToVisibleAprilTag(boolean isLeft) {
+        return Commands.defer(() -> {
+            VisionTypes.TargetInfo targetInfo = Subsystems.visionSubsystem.getTargetInfo().orElse(null);
+            if (targetInfo == null) {
+                noPoseAlert.set(true);
+                return Commands.none();
+            }
+            Pose2d tagPose = Subsystems.aprilTagUtil.getTagPose2d(targetInfo.aprilTagID()).orElse(null);
+            Pose2d targetPose = Subsystems.aprilTagUtil.getScoringPoseForTag(targetInfo.aprilTagID(), isLeft).orElse(null);
+            if (targetPose == null) {
+                noPoseAlert.set(true);
+                return Commands.none();
+            }
+            tagPublisher.set(tagPose);
+            targetPublisher.set(targetPose);
+            return new LimelightBasedAlignmentCommand(isLeft);
         }, Set.of(Subsystems.swerveSubsystem));
     }
 }

@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.async.AsyncManager;
 import frc.robot.auto.AutoManager;
 import frc.robot.subsystems.Intake.FunnelSubsystem;
+import frc.robot.subsystems.pose.PoseManager;
 import frc.robot.subsystems.scoring.ScoreSubsystem;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.DMS.LEDSubsystem;
@@ -48,8 +49,10 @@ public class Subsystems {
     // Utility classes
     //
     public static RotationController rotationController;
+    public static TranslationController translationController;
     public static AsyncManager asyncManager;
     public static AprilTagUtil aprilTagUtil;
+    public static PoseManager poseManager;
 
     // Warning: This must be created after everything else to ensure all subsystems
     // are registered
@@ -103,6 +106,7 @@ public class Subsystems {
 
     private void createUtilitySubsystems() {
         rotationController = new RotationController();
+        translationController = new TranslationController();
 
         asyncManager = new AsyncManager();
         asyncManager.start();
@@ -115,6 +119,8 @@ public class Subsystems {
         visionOdometryUpdater = new VisionOdometryUpdater(visionSubsystem, swerveSubsystem);
 
         scoreSubsystem = new ScoreSubsystem();
+
+        poseManager = new PoseManager();
     }
 
     private void registerLifecycleSubsystems() {
@@ -140,6 +146,9 @@ public class Subsystems {
         SmartDashboard.putData("Subsystems/Score", scoreSubsystem);
         SmartDashboard.putData("Subsystems/Funnel", funnelSubsystem);
         SmartDashboard.putData("Subsystems/AprilTagUtil", aprilTagUtil);
+        SmartDashboard.putData("Subsystems/PoseManager", poseManager);
+        SmartDashboard.putData("Subsystems/RotationController", rotationController);
+        SmartDashboard.putData("Subsystems/TranslationController", translationController);
 
         SmartDashboard.putData("CommandScheduler", CommandScheduler.getInstance());
     }

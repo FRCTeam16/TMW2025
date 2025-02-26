@@ -12,6 +12,8 @@ import frc.robot.Subsystems;
 import frc.robot.commands.PathfindFactory;
 import frc.robot.commands.ResetPoseCommand;
 import frc.robot.commands.vision.UpdateRobotPoseFromVision;
+import frc.robot.subsystems.pose.PoseChangeRequest;
+import frc.robot.util.GameInfo;
 
 public class PathTestingControls extends ControlBinding {
 
@@ -23,8 +25,11 @@ public class PathTestingControls extends ControlBinding {
     public void bindControls() {
         joystick.a().whileTrue(PathfindFactory.pathfindToAprilTag(7, true));
         joystick.b().whileTrue(PathfindFactory.pathfindToAprilTag(7, false));
-        joystick.x().whileTrue(PathfindFactory.pathfindToAprilTag(8, false));
-        joystick.y().whileTrue(PathfindFactory.pathfindToAprilTag(10, true));
+
+        joystick.x().whileTrue(PathfindFactory.pidDriveToVisibleAprilTag( false));
+        joystick.y().whileTrue(PathfindFactory.pidDriveToVisibleAprilTag( true));
+
+        SmartDashboard.putData("PID Drive to April Tag 7", PathfindFactory.pidDriveToAprilTag(7, true));
 
         new JoystickButton(driveStick, 3).whileTrue(
                 PathfindFactory.pathfindToVisibleAprilTag(true));
@@ -32,22 +37,23 @@ public class PathTestingControls extends ControlBinding {
                 PathfindFactory.pathfindToVisibleAprilTag(false));
 
 
-
-
-        joystick.leftBumper().onTrue(Commands.runOnce(() -> {
-            Pose2d resetPose = new Pose2d(7, 6, Rotation2d.fromDegrees(0));
-            Robot.poseUpdates.add(resetPose);
+        joystick.rightBumper().onTrue(Commands.runOnce(() -> {
+            if (GameInfo.isBlueAlliance()) {
+                Subsystems.swerveSubsystem.getPigeon2().setYaw(180);
+                Pose2d resetPose = new Pose2d(7, 3, Rotation2d.fromDegrees(180));
+                Subsystems.poseManager.pushRequest(new PoseChangeRequest(resetPose));
+            }
+            if (GameInfo.isRedAlliance()) {
+                Subsystems.swerveSubsystem.getPigeon2().setYaw(0);
+                Pose2d resetPose = new Pose2d(8, 7, Rotation2d.fromDegrees(0));
+                Subsystems.poseManager.pushRequest(new PoseChangeRequest(resetPose, true));
+            }
         }));
 
         joystick.leftTrigger().onTrue(
                 UpdateRobotPoseFromVision.resetFromMainPoseEstimator().ignoringDisable(true)
         );
 
-        SmartDashboard.putData("Test Reset Pose", new ResetPoseCommand());
-        Subsystems.visionSubsystem.getLimelights().forEach(limelight ->
-                SmartDashboard.putData("Test Reset Pose from " + limelight.getName(),
-                        UpdateRobotPoseFromVision.resetFromLimelightPoseEstimator(limelight.getName())));
-
-
+        SmartDashboard.putData("Test Reset Pose Tare", new ResetPoseCommand());
     }
 }

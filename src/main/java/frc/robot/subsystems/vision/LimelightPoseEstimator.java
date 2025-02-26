@@ -33,7 +33,6 @@ public class LimelightPoseEstimator implements Sendable {
     public LimelightPoseEstimator(String limelightName, boolean useMegaTag2) {
         this.limelightName = limelightName;
         this.useMegaTag2 = useMegaTag2;
-
         this.publisher = NetworkTableInstance.getDefault()
                 .getStructTopic("LimelightPoseEstimator/" + limelightName + "/pose", Pose2d.struct).publish();
     }

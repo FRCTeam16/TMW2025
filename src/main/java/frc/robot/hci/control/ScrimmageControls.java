@@ -2,6 +2,7 @@ package frc.robot.hci.control;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -25,8 +26,7 @@ public class ScrimmageControls extends ControlBinding {
 
     private final JoystickButton intakeAlgae = new JoystickButton(steerStick, 2);
     private final JoystickButton shootAlgae = new JoystickButton(steerStick, 1);
-
-    private final JoystickButton robotCentric = new JoystickButton(steerStick, 3);
+//    private final JoystickButton robotCentric = new JoystickButton(steerStick, 3);
 
 
     private final Trigger elevatorDown = joystick.rightTrigger();
@@ -43,7 +43,7 @@ public class ScrimmageControls extends ControlBinding {
     private final Trigger climberPickup = joystick.leftBumper();
     private final Trigger climberClimb = joystick.povRight();
 
-    private final Trigger assignPose = joystick.back();
+    private final Trigger resetPose = joystick.back();
 
     private final Trigger manualAlgaeToggleButton = joystick.leftStick();
     private final Supplier<Double> manualAlgaeArmControl = algaeArmDampener(); // deadband(joystick::getLeftY, 0.05);
@@ -52,8 +52,6 @@ public class ScrimmageControls extends ControlBinding {
             deadband(joystick::getRightY, 0.05) :
             deadband(joystick::getRightTriggerAxis, 0.05);  // simulation mode is flipped
 
-    private final Trigger resetPose = joystick.leftTrigger();
-
 
     public ScrimmageControls(Joystick driveStick, Joystick steerStick, CommandXboxController joystick) {
         super(driveStick, steerStick, joystick);
@@ -61,8 +59,6 @@ public class ScrimmageControls extends ControlBinding {
 
     @Override
     public void bindControls() {
-        // reset the field-centric heading on left bumper press
-        joystick.leftBumper().onTrue(Subsystems.swerveSubsystem.runOnce(Subsystems.swerveSubsystem::seedFieldCentric));
 
         intakeCoral.whileTrue(Subsystems.coralIntake.intakeCoralCommand());
         shootCoral.whileTrue(Subsystems.coralIntake.shootCoralCommand());
@@ -87,12 +83,12 @@ public class ScrimmageControls extends ControlBinding {
         manualAlgaeToggleButton.toggleOnTrue(Subsystems.algaeArm.openLoopCommand(manualAlgaeArmControl));
         manualElevatorToggleButton.toggleOnTrue(Subsystems.elevator.openLoopCommand(manualElevatorControl));
 
-        alignLeft.whileTrue(PathfindFactory.pathfindToVisibleAprilTag(true));
-        alignRight.whileTrue(PathfindFactory.pathfindToVisibleAprilTag(false));
+        alignLeft.whileTrue(PathfindFactory.pidDriveToVisibleAprilTag(true));
+        alignRight.whileTrue(PathfindFactory.pidDriveToVisibleAprilTag(false));
 
-        robotCentric.whileTrue(new DriveRobotCentricCommand());
+//        robotCentric.whileTrue(new DriveRobotCentricCommand());
 
-        assignPose.onTrue(
+        resetPose.onTrue(
                 UpdateRobotPoseFromVision.resetFromMainPoseEstimator().ignoringDisable(true)
         );
 
@@ -104,11 +100,16 @@ public class ScrimmageControls extends ControlBinding {
     void bindCommonButtons() {
         SmartDashboard.putData("Reset Pose From Vision",
                 UpdateRobotPoseFromVision.resetFromMainPoseEstimator().ignoringDisable(true));
-//        SmartDashboard.putData("Tare Swerve Pose",
-//                () -> Subsystems.swerveSubsystem.tareEverything());
+
+        SmartDashboard.putData("Zero Yaw from Alliance",
+                new ZeroYawCommand().ignoringDisable(true));
 
         SmartDashboard.putData("Set LLs to Apriltag", new PipelineSwitcher(Pipeline.April));
         SmartDashboard.putData("Set LLs to Viewfinder", new PipelineSwitcher(Pipeline.View));
+
+        // reset the field-centric heading on left bumper press
+        SmartDashboard.putData("Seed Field Centric", Commands.runOnce(Subsystems.poseManager::requestSeedFieldCentric)
+                .ignoringDisable(true));
     }
 
     void bindDebugControls() {
@@ -117,8 +118,6 @@ public class ScrimmageControls extends ControlBinding {
 
         SmartDashboard.putData("TestTargetCalc", new TestTargetPoseCalc().ignoringDisable(true));
 
-        resetPose.onTrue(
-                UpdateRobotPoseFromVision.resetFromMainPoseEstimator().ignoringDisable(true));
 
     }
 

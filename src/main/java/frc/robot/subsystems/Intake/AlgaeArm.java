@@ -2,6 +2,7 @@ package frc.robot.subsystems.Intake;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -58,9 +59,11 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
         // TODO: Consider a method to allow pass in of translated angles?
 //        BSLogger.log("AlgaeArm", "Setting position to: " + position + " | Estimated angle: " + getEstimatedAngle());
         this.targetPosition = position;
-        algaeArmMotor.setControl(
-                positionVoltage.withPosition(position)
-                        .withFeedForward(calculateGravityCompensation(getEstimatedAngle())));
+        // TODO: Check for near zero here and don't do anything, assume we are held
+//        algaeArmMotor.setControl(
+//                positionVoltage.withPosition(position)
+//                        .withFeedForward(calculateGravityCompensation(getEstimatedAngle())));
+        algaeArmMotor.setControl(new NeutralOut());
     }
 
     /**

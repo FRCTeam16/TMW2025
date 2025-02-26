@@ -1,11 +1,9 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.util.sendable.Sendable;
@@ -14,10 +12,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Subsystems;
 import frc.robot.subsystems.vision.LimelightPoseEstimator;
 import frc.robot.subsystems.vision.VisionSubsystem;
-import frc.robot.util.BSMath;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Class that updates the odometry of the robot using vision measurements.
@@ -55,20 +53,19 @@ public class VisionOdometryUpdater implements Sendable {
                 drivetrain.getPigeon2().getRotation2d(),
                 drivetrain.getState().ModulePositions,
                 drivetrain.getState().Pose
-                // TODO add stdev for drive and vision measurements
         );
         this.visionPoseEstimators = visionSubsystem.getLimelights().stream()
-                .map(limelight -> new LimelightPoseEstimator(limelight.getName(), false))
+                .map(limelight -> new LimelightPoseEstimator(limelight.getName(), true))
                 .toList();
 
         this.posePublisher = NetworkTableInstance.getDefault()
                 .getStructTopic("VisionOdometryUpdater/Pose", Pose2d.struct).publish();
 
-        this.visionPoseEstimators.forEach(visionPoseEstimator -> 
-        SmartDashboard.putData("VisionPoseEstimator-"+visionPoseEstimator.getName(), visionPoseEstimator));
+        this.visionPoseEstimators.forEach(visionPoseEstimator ->
+                SmartDashboard.putData("VisionPoseEstimator-" + visionPoseEstimator.getName(), visionPoseEstimator));
 
         // Defaults
-        Subsystems.swerveSubsystem.setVisionMeasurementStdDevs(VecBuilder.fill(0.5, 0.5, 99)); // Example tuning values
+        Subsystems.swerveSubsystem.setVisionMeasurementStdDevs(VecBuilder.fill(0.7, 0.7, 999999)); // Example tuning values
     }
 
     /**
@@ -77,7 +74,7 @@ public class VisionOdometryUpdater implements Sendable {
      * This method should be called periodically to ensure the robot's pose estimate is up-to-date.
      */
     public void updateOdometry() {
-        Rotation2d robotRotation2d = drivetrain.getPigeon2().getRotation2d();
+        Rotation2d robotRotation2d = drivetrain.getState().Pose.getRotation();
 
         // Update main pose odometry estimation
         mainPoseEstimator.update(
@@ -90,11 +87,10 @@ public class VisionOdometryUpdater implements Sendable {
                 .flatMap(Optional::stream)
                 .filter(pose -> pose.avgTagDist < MAX_TAG_DIST_METERS)
                 .forEach(pose -> {
-                    double visionStdDev = BSMath.map(pose.avgTagDist, 0, MAX_TAG_DIST_METERS, 0.3, 0.9);
-                    Vector<N3> vector = VecBuilder.fill(visionStdDev, visionStdDev, 99);
-                    mainPoseEstimator.addVisionMeasurement(pose.pose, pose.timestampSeconds, vector);
-//                    mainPoseEstimator.addVisionMeasurement(pose.pose, pose.timestampSeconds);
-
+//                    double visionStdDev = BSMath.map(pose.avgTagDist, 0, MAX_TAG_DIST_METERS, 0.3, 0.9);
+//                    Vector<N3> vector = VecBuilder.fill(visionStdDev, visionStdDev, 99);
+//                    mainPoseEstimator.addVisionMeasurement(pose.pose, pose.timestampSeconds, vector);
+                    mainPoseEstimator.addVisionMeasurement(pose.pose, pose.timestampSeconds);
                 });
 
         // Publish pose to network tables
@@ -107,8 +103,10 @@ public class VisionOdometryUpdater implements Sendable {
     }
 
     public Pose2d getEstimatedPose() {
-         return mainPoseEstimator.getEstimatedPosition();
+        return mainPoseEstimator.getEstimatedPosition();
     }
+
+
 
     public List<LimelightPoseEstimator> getVisionPoseEstimators() {
         return visionPoseEstimators;
@@ -120,8 +118,18 @@ public class VisionOdometryUpdater implements Sendable {
         sendableBuilder.addDoubleProperty("MainPose/X", () -> mainPoseEstimator.getEstimatedPosition().getX(), null);
         sendableBuilder.addDoubleProperty("MainPose/Y", () -> mainPoseEstimator.getEstimatedPosition().getY(), null);
         sendableBuilder.addDoubleProperty("MainPose/Rotation", () -> mainPoseEstimator.getEstimatedPosition().getRotation().getDegrees(), null);
-    
+
     }
 
 
+    public Optional<Double> getTargetDistance() {
+        Rotation2d robotRotation2d = drivetrain.getState().Pose.getRotation();
+        double averageDistance = visionPoseEstimators.stream()
+                .map(visionPoseEstimator -> visionPoseEstimator.estimatePose(robotRotation2d.getMeasure()))
+                .flatMap(Optional::stream)
+                .mapToDouble(pe -> pe.avgTagDist)
+                .average()
+                .orElse(99999);
+        return averageDistance == 99999 ? Optional.empty() : Optional.of(averageDistance);
+    }
 }

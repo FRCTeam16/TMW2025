@@ -25,9 +25,7 @@ public class Robot extends TimedRobot {
 
   public static final RobotConfig robotConfig = RobotConfig.getInstance();
   private final RobotContainer m_robotContainer;
-  public static Queue<Pose2d> poseUpdates = new java.util.LinkedList<>();
 
-  private Alert resetPoseAlert = new Alert("Reset robot pose", Alert.AlertType.kInfo);
 
   public Robot() {
     DataLogManager.start();
@@ -43,12 +41,15 @@ public class Robot extends TimedRobot {
 
     // Set up starting config
     if (GameInfo.isRedAlliance()) {
-      Subsystems.swerveSubsystem.getPigeon2().setYaw(0);
-      Subsystems.swerveSubsystem.resetPose(new Pose2d(14, 7.3, Rotation2d.fromDegrees(0)));
+      BSLogger.log("Robot", "robotInit:: setting pose for red");
+//      Subsystems.swerveSubsystem.getPigeon2().setYaw(0);
+//      Subsystems.swerveSubsystem.resetPose(new Pose2d(14, 7.3, Rotation2d.fromDegrees(0)));
     } else if (GameInfo.isBlueAlliance()){
-      Subsystems.swerveSubsystem.resetPose(new Pose2d(8, 3, Rotation2d.fromDegrees(180)));
-      Subsystems.swerveSubsystem.getPigeon2().setYaw(180);
+      BSLogger.log("Robot", "robotInit:: setting pose for red");
+//      Subsystems.swerveSubsystem.getPigeon2().setYaw(0);
+//      Subsystems.swerveSubsystem.resetPose(new Pose2d(8, 3, Rotation2d.fromDegrees(0)));
     } else {
+      BSLogger.log("Robot", "robotInit:: setting pose for unknown alliance");
       Subsystems.swerveSubsystem.resetPose(new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
     }
   }
@@ -57,17 +58,8 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
     SmartDashboard.putNumber("Yaw", Subsystems.swerveSubsystem.getPigeon2().getYaw().getValueAsDouble() % 360.0);
-
-    // Performs pose resets in the main thread to avoid locking issues
-    if (!poseUpdates.isEmpty()) {
-      Pose2d pose = poseUpdates.poll();
-      if (pose == null) {
-        return;
-      }
-      BSLogger.log("Robot", "Resetting pose to: " + pose);
-//      resetPoseAlert.set(true);
-      Subsystems.swerveSubsystem.resetPose(pose);
-    }
+    SmartDashboard.putNumber("Rot", Subsystems.swerveSubsystem.getState().Pose.getRotation().getDegrees());
+    Subsystems.poseManager.update();
   }
 
   @Override

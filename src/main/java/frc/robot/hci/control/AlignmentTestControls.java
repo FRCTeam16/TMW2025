@@ -12,7 +12,7 @@ public class AlignmentTestControls extends ControlBinding {
 
     @Override
     public void bindControls() {
-        joystick.x().whileTrue(new LimelightBasedAlignmentCommand(LimelightBasedAlignmentCommand.TargetSide.LEFT));
-        joystick.b().whileTrue(new LimelightBasedAlignmentCommand(LimelightBasedAlignmentCommand.TargetSide.RIGHT));
+        joystick.x().whileTrue(new LimelightBasedAlignmentCommand(true));
+        joystick.b().whileTrue(new LimelightBasedAlignmentCommand(false));
     }
 }

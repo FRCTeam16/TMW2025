@@ -4,17 +4,15 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.Subsystems;
-import frc.robot.subsystems.scoring.TargetPose;
-import frc.robot.subsystems.vision.AprilTagAngleLookup;
 import frc.robot.subsystems.vision.LimelightHelpers;
 import frc.robot.subsystems.vision.VisionTypes;
+import frc.robot.util.BSLogger;
 import frc.robot.util.PIDHelper;
 
 import java.util.Optional;
@@ -24,27 +22,24 @@ import static frc.robot.Constants.MaxAngularRate;
 
 public class LimelightBasedAlignmentCommand extends Command {
     private final SwerveRequest.RobotCentric alignDrive = new SwerveRequest.RobotCentric();
-    PIDController translationPID = new PIDController(0.1, 0, 0);
-    PIDHelper translationPIDHelper = new PIDHelper("AlignmentTest");
-
     private final Angle targetAngle;    // offset angle to align
     private final String selectedLimelightName;
-    private final TargetSide targetSide;
+    PIDController translationPID = Subsystems.translationController;
+    PIDHelper translationPIDHelper = new PIDHelper("AlignmentTest");
 
-    public LimelightBasedAlignmentCommand(TargetSide targetSide) {
+    public LimelightBasedAlignmentCommand(boolean isLeft) {
         this.addRequirements(Subsystems.swerveSubsystem);
-        this.targetSide = targetSide;
-        if (targetSide == TargetSide.LEFT) {
+        if (isLeft) {
             this.targetAngle = Degrees.of(18.0);
             this.selectedLimelightName = "limelight-left";
-        } else if (targetSide == TargetSide.RIGHT) {
+        } else {
             this.targetAngle = Degrees.of(-25.0);
             this.selectedLimelightName = "limelight-right";
-        } else {
-            throw new IllegalArgumentException("Invalid target side");
         }
+    }
 
-        this.translationPIDHelper.initialize(0.1, 0, 0, 0, 0, 0);
+    @Override
+    public void initialize() {
         this.translationPID.setTolerance(0.5);
     }
 
@@ -52,6 +47,7 @@ public class LimelightBasedAlignmentCommand extends Command {
     public void execute() {
         Optional<VisionTypes.TargetInfo> targetInfo = Subsystems.visionSubsystem.getTargetInfo();
         if (targetInfo.isEmpty()) {
+            BSLogger.log("LimelightAlign", "No target");
             noopDrive();
             return;
         }
@@ -65,7 +61,6 @@ public class LimelightBasedAlignmentCommand extends Command {
                         .withRotationalRate(rotationRate)
                         .withVelocityY(yDriveSpeed));
     }
-
 
     private void noopDrive() {
         Subsystems.swerveSubsystem.setControl(
@@ -100,19 +95,14 @@ public class LimelightBasedAlignmentCommand extends Command {
         translationPIDHelper.updatePIDController(translationPID);
         var errorDegrees = Degrees.of(LimelightHelpers.getTX(this.selectedLimelightName));
         LinearVelocity maxRobotSpeed = MetersPerSecond.of(0.5);
-        var rawSpeed = translationPID.calculate(errorDegrees.in(Degrees), this.targetAngle.in(Degrees));
+        var rawSpeed = -translationPID.calculate(errorDegrees.in(Degrees), this.targetAngle.in(Degrees));
         LinearVelocity yDriveSpeed = MetersPerSecond.of(MathUtil.clamp(
                 maxRobotSpeed.in(MetersPerSecond) * rawSpeed, -0.5, 0.5));
 
-        System.out.println("YTRANS: " + errorDegrees + " | " + yDriveSpeed);
+        BSLogger.log("BasicVision", "YTRANS: " + errorDegrees + " | " + yDriveSpeed);
         if (this.translationPID.atSetpoint()) {
             yDriveSpeed = MetersPerSecond.of(0);
         }
         return yDriveSpeed;
-    }
-
-    public enum TargetSide {
-        LEFT,
-        RIGHT
     }
 }

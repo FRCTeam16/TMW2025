@@ -5,8 +5,12 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Robot;
 import frc.robot.Subsystems;
+import frc.robot.subsystems.pose.PoseChangeRequest;
 import frc.robot.util.BSLogger;
 
+/**
+ * Command to reset the robot's pose. Rotation is maintained, but translation is reset to the specified value.
+ */
 public class ResetPoseCommand extends Command {
     private final Pose2d pose;
 
@@ -25,10 +29,9 @@ public class ResetPoseCommand extends Command {
 
     @Override
     public void initialize() {
-        Robot.poseUpdates.add(pose);    // FIXME: null check
         if (pose != null) {
             BSLogger.log("ResetPoseCommand", "Resetting pose to: " + pose);
-            Subsystems.swerveSubsystem.resetPose(pose);
+            Subsystems.poseManager.pushRequest(new PoseChangeRequest(pose));
         } else {
             BSLogger.log("RestPoseCommand", "Zeroing Pose");
             Subsystems.swerveSubsystem.tareEverything();
