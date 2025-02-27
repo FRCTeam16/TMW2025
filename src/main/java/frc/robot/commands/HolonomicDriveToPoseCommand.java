@@ -33,8 +33,6 @@ public class HolonomicDriveToPoseCommand extends Command {
 
     public HolonomicDriveToPoseCommand(Pose2d targetPose) {
         this.targetPose = targetPose;
-// 1.8, 0, 0.04)
-        // Configure PID tolerances
         distancePID.setTolerance(DISTANCE_TOLERANCE);
         anglePID.setTolerance(ANGLE_TOLERANCE);
 
@@ -54,7 +52,7 @@ public class HolonomicDriveToPoseCommand extends Command {
 
     @Override
     public void execute() {
-
+        System.out.println("TEST TEST TEST");
         // When we are close to the target we want to constantly update
         // our pose based on the camera
         Optional<Double> averageDistance = Subsystems.visionOdometryUpdater.getTargetDistance();
@@ -84,6 +82,7 @@ public class HolonomicDriveToPoseCommand extends Command {
     @Override
     public boolean isFinished() {
         // The command ends when both translation and rotation are within tolerance.
+//        driveController.atReference()
         return distancePID.atSetpoint() && anglePID.atSetpoint();
     }
 

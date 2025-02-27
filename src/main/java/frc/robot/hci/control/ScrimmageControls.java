@@ -84,7 +84,7 @@ public class ScrimmageControls extends ControlBinding {
         manualElevatorToggleButton.toggleOnTrue(Subsystems.elevator.openLoopCommand(manualElevatorControl));
 
         alignLeft.whileTrue(PathfindFactory.holonomicDriveToVisibleAprilTag(true));
-        alignRight.whileTrue(PathfindFactory.pidDriveToVisibleAprilTag(false));
+        alignRight.whileTrue(PathfindFactory.holonomicDriveToVisibleAprilTag(false));
 
 //        robotCentric.whileTrue(new DriveRobotCentricCommand());
 

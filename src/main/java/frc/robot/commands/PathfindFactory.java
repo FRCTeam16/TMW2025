@@ -33,6 +33,7 @@ public class PathfindFactory {
 
     public static Command pathfindToVisibleAprilTag(boolean isLeft) {
         return Commands.defer(() -> {
+            noPoseAlert.set(false);
             VisionTypes.TargetInfo targetInfo = Subsystems.visionSubsystem.getTargetInfo().orElse(null);
             if (targetInfo == null) {
                 noPoseAlert.set(true);
@@ -50,6 +51,7 @@ public class PathfindFactory {
 
     public static Command pidDriveToAprilTag(int aprilTagId, boolean isLeft) {
         return Commands.defer(() -> {
+            noPoseAlert.set(false);
             Pose2d tagPose = Subsystems.aprilTagUtil.getTagPose2d(aprilTagId).orElse(null);
             Pose2d targetPose = Subsystems.aprilTagUtil.getScoringPoseForTag(aprilTagId, isLeft).orElse(null);
             if (targetPose == null) {
@@ -65,6 +67,7 @@ public class PathfindFactory {
 
     public static Command pidDriveToVisibleAprilTag(boolean isLeft) {
         return Commands.defer(() -> {
+            noPoseAlert.set(false);
             VisionTypes.TargetInfo targetInfo = Subsystems.visionSubsystem.getTargetInfo().orElse(null);
             if (targetInfo == null) {
                 noPoseAlert.set(true);
@@ -84,6 +87,7 @@ public class PathfindFactory {
 
     public static Command holonomicDriveToVisibleAprilTag(boolean isLeft) {
         return Commands.defer(() -> {
+            noPoseAlert.set(false);
             VisionTypes.TargetInfo targetInfo = Subsystems.visionSubsystem.getTargetInfo().orElse(null);
             if (targetInfo == null) {
                 noPoseAlert.set(true);
