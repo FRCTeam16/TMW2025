@@ -8,6 +8,6 @@ public class TranslationController extends PIDController {
     }
 
     public TranslationController() {
-        super(0, 0, 0);
+        super(2.5, 0, 0);
     }
 }

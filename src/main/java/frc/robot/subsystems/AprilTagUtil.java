@@ -11,8 +11,8 @@ import frc.robot.subsystems.scoring.TargetPose;
 import java.util.Optional;
 
 public class AprilTagUtil implements Sendable {
-    private double scoringDistance = -0.71; // robot meters from tag
-    private double offsetDistance = 0.0; // 0.17; // robot horizontal offset from tag
+    private double scoringDistance = -0.44; // robot meters from tag
+    private double offsetDistance = 0.153; // 0.17; // robot horizontal offset from tag
 
 
     private final AprilTagFieldLayout fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
@@ -59,6 +59,14 @@ public class AprilTagUtil implements Sendable {
 
         // Calculate offset based on left/right scoring position
         double lateralOffset = isLeft ? -offsetDistance : offsetDistance; // meters
+
+//        if (aprilTagID == 7) {
+//            if (isLeft)
+//                lateralOffset = -3.84;
+//            else {
+//                lateralOffset = 3.83;
+//            }
+//        }
 
         // Create transform from tag to scoring position
         Transform2d scoreTransform = new Transform2d(
