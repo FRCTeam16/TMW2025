@@ -83,7 +83,7 @@ public class ScrimmageControls extends ControlBinding {
         manualAlgaeToggleButton.toggleOnTrue(Subsystems.algaeArm.openLoopCommand(manualAlgaeArmControl));
         manualElevatorToggleButton.toggleOnTrue(Subsystems.elevator.openLoopCommand(manualElevatorControl));
 
-        alignLeft.whileTrue(PathfindFactory.pidDriveToVisibleAprilTag(true));
+        alignLeft.whileTrue(PathfindFactory.holonomicDriveToVisibleAprilTag(true));
         alignRight.whileTrue(PathfindFactory.pidDriveToVisibleAprilTag(false));
 
 //        robotCentric.whileTrue(new DriveRobotCentricCommand());

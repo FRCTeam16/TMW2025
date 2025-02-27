@@ -49,6 +49,7 @@ public class Subsystems {
     // Utility classes
     //
     public static RotationController rotationController;
+    public static ProfiledRotationController profiledRotationController;
     public static TranslationController translationController;
     public static AsyncManager asyncManager;
     public static AprilTagUtil aprilTagUtil;
@@ -106,6 +107,7 @@ public class Subsystems {
 
     private void createUtilitySubsystems() {
         rotationController = new RotationController();
+        profiledRotationController = new ProfiledRotationController();
         translationController = new TranslationController();
 
         asyncManager = new AsyncManager();
@@ -148,6 +150,7 @@ public class Subsystems {
         SmartDashboard.putData("Subsystems/AprilTagUtil", aprilTagUtil);
         SmartDashboard.putData("Subsystems/PoseManager", poseManager);
         SmartDashboard.putData("Subsystems/RotationController", rotationController);
+        SmartDashboard.putData("Subsystems/ProfiledRotationController", profiledRotationController);
         SmartDashboard.putData("Subsystems/TranslationController", translationController);
 
         SmartDashboard.putData("CommandScheduler", CommandScheduler.getInstance());

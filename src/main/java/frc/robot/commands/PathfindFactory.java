@@ -82,6 +82,25 @@ public class PathfindFactory {
         }, Set.of(Subsystems.swerveSubsystem));
     }
 
+    public static Command holonomicDriveToVisibleAprilTag(boolean isLeft) {
+        return Commands.defer(() -> {
+            VisionTypes.TargetInfo targetInfo = Subsystems.visionSubsystem.getTargetInfo().orElse(null);
+            if (targetInfo == null) {
+                noPoseAlert.set(true);
+                return Commands.none();
+            }
+            Pose2d tagPose = Subsystems.aprilTagUtil.getTagPose2d(targetInfo.aprilTagID()).orElse(null);
+            Pose2d targetPose = Subsystems.aprilTagUtil.getScoringPoseForTag(targetInfo.aprilTagID(), isLeft).orElse(null);
+            if (targetPose == null) {
+                noPoseAlert.set(true);
+                return Commands.none();
+            }
+            tagPublisher.set(tagPose);
+            targetPublisher.set(targetPose);
+            return new HolonomicDriveToPoseCommand(targetPose);
+        }, Set.of(Subsystems.swerveSubsystem));
+    }
+
     public static Command pidDriveProfiledToAprilTag(boolean isLeft) {
         return Commands.defer(() -> {
             VisionTypes.TargetInfo targetInfo = Subsystems.visionSubsystem.getTargetInfo().orElse(null);
