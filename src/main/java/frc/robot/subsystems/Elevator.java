@@ -176,9 +176,9 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     public enum ElevatorSetpoint {
         Zero(0),
         TROUGH(-16.5),
-        L2(-19.05),
-        L3(-27.0),
-        L4(-40.8),
+        L2(-18),
+        L3(-26.0),
+        L4(-39.0),
         AlgaeBarge(-38.5),
         AlgaeProcessor(0.0),
         AlgaeReefHigh(-15.8),
