@@ -1,10 +1,15 @@
 package frc.robot.subsystems.Intake;
 
+//import com.ctre.phoenix6.motorcontrol.can.TalonFX;
 import au.grapplerobotics.LaserCan;
 import au.grapplerobotics.interfaces.LaserCanInterface.Measurement;
+
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -158,6 +163,9 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
         @Override
         public void end(boolean interrupted) {
             CoralIntake.this.stop();
+        }
+        public StatusSignal<Current> getCurrent() {
+            return topMotor.getSupplyCurrent(); // Returns motor's current in Amps
         }
     }
 }
