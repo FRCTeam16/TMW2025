@@ -10,12 +10,12 @@ import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Subsystems;
+import frc.robot.subsystems.vision.Limelight;
 import frc.robot.subsystems.vision.LimelightPoseEstimator;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Class that updates the odometry of the robot using vision measurements.
@@ -55,12 +55,12 @@ public class VisionOdometryUpdater implements Sendable {
                 drivetrain.getState().Pose
         );
         this.visionPoseEstimators = visionSubsystem.getLimelights().stream()
-                .map(limelight -> new LimelightPoseEstimator(limelight.getName(), true))
+                .map(Limelight::getPoseEstimator)
                 .toList();
 
         this.posePublisher = NetworkTableInstance.getDefault()
                 .getStructTopic("VisionOdometryUpdater/Pose", Pose2d.struct).publish();
-
+        // TODO: Move to Limelight initialization
         this.visionPoseEstimators.forEach(visionPoseEstimator ->
                 SmartDashboard.putData("VisionPoseEstimator-" + visionPoseEstimator.getName(), visionPoseEstimator));
 
@@ -118,7 +118,6 @@ public class VisionOdometryUpdater implements Sendable {
         sendableBuilder.addDoubleProperty("MainPose/X", () -> mainPoseEstimator.getEstimatedPosition().getX(), null);
         sendableBuilder.addDoubleProperty("MainPose/Y", () -> mainPoseEstimator.getEstimatedPosition().getY(), null);
         sendableBuilder.addDoubleProperty("MainPose/Rotation", () -> mainPoseEstimator.getEstimatedPosition().getRotation().getDegrees(), null);
-
     }
 
 

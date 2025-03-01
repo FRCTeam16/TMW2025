@@ -25,7 +25,7 @@ public class LimelightBasedAlignmentCommand extends Command {
     private final Angle targetAngle;    // offset angle to align
     private final String selectedLimelightName;
     PIDController translationPID = Subsystems.translationController;
-    PIDHelper translationPIDHelper = new PIDHelper("AlignmentTest");
+
 
     public LimelightBasedAlignmentCommand(boolean isLeft) {
         this.addRequirements(Subsystems.swerveSubsystem);
@@ -92,7 +92,6 @@ public class LimelightBasedAlignmentCommand extends Command {
     }
 
     private LinearVelocity calculateRobotYTranslationSpeed() {
-        translationPIDHelper.updatePIDController(translationPID);
         var errorDegrees = Degrees.of(LimelightHelpers.getTX(this.selectedLimelightName));
         LinearVelocity maxRobotSpeed = MetersPerSecond.of(0.5);
         var rawSpeed = -translationPID.calculate(errorDegrees.in(Degrees), this.targetAngle.in(Degrees));

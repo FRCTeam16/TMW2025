@@ -1,11 +1,5 @@
 package frc.robot.subsystems.vision;
 
-import static edu.wpi.first.units.Units.Meters;
-
-import java.util.HashMap;
-import java.util.Optional;
-import java.util.function.Consumer;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.util.sendable.Sendable;
@@ -15,12 +9,18 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
+import java.util.Optional;
+import java.util.function.Consumer;
+
+import static edu.wpi.first.units.Units.Meters;
+
 public class Limelight implements Sendable {
     public static final Distance DEFAULT_HEIGHT_TO_TARGET = Meters.of(0.5);
     private final String name;
     private final VisionTypes.LimelightInfo info;
 
     private final VisionTypes.CameraDistanceValues cameraDistanceValues;
+    private final LimelightPoseEstimator poseEstimator;
 
     public Limelight(VisionTypes.LimelightInfo info) {
         this.name = LimelightHelpers.sanitizeName(info.name());
@@ -31,9 +31,14 @@ public class Limelight implements Sendable {
                 this.info.heightToCamera(),
                 DEFAULT_HEIGHT_TO_TARGET,
                 this.info.cameraAngle());
+        this.poseEstimator = new LimelightPoseEstimator(this.name, true);
 
         // TODO: Add robotspace coordinates for camera
         // https://docs.limelightvision.io/docs/docs-limelight/apis/limelight-lib#6-special-apriltag-functionality
+    }
+
+    public LimelightPoseEstimator getPoseEstimator() {
+        return poseEstimator;
     }
 
     public VisionTypes.LimelightInfo getInfo() {
