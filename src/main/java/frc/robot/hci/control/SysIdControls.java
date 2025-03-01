@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Subsystems;
+import frc.robot.commands.dms.RunDMSCommand;
 
 public class SysIdControls extends ControlBinding {
     public SysIdControls(Joystick driveStick, Joystick steerStick, CommandXboxController joystick) {
@@ -19,5 +20,7 @@ public class SysIdControls extends ControlBinding {
         joystick.start().and(joystick.y()).whileTrue(Subsystems.swerveSubsystem.getSysIdHelper().sysIdQuasistatic(SysIdRoutine.Direction.kForward));
         joystick.start().and(joystick.x()).whileTrue(Subsystems.swerveSubsystem.getSysIdHelper().sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
 
+        // DMS
+        joystick.a().onTrue(new RunDMSCommand());
     }
 }

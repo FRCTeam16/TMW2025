@@ -16,9 +16,7 @@ public class PipelineSwitcher extends Command {
 
     @Override
     public void initialize() {
-       Subsystems.visionSubsystem.getLimelights().forEach(limelight -> {
-        limelight.setPipeline(pipeline);
-       }) ;
+        Subsystems.visionSubsystem.selectPipeline(pipeline);
     }
        @Override
        public boolean isFinished() {

@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.generated.RobotConfig;
+import frc.robot.subsystems.vision.Pipeline;
 import frc.robot.util.BSLogger;
 import frc.robot.util.GameInfo;
 
@@ -64,7 +65,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledInit() {
-
+    // We may want to switch to the view pipeline when disabled for thermal reasons
+//    Subsystems.visionSubsystem.selectPipeline(Pipeline.View);
   }
 
   @Override
@@ -75,6 +77,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
+    Subsystems.visionSubsystem.selectPipeline(Pipeline.April);
     BSLogger.log("Robot", "autoInit:: Started at:" + Timer.getFPGATimestamp());
     autonomousCommand = m_robotContainer.getAutonomousCommand();
     BSLogger.log("Robot", "autoInit:: got robotCommand: " + Timer.getFPGATimestamp());
@@ -98,6 +101,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
+    Subsystems.visionSubsystem.selectPipeline(Pipeline.April);
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }

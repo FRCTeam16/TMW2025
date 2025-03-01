@@ -31,10 +31,6 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
     private int secondsToClimb = 30;
 
 
-     enum DMSPhase {
-        Stopped, RunDriveMotors, RunSteerMotors, DisplayResults
-    }
-
     /**
      * Creates a new LEDSubsystem.
      */
@@ -298,6 +294,10 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
         if (now > RESULTS_DISPLAY_TIME) {
             currentPhase = DMSPhase.Stopped;
         }
+    }
+
+    enum DMSPhase {
+        Stopped, RunDriveMotors, RunSteerMotors, DisplayResults
     }
 
 

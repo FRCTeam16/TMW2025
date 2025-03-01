@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.DoubleToIntFunction;
 
+@Deprecated
 public class DMSStats {
     private static final double VEL_THRESHOLD = 0.85;
     private static final double AMP_THRESHOLD = 1.4;
@@ -124,6 +125,5 @@ public class DMSStats {
         } else {
             return 4;
         }
-
     }
 }

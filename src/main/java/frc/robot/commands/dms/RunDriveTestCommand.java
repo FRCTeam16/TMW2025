@@ -1,9 +1,10 @@
 package frc.robot.commands.dms;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.Constants;
 import frc.robot.Subsystems;
-import frc.robot.subsystems.DMS.DMSDataCollector;
+import frc.robot.subsystems.DMS.SwerveDataCollector;
 
 import java.util.Arrays;
 
@@ -11,28 +12,23 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 
 class RunDriveTestCommand extends AbstractRunDMSMotorTestCommand {
 
-    private final SwerveRequest.RobotCentric robotCentric = new SwerveRequest.RobotCentric();
+    private final SwerveRequest.ApplyRobotSpeeds applyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
 
-    public RunDriveTestCommand(DMSDataCollector dmsDataCollector) {
-       super(dmsDataCollector);
+    public RunDriveTestCommand(SwerveDataCollector swerveDataCollector) {
+        super(swerveDataCollector);
     }
 
     @Override
     void startMotors() {
         Subsystems.swerveSubsystem.setControl(
-        robotCentric
-                .withVelocityX(MetersPerSecond.of(1.0).times(Constants.MaxSpeed.in(MetersPerSecond)))
-                .withVelocityY(0)
-                .withRotationalRate(0));
+                applyRobotSpeeds.withSpeeds(
+                        new ChassisSpeeds(Constants.MaxSpeed.in(MetersPerSecond), 0, 0)));
     }
 
     @Override
     void stopMotors() {
         Subsystems.swerveSubsystem.setControl(
-                robotCentric
-                        .withVelocityX(0)
-                        .withVelocityY(0)
-                        .withRotationalRate(0));
+                applyRobotSpeeds.withSpeeds(new ChassisSpeeds()));
     }
 
     @Override

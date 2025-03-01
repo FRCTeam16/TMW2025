@@ -9,6 +9,9 @@ import frc.robot.util.BSLogger;
 
 import java.util.Queue;
 
+/**
+ * The PoseManager class is responsible for managing pose updates and resets.
+ */
 public class PoseManager implements Sendable {
     public static Queue<PoseChangeRequest> poseUpdates = new java.util.LinkedList<>();
     private Alert resetPoseAlert = new Alert("Reset robot pose", Alert.AlertType.kInfo);
@@ -28,7 +31,6 @@ public class PoseManager implements Sendable {
             Subsystems.swerveSubsystem.seedFieldCentric();
             seedFieldCentricRequest = false;
         }
-
 
         // Performs pose resets in the main thread to avoid locking issues
         if (!poseUpdates.isEmpty()) {
