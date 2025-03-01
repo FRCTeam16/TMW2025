@@ -10,6 +10,7 @@ import frc.robot.Robot;
 import frc.robot.Subsystems;
 import frc.robot.commands.*;
 import frc.robot.commands.vision.PipelineSwitcher;
+import frc.robot.commands.vision.SimpleAlignCommand;
 import frc.robot.commands.vision.UpdateRobotPoseFromVision;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Elevator;
@@ -83,15 +84,16 @@ public class ScrimmageControls extends ControlBinding {
         manualAlgaeToggleButton.toggleOnTrue(Subsystems.algaeArm.openLoopCommand(manualAlgaeArmControl));
         manualElevatorToggleButton.toggleOnTrue(Subsystems.elevator.openLoopCommand(manualElevatorControl));
 
-        alignLeft.whileTrue(PathfindFactory.holonomicDriveToVisibleAprilTag(true));
-        alignRight.whileTrue(PathfindFactory.holonomicDriveToVisibleAprilTag(false));
+//        alignLeft.whileTrue(PathfindFactory.limelightAlignToVisibleAprilTag(true));
+//        alignRight.whileTrue(PathfindFactory.limelightAlignToVisibleAprilTag(false));
+        alignLeft.whileTrue(new SimpleAlignCommand(true));
+        alignRight.whileTrue(new SimpleAlignCommand(false));
 
 //        robotCentric.whileTrue(new DriveRobotCentricCommand());
 
         resetPose.onTrue(
                 UpdateRobotPoseFromVision.resetFromMainPoseEstimator().ignoringDisable(true)
         );
-
 
         bindCommonButtons();
         bindDebugControls();

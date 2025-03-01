@@ -4,10 +4,9 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
-import edu.wpi.first.util.sendable.Sendable;
-import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Subsystems;
 import frc.robot.subsystems.vision.Limelight;
@@ -28,7 +27,7 @@ import java.util.Optional;
  * <a href="https://docs.limelightvision.io/docs/docs-limelight/tutorials/tutorial-swerve-pose-estimation">Swerve Pose Estimation Tutorial</a>
  * <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/state-space/state-space-pose-estimators.html">State Space Pose Estimators</a>
  */
-public class VisionOdometryUpdater implements Sendable {
+public class VisionOdometryUpdater {
 
     /**
      * Maximum distance in meters for a tag to be considered in the pose estimation.
@@ -39,6 +38,7 @@ public class VisionOdometryUpdater implements Sendable {
     private final SwerveDrivePoseEstimator mainPoseEstimator;
     private final List<LimelightPoseEstimator> visionPoseEstimators;
     private final StructPublisher<Pose2d> posePublisher;
+    private final DoublePublisher distancePublisher;
 
     /**
      * Constructs a VisionOdometryUpdater.
@@ -60,7 +60,10 @@ public class VisionOdometryUpdater implements Sendable {
 
         this.posePublisher = NetworkTableInstance.getDefault()
                 .getStructTopic("VisionOdometryUpdater/Pose", Pose2d.struct).publish();
-        // TODO: Move to Limelight initialization
+        this.distancePublisher = NetworkTableInstance.getDefault()
+                .getDoubleTopic("VisionOdometryUpdater/TargetDistance").publish();
+
+        // TODO: Move to be encapsulated in Limelight
         this.visionPoseEstimators.forEach(visionPoseEstimator ->
                 SmartDashboard.putData("VisionPoseEstimator-" + visionPoseEstimator.getName(), visionPoseEstimator));
 
@@ -95,6 +98,13 @@ public class VisionOdometryUpdater implements Sendable {
 
         // Publish pose to network tables
         posePublisher.set(mainPoseEstimator.getEstimatedPosition());
+        Optional<Double> distance = this.getTargetDistance();
+        if (distance.isPresent()) {
+            distancePublisher.set(distance.get());
+        } else {
+            distancePublisher.set(9999);
+        }
+
     }
 
 
@@ -107,19 +117,9 @@ public class VisionOdometryUpdater implements Sendable {
     }
 
 
-
     public List<LimelightPoseEstimator> getVisionPoseEstimators() {
         return visionPoseEstimators;
     }
-
-    @Override
-    public void initSendable(SendableBuilder sendableBuilder) {
-        sendableBuilder.setSmartDashboardType("VisionOdometryUpdater");
-        sendableBuilder.addDoubleProperty("MainPose/X", () -> mainPoseEstimator.getEstimatedPosition().getX(), null);
-        sendableBuilder.addDoubleProperty("MainPose/Y", () -> mainPoseEstimator.getEstimatedPosition().getY(), null);
-        sendableBuilder.addDoubleProperty("MainPose/Rotation", () -> mainPoseEstimator.getEstimatedPosition().getRotation().getDegrees(), null);
-    }
-
 
     public Optional<Double> getTargetDistance() {
         Rotation2d robotRotation2d = drivetrain.getState().Pose.getRotation();

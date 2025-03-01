@@ -124,7 +124,7 @@ public class PathfindFactory {
         }, Set.of(Subsystems.swerveSubsystem));
     }
 
-    public static Command limelightDriveToVisibleAprilTag(boolean isLeft) {
+    public static Command limelightAlignToVisibleAprilTag(boolean isLeft) {
         return Commands.defer(() -> {
             VisionTypes.TargetInfo targetInfo = Subsystems.visionSubsystem.getTargetInfo().orElse(null);
             if (targetInfo == null) {

@@ -31,9 +31,9 @@ public class Climber extends SubsystemBase implements Lifecycle {
                 .withKP(5.0);
         SoftwareLimitSwitchConfigs softwareLimitSwitchConfigs = new SoftwareLimitSwitchConfigs()
                 .withForwardSoftLimitEnable(true)
-                .withForwardSoftLimitThreshold(75)
+                .withForwardSoftLimitThreshold(82)
                 .withReverseSoftLimitEnable(true)
-                .withReverseSoftLimitThreshold(-20);
+                .withReverseSoftLimitThreshold(-40);
         MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs()
                 .withMotionMagicAcceleration(5)
                 .withMotionMagicCruiseVelocity(5);
@@ -104,9 +104,9 @@ public class Climber extends SubsystemBase implements Lifecycle {
 
     public enum ClimberPosition {
         UP(0),
-        CLIMB(-40),
-        DOWN(75),
-        PICKUP(40);
+        CLIMB(-20), // -53.3
+        DOWN(81),   // 100
+        PICKUP(44); // 53.3
 
         private final double position;
 

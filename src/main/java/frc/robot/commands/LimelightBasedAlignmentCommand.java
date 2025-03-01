@@ -7,45 +7,59 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.Subsystems;
+import frc.robot.subsystems.RotationController;
 import frc.robot.subsystems.vision.LimelightHelpers;
 import frc.robot.subsystems.vision.VisionTypes;
 import frc.robot.util.BSLogger;
-import frc.robot.util.PIDHelper;
 
 import java.util.Optional;
 
 import static edu.wpi.first.units.Units.*;
-import static frc.robot.Constants.MaxAngularRate;
 
 public class LimelightBasedAlignmentCommand extends Command {
     private final SwerveRequest.RobotCentric alignDrive = new SwerveRequest.RobotCentric();
     private final Angle targetAngle;    // offset angle to align
     private final String selectedLimelightName;
-    PIDController translationPID = Subsystems.translationController;
+    RotationController rotationController = Subsystems.rotationController;
+    PIDController translationPID = Subsystems.alignTranslationController;
+
+    Optional<VisionTypes.TargetInfo> targetInfo = Optional.empty();
 
 
     public LimelightBasedAlignmentCommand(boolean isLeft) {
         this.addRequirements(Subsystems.swerveSubsystem);
         if (isLeft) {
-            this.targetAngle = Degrees.of(18.0);
-            this.selectedLimelightName = "limelight-left";
+            this.targetAngle = Degrees.of(20.0);
+            this.selectedLimelightName = "limelight";
         } else {
-            this.targetAngle = Degrees.of(-25.0);
-            this.selectedLimelightName = "limelight-right";
+            this.targetAngle = Degrees.of(-22.0);
+            this.selectedLimelightName = "limelight";
         }
     }
 
     @Override
     public void initialize() {
-        this.translationPID.setTolerance(0.5);
+        translationPID.reset();
+        rotationController.reset();
+        translationPID.setSetpoint(this.targetAngle.in(Degrees));
+        translationPID.setTolerance(0.5);
+        this.rotationController.setTolerance(1);
     }
 
     @Override
     public void execute() {
-        Optional<VisionTypes.TargetInfo> targetInfo = Subsystems.visionSubsystem.getTargetInfo();
+        System.out.println("*************************");
+        System.out.println("*************************");
+        System.out.println("*************************");
+
+        targetInfo = Subsystems.visionSubsystem.getTargetInfo();
+
         if (targetInfo.isEmpty()) {
             BSLogger.log("LimelightAlign", "No target");
             noopDrive();
@@ -55,11 +69,27 @@ public class LimelightBasedAlignmentCommand extends Command {
         // Lock angle and calculate translation speed
         AngularVelocity rotationRate = calculateRobotRotation(targetInfo.get());
         LinearVelocity xDriveSpeed = getVelocityX();
-        LinearVelocity yDriveSpeed = calculateRobotYTranslationSpeed();
+        LinearVelocity yDriveSpeed = ManualCalculateRobotYTranslationSpeed();
+
+        xDriveSpeed = MetersPerSecond.of(0);
+
+        SmartDashboard.putNumber("LimelightAlign/xSpeed", xDriveSpeed.in(MetersPerSecond));
+        SmartDashboard.putNumber("LimelightAlign/ySpeed", yDriveSpeed.in(MetersPerSecond));
+        SmartDashboard.putNumber("LimelightAlign/rSpeed", rotationRate.in(DegreesPerSecond));
+        SmartDashboard.putNumber("LimelightAlign/tx", targetInfo.get().xOffset());
+        SmartDashboard.putNumber("LimelightAlign/setpoint", translationPID.getSetpoint());
+
+
         Subsystems.swerveSubsystem.setControl(
                 alignDrive.withVelocityX(xDriveSpeed)
                         .withRotationalRate(rotationRate)
                         .withVelocityY(yDriveSpeed));
+
+
+        System.out.println("*************************");
+        System.out.println("*************************");
+        System.out.println("*************************");
+
     }
 
     private void noopDrive() {
@@ -76,13 +106,13 @@ public class LimelightBasedAlignmentCommand extends Command {
             return DegreesPerSecond.of(0);
         }
         Angle aprilTagAngle = pose2d.get().getRotation().getMeasure();
-        final Angle robotFacingAngle = aprilTagAngle.plus(Degrees.of(180));
+        final Angle robotFacingAngle = aprilTagAngle; // .plus(Degrees.of(180));
         // Calculate angular velocity
         return DegreesPerSecond.of(
-                        Subsystems.rotationController.calculate(
-                                Subsystems.swerveSubsystem.getPigeon2().getYaw().getValueAsDouble(),
+                        rotationController.calculate(
+                                Subsystems.swerveSubsystem.getState().Pose.getRotation().getDegrees(),
                                 robotFacingAngle.in(Degrees)))
-                .times(MaxAngularRate.in(RadiansPerSecond));
+                .times(DegreesPerSecond.of(180).in(RadiansPerSecond));
     }
 
     private LinearVelocity getVelocityX() {
@@ -92,16 +122,39 @@ public class LimelightBasedAlignmentCommand extends Command {
     }
 
     private LinearVelocity calculateRobotYTranslationSpeed() {
-        var errorDegrees = Degrees.of(LimelightHelpers.getTX(this.selectedLimelightName));
+        if (targetInfo.isEmpty()) {
+            return MetersPerSecond.of(0);
+        }
+//        Angle errorDegrees = Degrees.of(LimelightHelpers.getTX(this.selectedLimelightName));
         LinearVelocity maxRobotSpeed = MetersPerSecond.of(0.5);
-        var rawSpeed = -translationPID.calculate(errorDegrees.in(Degrees), this.targetAngle.in(Degrees));
-        LinearVelocity yDriveSpeed = MetersPerSecond.of(MathUtil.clamp(
-                maxRobotSpeed.in(MetersPerSecond) * rawSpeed, -0.5, 0.5));
+        double rawSpeed = translationPID.calculate(targetInfo.get().xOffset());
+        rawSpeed = MathUtil.clamp(rawSpeed, -0.25, 0.25);
+        LinearVelocity yDriveSpeed = Constants.MaxSpeed.times(rawSpeed);
 
-        BSLogger.log("BasicVision", "YTRANS: " + errorDegrees + " | " + yDriveSpeed);
         if (this.translationPID.atSetpoint()) {
             yDriveSpeed = MetersPerSecond.of(0);
         }
         return yDriveSpeed;
     }
+
+    private LinearVelocity ManualCalculateRobotYTranslationSpeed() {
+        boolean hasTarget = LimelightHelpers.getTV("limelight");
+        double tx = LimelightHelpers.getTX("limelight");
+
+        System.out.println("@@@@@ TX: " + tx);
+
+        LinearVelocity yDriveSpeed = MetersPerSecond.of(0);
+        if (hasTarget) {
+            double error = translationPID.calculate(tx, this.targetAngle.in(Degrees));
+            error = MathUtil.clamp(error, -0.15, 0.15);
+            yDriveSpeed = Constants.MaxSpeed.times(error);
+        }
+        if (translationPID.atSetpoint()) {
+            yDriveSpeed = MetersPerSecond.of(0);
+        }
+        return yDriveSpeed;
+    }
+
+
+
 }

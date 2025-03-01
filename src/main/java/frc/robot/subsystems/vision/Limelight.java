@@ -26,7 +26,7 @@ public class Limelight implements Sendable {
         this.name = LimelightHelpers.sanitizeName(info.name());
         this.info = info;
         this.setLEDMode(VisionTypes.LEDMode.CurrentPipeline);
-        this.setPipelineIndex(0);   // implicitly sets pipeline type
+        this.setPipelineIndex(0);
         this.cameraDistanceValues = new VisionTypes.CameraDistanceValues(
                 this.info.heightToCamera(),
                 DEFAULT_HEIGHT_TO_TARGET,
@@ -66,8 +66,8 @@ public class Limelight implements Sendable {
         return Pipeline.fromPipelineIndex(this.getPipelineIndex());
     }
 
-    public double getAprilTagID() {
-        return LimelightHelpers.getFiducialID(this.name);
+    public int getAprilTagID() {
+        return (int) LimelightHelpers.getFiducialID(this.name);
     }
 
     public String getNeuralClassID() {
@@ -84,26 +84,11 @@ public class Limelight implements Sendable {
                 LimelightHelpers.getTX(this.name),
                 LimelightHelpers.getTY(this.name),
                 LimelightHelpers.getTA(this.name),
-                (int) getAprilTagID()
+                getAprilTagID()
         );
     }
 
-    public VisionTypes.PoseInfo getBotPoseForCurrentAlliance() {
-        Optional<DriverStation.Alliance> alliance = DriverStation.getAlliance();
-        if (alliance.isPresent()) {
-            Pose2d pose = DriverStation.Alliance.Red.equals(alliance.get()) ?
-                    LimelightHelpers.getBotPose2d_wpiRed(this.name) :
-                    LimelightHelpers.getBotPose2d_wpiBlue(this.name);
-            double latency = LimelightHelpers.getLatency_Capture(this.name) +
-                    LimelightHelpers.getLatency_Pipeline(this.name);
-            return new VisionTypes.PoseInfo(pose, latency);
-        } else {
-            DataLogManager.log("[Limelight] No alliance information available from DriverStation");
-            throw new RuntimeException("No alliance information available");
-        }
-    }
-
-
+    @Deprecated
     public void setLEDMode(VisionTypes.LEDMode ledMode) {
         Consumer<String> selector = switch (ledMode) {
             case CurrentPipeline -> LimelightHelpers::setLEDMode_PipelineControl;

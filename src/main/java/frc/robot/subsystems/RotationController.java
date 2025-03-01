@@ -11,10 +11,10 @@ public class RotationController extends PIDController {
     private static final double SPEED_CLAMP = 0.2;
 
 //    1.8, 0, 0.04)
-    private static final double kP = 1.4; // 13.0; //0.01; //4.25;
+    private static final double kP = 0.05; // 13.0; //0.01; //4.25;
     // private static final double kI = 1.35; // 3.0;
     private static final double kI = 0.0; // 3.0;
-    private static final double kD = 0.04; // 0.5; // 0;
+    private static final double kD = 0.00; // 0.5; // 0;
 
     private double tolerance = 2.0;
 

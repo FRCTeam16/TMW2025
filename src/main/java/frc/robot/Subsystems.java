@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.async.AsyncManager;
@@ -51,6 +52,7 @@ public class Subsystems {
     public static RotationController rotationController;
     public static ProfiledRotationController profiledRotationController;
     public static TranslationController translationController;
+    public static PIDController alignTranslationController;
     public static AsyncManager asyncManager;
     public static AprilTagUtil aprilTagUtil;
     public static PoseManager poseManager;
@@ -109,6 +111,7 @@ public class Subsystems {
         rotationController = new RotationController();
         profiledRotationController = new ProfiledRotationController();
         translationController = new TranslationController();
+        alignTranslationController = new PIDController(0.012, 0, 0);
 
         asyncManager = new AsyncManager();
         asyncManager.start();
@@ -138,7 +141,7 @@ public class Subsystems {
     }
 
     private void registerSmartDashboardEntries() {
-        SmartDashboard.putData("VisionOdometryUpdater", visionOdometryUpdater);
+//        SmartDashboard.putData("VisionOdometryUpdater", visionOdometryUpdater);
         SmartDashboard.putData("Subsystems/Elevator", elevator);
         SmartDashboard.putData("Subsystems/Climber", climber);
         SmartDashboard.putData("Subsystems/AlgaeIntake", algaeIntake);
@@ -149,9 +152,11 @@ public class Subsystems {
         SmartDashboard.putData("Subsystems/Funnel", funnelSubsystem);
         SmartDashboard.putData("Subsystems/AprilTagUtil", aprilTagUtil);
         SmartDashboard.putData("Subsystems/PoseManager", poseManager);
-        SmartDashboard.putData("Subsystems/RotationController", rotationController);
-        SmartDashboard.putData("Subsystems/ProfiledRotationController", profiledRotationController);
-        SmartDashboard.putData("Subsystems/TranslationController", translationController);
+
+        SmartDashboard.putData("PID/RotationController", rotationController);
+        SmartDashboard.putData("PID/ProfiledRotationController", profiledRotationController);
+        SmartDashboard.putData("PID/TranslationController", translationController);
+        SmartDashboard.putData("PID/AlignTranslationController", alignTranslationController);
 
         SmartDashboard.putData("CommandScheduler", CommandScheduler.getInstance());
     }
