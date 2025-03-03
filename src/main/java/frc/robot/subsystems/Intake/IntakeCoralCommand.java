@@ -37,8 +37,10 @@ public class IntakeCoralCommand extends Command {
             //if first laser sees coral while default action: change action to action 2
             if (coralIntake.coralDetectedAtTopSensor()) {
                 Subsystems.asyncManager.register(STOP_CORAL_INTAKE_TASK, () -> {
-                    BSLogger.log("IntakeCoralCommand", "Async detect & stop started");
+                    BSLogger.log("IntakeCoralCommandAsync", "Async detect & stop started");
                     if (Subsystems.coralIntake.coralDetectedAtBottomSensor()) {
+                        BSLogger.log("IntakeCoralCommandAsync", "Async STOPPING INTAKE CMD");
+                        step = 3;
                         Subsystems.coralIntake.stop();
                     }
                 });

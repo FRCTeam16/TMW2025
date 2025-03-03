@@ -34,9 +34,9 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
     private final StaticBrake stop = new StaticBrake();
 
 
-    double intakeHighSpeedLeft = 0.25;
-    double intakeHighSpeedRight = -0.25;
-    double intakeLowSpeed = 0.05;
+    double intakeHighSpeedLeft = 0.5;
+    double intakeHighSpeedRight = -0.5;
+    double intakeLowSpeed = 0.2;
     double ejectSpeed = -0.3;
     private boolean topSensorDetected;
     private boolean bottomSensorDetected;
@@ -45,9 +45,9 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
     public CoralIntake() {
         CANdiConfiguration candiConfig = new CANdiConfiguration()
                 .withDigitalInputs(new DigitalInputsConfigs()
-                        .withS1CloseState(S1CloseStateValue.CloseWhenLow)
+                        .withS1CloseState(S1CloseStateValue.CloseWhenHigh)
                         .withS1FloatState(S1FloatStateValue.PullLow)
-                        .withS2CloseState(S2CloseStateValue.CloseWhenLow)
+                        .withS2CloseState(S2CloseStateValue.CloseWhenHigh)
                         .withS2FloatState(S2FloatStateValue.PullLow));
         this.candi.getConfigurator().apply(candiConfig);
         this.setDefaultCommand(this.stopCommand());
@@ -60,8 +60,8 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
     }
 
     private void updateDetectorState() {
-        topSensorDetected = topSensorFilter.calculate(candi.getS2Closed().getValue());
-        bottomSensorDetected = bottomSensorFilter.calculate(candi.getS1Closed().getValue());
+        topSensorDetected = topSensorFilter.calculate(candi.getS1Closed().getValue());
+        bottomSensorDetected = bottomSensorFilter.calculate(candi.getS2Closed().getValue());
     }
 
     @Override
@@ -79,8 +79,8 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
         builder.addDoubleProperty("ejectSpeed", () -> ejectSpeed, (v) -> ejectSpeed = v);
         builder.addBooleanProperty("coralDetectedAtTop", this::coralDetectedAtTopSensor, null); // s2
         builder.addBooleanProperty("coralDetectedAtBottom", this::coralDetectedAtBottomSensor, null); // s1
-        builder.addBooleanProperty("rawTopSensor", () -> candi.getS2Closed().getValue(), null);
-        builder.addBooleanProperty("rawBotSensor", () -> candi.getS1Closed().getValue(), null);
+        builder.addBooleanProperty("rawTopSensor", () -> candi.getS1Closed().getValue(), null);
+        builder.addBooleanProperty("rawBotSensor", () -> candi.getS2Closed().getValue(), null);
     }
 
     void intakeFast() {

@@ -11,9 +11,9 @@ public class CoralTestingControls extends ControlBinding {
 
     @Override
     public void bindControls() {
-        joystick.povLeft().and(joystick.a()).onTrue(Subsystems.coralIntake.intakeCoralCommand());
-        joystick.povLeft().and(joystick.b()).onTrue(Subsystems.coralIntake.stopCommand());
-        joystick.povLeft().and(joystick.y()).whileTrue(Subsystems.coralIntake.ejectCommand());
-        joystick.povLeft().and(joystick.x()).whileTrue(Subsystems.coralIntake.shootCoralCommand());
+        (joystick.a()).whileTrue(Subsystems.coralIntake.intakeCoralCommand());
+        (joystick.b()).onTrue(Subsystems.coralIntake.stopCommand());
+        (joystick.y()).whileTrue(Subsystems.coralIntake.ejectCommand());
+        (joystick.x()).whileTrue(Subsystems.coralIntake.shootCoralCommand());
     }
 }
