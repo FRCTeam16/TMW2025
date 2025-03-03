@@ -102,6 +102,11 @@ public class RobotContainer {
         return Subsystems.autoManager.getSelectedAutoStrategy();
     }
 
+
+    public void robotInit() {
+        Subsystems.lifecycleSubsystems.stream().filter(Objects::nonNull).forEach(Lifecycle::robotInit);
+    }
+
     public void teleopInit() {
         Subsystems.lifecycleSubsystems.stream().filter(Objects::nonNull).forEach(Lifecycle::teleopInit);
     }

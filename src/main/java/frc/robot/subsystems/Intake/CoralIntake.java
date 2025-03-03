@@ -1,44 +1,71 @@
 package frc.robot.subsystems.Intake;
 
-import au.grapplerobotics.LaserCan;
-import au.grapplerobotics.interfaces.LaserCanInterface.Measurement;
+import com.ctre.phoenix6.configs.CANdiConfiguration;
+import com.ctre.phoenix6.configs.DigitalInputsConfigs;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.StaticBrake;
+import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.S1CloseStateValue;
+import com.ctre.phoenix6.signals.S1FloatStateValue;
+import com.ctre.phoenix6.signals.S2CloseStateValue;
+import com.ctre.phoenix6.signals.S2FloatStateValue;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
+import frc.robot.Subsystems;
 import frc.robot.subsystems.Lifecycle;
 
 public class CoralIntake extends SubsystemBase implements Lifecycle {
     public static final double COMMAND_TIMEOUT_SECONDS = 5.0;
-    public static final int INVALID_LASER_MEASUREMENT = 9999;
     private final TalonFX topMotor = new TalonFX(Robot.robotConfig.getCanID("coralIntakeLeftMotor"));
-    private final TalonFX bottomMotor  = new TalonFX(Robot.robotConfig.getCanID("coralIntakeRightMotor"));
+    private final TalonFX bottomMotor = new TalonFX(Robot.robotConfig.getCanID("coralIntakeRightMotor"));
     private final DutyCycleOut dutyCycleOutTop = new DutyCycleOut(1);
     private final DutyCycleOut dutyCycleOutBottom = new DutyCycleOut(1);
-    private final LaserCan laser1 = new LaserCan(1);    // top
-    private final LaserCan laser2 = new LaserCan(2);    // bottom
 
-    private final MedianFilter laser1Filter = new MedianFilter(5);
-    private final MedianFilter laser2Filter = new MedianFilter(5);
+    private final CANdi candi = new CANdi(Robot.robotConfig.getCanID("coralIntakeCandi"));
+
+    private final Debouncer topSensorFilter = new Debouncer(0.005);
+    private final Debouncer bottomSensorFilter = new Debouncer(0.005);
 
     private final StaticBrake stop = new StaticBrake();
-    
 
-    //TODO: GET REAL NUMS
-    int laser1SenseDistance = 30;
-    int laser2SenseDistance = 30;
+
     double intakeHighSpeedLeft = 0.25;
     double intakeHighSpeedRight = -0.25;
     double intakeLowSpeed = 0.05;
     double ejectSpeed = -0.3;
+    private boolean topSensorDetected;
+    private boolean bottomSensorDetected;
 
 
     public CoralIntake() {
+        CANdiConfiguration candiConfig = new CANdiConfiguration()
+                .withDigitalInputs(new DigitalInputsConfigs()
+                        .withS1CloseState(S1CloseStateValue.CloseWhenLow)
+                        .withS1FloatState(S1FloatStateValue.PullLow)
+                        .withS2CloseState(S2CloseStateValue.CloseWhenLow)
+                        .withS2FloatState(S2FloatStateValue.PullLow));
+        this.candi.getConfigurator().apply(candiConfig);
         this.setDefaultCommand(this.stopCommand());
+
+    }
+
+    @Override
+    public void robotInit() {
+        Subsystems.asyncManager.register("CoralPeriodicDetect", this::updateDetectorState);
+    }
+
+    private void updateDetectorState() {
+        topSensorDetected = topSensorFilter.calculate(candi.getS2Closed().getValue());
+        bottomSensorDetected = bottomSensorFilter.calculate(candi.getS1Closed().getValue());
+    }
+
+    @Override
+    public void periodic() {
     }
 
     @Override
@@ -50,10 +77,10 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
 
         builder.addDoubleProperty("intakeLowSpeed", () -> intakeLowSpeed, (v) -> intakeLowSpeed = v);
         builder.addDoubleProperty("ejectSpeed", () -> ejectSpeed, (v) -> ejectSpeed = v);
-        builder.addBooleanProperty("coralDetectedAtFirstLaser", this::coralDetectedAtFirstLaser, null);
-        builder.addIntegerProperty("laser1 Dist", this::getLaser1Measurement, null);
-        builder.addBooleanProperty("coralDetectedAtSecondLaser", this::coralDetectedAtSecondLaser, null);
-        builder.addIntegerProperty("laser2 Dist", this::getLaser2Measurement, null);
+        builder.addBooleanProperty("coralDetectedAtTop", this::coralDetectedAtTopSensor, null); // s2
+        builder.addBooleanProperty("coralDetectedAtBottom", this::coralDetectedAtBottomSensor, null); // s1
+        builder.addBooleanProperty("rawTopSensor", () -> candi.getS2Closed().getValue(), null);
+        builder.addBooleanProperty("rawBotSensor", () -> candi.getS1Closed().getValue(), null);
     }
 
     void intakeFast() {
@@ -76,43 +103,16 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
         bottomMotor.setControl(stop);
     }
 
-    private int getLaser1Measurement() {
-        Measurement measurement = laser1.getMeasurement();
-        if (measurement != null && measurement.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT) {
-            return (int) laser1Filter.calculate(measurement.distance_mm);
-        } else {
-            return INVALID_LASER_MEASUREMENT;
-        }
+    public boolean coralDetectedAtBottomSensor() {
+        return bottomSensorDetected;
     }
 
-    private int getLaser2Measurement() {
-        Measurement measurement = laser2.getMeasurement();
-        if (measurement != null && measurement.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT) {
-            return (int) laser2Filter.calculate(measurement.distance_mm);
-        } else {
-            return INVALID_LASER_MEASUREMENT;
-        }
-    }
-
-    public boolean coralDetectedAtFirstLaser() {
-        int measurement = getLaser1Measurement();
-        if (measurement < INVALID_LASER_MEASUREMENT) {
-            return measurement < laser1SenseDistance;
-        }
-        return false;
-    }
-
-    public boolean coralDetectedAtSecondLaser() {
-        int measurement = getLaser2Measurement();
-        if (measurement < INVALID_LASER_MEASUREMENT) {
-            return measurement < laser2SenseDistance;
-        }
-        return false;
+    public boolean coralDetectedAtTopSensor() {
+        return topSensorDetected;
     }
 
 
     public Command ejectCommand() {
-        System.out.println("Intake Eject Command Active");
         return this.run(this::eject);
     }
 

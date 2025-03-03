@@ -20,6 +20,7 @@ public class CanIDLookup {
             "algaeArmMotor", 53,
             "coralIntakeLeftMotor", 54,
             "coralIntakeRightMotor", 55,
+            "coralIntakeCandi", 1,
             "climberMotor", 21,
             "elevatorLeftMotor", 30,
             "elevatorRightMotor", 31,

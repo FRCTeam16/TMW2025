@@ -97,7 +97,7 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
             }
         }
 
-        boolean hasPart = Subsystems.coralIntake.coralDetectedAtFirstLaser();
+        boolean hasPart = Subsystems.coralIntake.coralDetectedAtBottomSensor();
         int elevatorPosition = (int) Subsystems.elevator.getCurrentPosition();
 
         byte[] buffer = new byte[BUFFER_SIZE];

@@ -83,8 +83,8 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     }
 
     boolean isElevatorObstructedByCoral() {
-        return Subsystems.coralIntake.coralDetectedAtSecondLaser() &&
-                !Subsystems.coralIntake.coralDetectedAtFirstLaser();
+        return Subsystems.coralIntake.coralDetectedAtTopSensor() &&
+                !Subsystems.coralIntake.coralDetectedAtBottomSensor();
     }
 
     private void setOpenLoop(double speed) {

@@ -29,7 +29,7 @@ public class Robot extends TimedRobot {
 
 
   public Robot() {
-//    DataLogManager.start(); too verbose
+    DataLogManager.start();
     m_robotContainer = RobotContainer.getInstance();
     CanBridge.runTCP();
 
@@ -53,6 +53,9 @@ public class Robot extends TimedRobot {
       BSLogger.log("Robot", "robotInit:: setting pose for unknown alliance");
       Subsystems.swerveSubsystem.resetPose(new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
     }
+
+    // Allow other interested parties to respond
+    m_robotContainer.robotInit();
   }
 
   @Override

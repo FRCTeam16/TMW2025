@@ -27,6 +27,20 @@ public class VisionSubsystem extends SubsystemBase implements Lifecycle {
         }
     }
 
+    @Override
+    public void robotInit() {
+        selectPipeline(Pipeline.View);
+    }
+
+    @Override
+    public void teleopInit() {
+        selectPipeline(Pipeline.April);
+    }
+
+    @Override
+    public void autoInit() {
+        selectPipeline(Pipeline.April);
+    }
 
     public Optional<Limelight> getDefaultLimelight() {
         return Optional.ofNullable(defaultLimelight);

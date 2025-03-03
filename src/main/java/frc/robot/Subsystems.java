@@ -153,6 +153,8 @@ public class Subsystems {
         SmartDashboard.putData("Subsystems/AprilTagUtil", aprilTagUtil);
         SmartDashboard.putData("Subsystems/PoseManager", poseManager);
 
+        SmartDashboard.putData("Subsystems/AsyncManager", asyncManager);
+
         SmartDashboard.putData("PID/RotationController", rotationController);
         SmartDashboard.putData("PID/ProfiledRotationController", profiledRotationController);
         SmartDashboard.putData("PID/TranslationController", translationController);
