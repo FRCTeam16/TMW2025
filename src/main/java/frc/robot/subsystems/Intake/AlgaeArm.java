@@ -48,12 +48,11 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
         algaeArmMotor.setNeutralMode(NeutralModeValue.Brake);
 
         this.algaeArmMotor.setPosition(0);
-        this.setDefaultCommand(this.holdPositionCommand());
+        this.setDefaultCommand(new DefaultHoldAlgaeArmCommand(this));
     }
 
     @Override
     public void teleopInit() {
-        this.setDefaultCommand(this.holdPositionCommand());
     }
 
     private void setArmPosition(double position) {
@@ -61,10 +60,10 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
 //        BSLogger.log("AlgaeArm", "Setting position to: " + position + " | Estimated angle: " + getEstimatedAngle());
         this.targetPosition = position;
         // TODO: Check for near zero here and don't do anything, assume we are held
-//        algaeArmMotor.setControl(
-//                positionVoltage.withPosition(position)
-//                        .withFeedForward(calculateGravityCompensation(getEstimatedAngle())));
-        algaeArmMotor.setControl(new NeutralOut());
+        algaeArmMotor.setControl(
+                positionVoltage.withPosition(position)
+                        .withFeedForward(calculateGravityCompensation(getEstimatedAngle())));
+//        algaeArmMotor.setControl(new NeutralOut());
     }
 
     /**
@@ -124,17 +123,22 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
         return this.run(() -> runOpenLoop(speed.get())).withName("AlgaeArm Manual Control");
     }
 
-    public Command holdPositionCommand() {
-        return this.run(this::holdPosition).withName("Hold AlgaeArm Position");
-    }
+//    public Command holdPositionCommand() {
+//        return this.run(this::holdPosition).withName("Hold AlgaeArm Position");
+//    }
 
     public Command setArmPositionCommand(AlgaeArmPosition position) {
         return new SetArmPositionCommand(position);
     }
 
-    public class DefaultHoldAlgaeArmCommand extends Command {
-        public DefaultHoldAlgaeArmCommand() {
-            addRequirements(Subsystems.algaeArm);
+    public static class DefaultHoldAlgaeArmCommand extends Command {
+        public DefaultHoldAlgaeArmCommand(AlgaeArm algaeArm) {
+            addRequirements(algaeArm);
+        }
+
+        @Override
+        public void initialize() {
+            Subsystems.algaeArm.holdPosition();
         }
     }
 
