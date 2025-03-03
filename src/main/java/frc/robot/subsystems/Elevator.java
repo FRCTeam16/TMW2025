@@ -57,7 +57,7 @@ public class Elevator extends SubsystemBase implements Lifecycle {
                 .withForwardSoftLimitEnable(true)
                 .withForwardSoftLimitThreshold(0.0)
                 .withReverseSoftLimitEnable(true)
-                .withReverseSoftLimitThreshold(-43);
+                .withReverseSoftLimitThreshold(-60);
 
         TalonFXConfiguration configuration = new TalonFXConfiguration()
                 .withSlot0(slot0)
@@ -176,12 +176,12 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     public enum ElevatorSetpoint {
         Zero(0),
         TROUGH(-16.5),
-        L2(-18),
-        L3(-26.0),
-        L4(-39.0),
+        L2(-25.75),
+        L3(-38),
+        L4(-57.0),
         AlgaeBarge(-38.5),
         AlgaeProcessor(0.0),
-        AlgaeReefHigh(-15.8),
+        AlgaeReefHigh(-19),
         AlgaeReefLow(-6.0);
 
         public final double val;
@@ -202,10 +202,10 @@ public class Elevator extends SubsystemBase implements Lifecycle {
 
         @Override
         public void initialize() {
-//            if (Subsystems.elevator.isElevatorObstructedByCoral()) {
-//                this.cancel();
-//                return;
-//            }
+            if (Subsystems.elevator.isElevatorObstructedByCoral()) {
+                this.cancel();
+                return;
+            }
             Subsystems.elevator.moveToPosition(this.setpoint);
         }
 

@@ -34,8 +34,8 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
     private final StaticBrake stop = new StaticBrake();
 
 
-    double intakeHighSpeedLeft = 0.5;
-    double intakeHighSpeedRight = -0.5;
+    double intakeHighSpeedLeft = 0.25;
+    double intakeHighSpeedRight = -0.25;
     double intakeLowSpeed = 0.2;
     double ejectSpeed = -0.3;
     private boolean topSensorDetected;

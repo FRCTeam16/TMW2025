@@ -43,15 +43,16 @@ public class Robot extends TimedRobot {
     // Set up starting config
     if (GameInfo.isRedAlliance()) {
       BSLogger.log("Robot", "robotInit:: setting pose for red");
-//      Subsystems.swerveSubsystem.getPigeon2().setYaw(0);
-//      Subsystems.swerveSubsystem.resetPose(new Pose2d(14, 7.3, Rotation2d.fromDegrees(0)));
+      Subsystems.swerveSubsystem.getPigeon2().setYaw(0);
+      Subsystems.swerveSubsystem.resetPose(new Pose2d(14, 7.3, Rotation2d.fromDegrees(0)));
     } else if (GameInfo.isBlueAlliance()){
       BSLogger.log("Robot", "robotInit:: setting pose for red");
-      Subsystems.swerveSubsystem.getPigeon2().setYaw(180);
+//      Subsystems.swerveSubsystem.getPigeon2().setYaw(180);
       Subsystems.swerveSubsystem.resetPose(new Pose2d(8, 3, Rotation2d.fromDegrees(180)));
     } else {
       BSLogger.log("Robot", "robotInit:: setting pose for unknown alliance");
-      Subsystems.swerveSubsystem.resetPose(new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
+      Subsystems.swerveSubsystem.getPigeon2().setYaw(0);
+//      Subsystems.swerveSubsystem.resetPose(new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
     }
 
     // Allow other interested parties to respond

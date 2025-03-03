@@ -111,7 +111,7 @@ public class Subsystems {
         rotationController = new RotationController();
         profiledRotationController = new ProfiledRotationController();
         translationController = new TranslationController();
-        alignTranslationController = new PIDController(0.012, 0, 0);
+        alignTranslationController = new PIDController(0.008, 0, 0);
 
         asyncManager = new AsyncManager();
         asyncManager.start();

@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Robot;
 import frc.robot.Subsystems;
 import frc.robot.commands.*;
+import frc.robot.commands.vision.AlignDriveInCommand;
 import frc.robot.commands.vision.PipelineSwitcher;
 import frc.robot.commands.vision.SimpleAlignCommand;
 import frc.robot.commands.vision.UpdateRobotPoseFromVision;
@@ -86,8 +87,8 @@ public class ScrimmageControls extends ControlBinding {
 
 //        alignLeft.whileTrue(PathfindFactory.limelightAlignToVisibleAprilTag(true));
 //        alignRight.whileTrue(PathfindFactory.limelightAlignToVisibleAprilTag(false));
-        alignLeft.whileTrue(new SimpleAlignCommand(true));
-        alignRight.whileTrue(new SimpleAlignCommand(false));
+        alignLeft.whileTrue(new AlignDriveInCommand(true)); // SimpleAlignCommand
+        alignRight.whileTrue(new AlignDriveInCommand(false));
 
 //        robotCentric.whileTrue(new DriveRobotCentricCommand());
 
@@ -103,8 +104,7 @@ public class ScrimmageControls extends ControlBinding {
         SmartDashboard.putData("Reset Pose From Vision",
                 UpdateRobotPoseFromVision.resetFromMainPoseEstimator().ignoringDisable(true));
 
-        SmartDashboard.putData("Zero Yaw from Alliance",
-                new ZeroYawCommand().ignoringDisable(true));
+        SmartDashboard.putData("Reset Alliance Pose", new ResetPoseCommand().ignoringDisable(true));
 
         SmartDashboard.putData("Set LLs to Apriltag", new PipelineSwitcher(Pipeline.April));
         SmartDashboard.putData("Set LLs to Viewfinder", new PipelineSwitcher(Pipeline.View));

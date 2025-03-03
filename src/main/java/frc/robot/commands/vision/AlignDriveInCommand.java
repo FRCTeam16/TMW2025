@@ -1,7 +1,6 @@
 package frc.robot.commands.vision;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.units.measure.Angle;
@@ -9,7 +8,6 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants;
 import frc.robot.Subsystems;
 import frc.robot.subsystems.RotationController;
 import frc.robot.subsystems.TranslationController;
@@ -20,26 +18,27 @@ import java.util.Optional;
 
 import static edu.wpi.first.units.Units.*;
 
-public class SimpleAlignCommand extends Command {
-    private final boolean isLeft;
-    private Angle targetRotation;
-    private Distance targetDistance;
-
+public class AlignDriveInCommand extends Command {
     private static final double TARGET_DISTANCE = 0.4;
 
+    private final Distance LIMELIGHT_OFFSET = Inches.of(12.279);
+
+    private final boolean isLeft;
+    private final Distance targetDistance;
     RotationController rotationController = Subsystems.rotationController;
+    private Angle targetRotation;
     private PIDController alignController = Subsystems.alignTranslationController;
     private TranslationController distanceController = Subsystems.translationController;
 
     private SwerveRequest.RobotCentric robotCentric = new SwerveRequest.RobotCentric();
     private SwerveRequest.Idle idle = new SwerveRequest.Idle();
 
-    public SimpleAlignCommand(boolean isLeft) {
+
+    public AlignDriveInCommand(boolean isLeft) {
         this.isLeft = isLeft;
         this.targetDistance = Meters.of(isLeft ? TARGET_DISTANCE : TARGET_DISTANCE);
         this.addRequirements(Subsystems.swerveSubsystem);
     }
-
 
     @Override
     public void initialize() {
@@ -66,7 +65,7 @@ public class SimpleAlignCommand extends Command {
 
     @Override
     public void execute() {
-        System.out.println("SimpleAlignCommand");
+        BSLogger.log("AlignDriveInCommand", "execute");
         boolean hasTarget = LimelightHelpers.getTV("limelight");
 
         if (!hasTarget) {
@@ -74,25 +73,15 @@ public class SimpleAlignCommand extends Command {
             return;
         }
 
-        // Y Velocity (Vision alignment)
-        double tx = LimelightHelpers.getTX("limelight");
-        double target = calculateYTarget().in(Degrees);
-        double yRrror = alignController.calculate(tx, target);
-        yRrror = MathUtil.clamp(yRrror, -0.25, 0.25);
-        LinearVelocity yspeed = Constants.MaxSpeed.times(yRrror);
+        double rawtx = LimelightHelpers.getTX("limelight");
+        Angle tx = Degrees.of(rawtx);
+        double targetAngleRads = calculateYTargetDirect(tx).in(Radians);
 
-        // X Velocity (Distance)
-        double xError = 0;
-        Optional<Double> distance = Subsystems.visionOdometryUpdater.getTargetDistance();
-        LinearVelocity xspeed = MetersPerSecond.of(0);
-        if (distance.isPresent()) {
-            xError = -distanceController.calculate(distance.get(), this.targetDistance.in(Meters));
-            xError = MathUtil.clamp(xError, -0.25, 0.25);
-            xspeed = Constants.MaxSpeed.times(xError);
-            System.out.println("DIST: " + distance.get() + " | Error: " + xError + " | Speed: " + xspeed);
-        }
+        LinearVelocity speed = MetersPerSecond.of(1.0);
+        LinearVelocity xspeed = speed.times(Math.cos(targetAngleRads));
+        LinearVelocity yspeed = speed.times(Math.sin(targetAngleRads));
 
-        // Rotation
+        // Robot Rotation
         double currentDegrees = Subsystems.swerveSubsystem.getState().Pose.getRotation().getDegrees();
         double rotationError = rotationController.calculate(currentDegrees);
         AngularVelocity rotationSpeed = DegreesPerSecond.of(180).times(rotationError);
@@ -106,13 +95,45 @@ public class SimpleAlignCommand extends Command {
         );
     }
 
-    private Angle calculateYTarget() {
+    private Angle calculateYTargetDirect(Angle tx) {
         Optional<Double> distance = Subsystems.visionOdometryUpdater.getTargetDistance();
         if (distance.isPresent()) {
-            if (distance.get() > 0.6) {
-                return Degrees.of((isLeft) ? 0 : 0);
+            Angle angle = tx.times(-1);                         // invert incoming angle sign
+            Distance D = Meters.of(distance.get());                      // distance to april tag
+            Distance d = Inches.of(6.5);                       // distance to reef pole
+
+            Distance x = D.times(Math.cos(angle.in(Radians)));             // R in reference system
+            x = x.minus(LIMELIGHT_OFFSET);                                 // limelight offset
+            Distance y = (D.times(Math.sin(angle.in(Radians)))).minus(d);  // r in reference system
+
+            // For right target add
+            if (isLeft) {
+                y = y.plus(d.times(2));
             }
+
+            double rawResult = Math.atan2(y.in(Meters), x.in(Meters));
+            Angle result = Radians.of(rawResult);
+
+//            BSLogger.log("calculateYTarget", "tx=" + angle.in(Degrees));
+//            BSLogger.log("calculateYTarget", "D =" + D);
+//            BSLogger.log("calculateYTarget", "d =" + d);
+//            BSLogger.log("calculateYTarget", "x =" + x);
+//            BSLogger.log("calculateYTarget", "y =" + y);
+//            BSLogger.log("calculateYTarget", "R =" + result.in(Degrees));
+
+            return result;
         }
+        // Default if no distance read
         return Degrees.of((isLeft) ? 22.5 : -23);
     }
+
+    @Override
+    public boolean isFinished() {
+        Optional<Double> distance = Subsystems.visionOdometryUpdater.getTargetDistance();
+        if (distance.isPresent()) {
+            return distance.get() < 0.02;
+        }
+        return true;
+    }
 }
+

@@ -21,4 +21,6 @@ public class PoseChangeRequest {
                 usePoseRotation ? targetPose.getRotation() :
                         Subsystems.swerveSubsystem.getState().Pose.getRotation());
     }
+
+    public boolean isUsePoseRotation() { return usePoseRotation; }
 }

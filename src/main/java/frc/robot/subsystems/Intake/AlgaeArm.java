@@ -47,6 +47,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
         algaeArmMotor.getConfigurator().apply(armConfiguration);
         algaeArmMotor.setNeutralMode(NeutralModeValue.Brake);
 
+        this.algaeArmMotor.setPosition(0);
         this.setDefaultCommand(this.holdPositionCommand());
     }
 
