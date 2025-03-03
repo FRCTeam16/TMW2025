@@ -17,9 +17,10 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle {
     private final NeutralOut brake = new NeutralOut();
     private final DutyCycleOut intakeDutyCycleOut = new DutyCycleOut(1);
 
-    private double forwardSpeed = 0.45;
+
+    private double forwardSpeed = 0.65;
     private double backwardSpeed = -0.3;
-    private double holdSpeed = 0.1;
+    private double holdSpeed = 0.15;
 
     public AlgaeIntake() {
         TalonFXConfiguration intakeConfiguration = new TalonFXConfiguration();
@@ -65,5 +66,6 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle {
     public Command stopCommand() {
         return this.run(() -> algaeIntakeMotor.setControl(brake)).withName("Algae Stop");
     }
+
 
 }

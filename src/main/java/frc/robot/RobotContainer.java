@@ -52,7 +52,7 @@ public class RobotContainer {
     public final CommandSwerveDrivetrain drivetrain;
     private final SwerveSupplier swerveSupplier;
 
-    private JoystickMode joystickMode = JoystickMode.CoralTesting;
+    private JoystickMode joystickMode = JoystickMode.Scrimmage;
     private ControlBinding controlBinding;
 
     public static RobotContainer getInstance() {

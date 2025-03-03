@@ -84,7 +84,6 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
     }
 
     private void runOpenLoop(double speed) {
-        BSLogger.log("AlgaeArm", "Running open loop with speed: " + speed);
         double clampedSpeed = MathUtil.clamp(speed, -openLoopMax, openLoopMax);
         algaeArmMotor.setControl(dutyCycleOut.withOutput(clampedSpeed));
     }
