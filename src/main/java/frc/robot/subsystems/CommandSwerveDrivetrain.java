@@ -200,4 +200,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         });
         m_simNotifier.startPeriodic(kSimLoopPeriod);
     }
+
+    /**
+     * Returns the yaw of the pigeon in degrees
+     * @return the yaw of the pigeon in degrees
+     */
+    public double getPigeonYaw() {
+        return this.getPigeon2().getYaw().getValueAsDouble() % 360.0;
+    }
 }

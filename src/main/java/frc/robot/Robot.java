@@ -62,7 +62,7 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
-    SmartDashboard.putNumber("Yaw", Subsystems.swerveSubsystem.getPigeon2().getYaw().getValueAsDouble() % 360.0);
+    SmartDashboard.putNumber("Yaw", Subsystems.swerveSubsystem.getPigeonYaw());
     SmartDashboard.putNumber("Rot", Subsystems.swerveSubsystem.getState().Pose.getRotation().getDegrees());
     Subsystems.poseManager.update();
   }

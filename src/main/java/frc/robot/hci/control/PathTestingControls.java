@@ -9,8 +9,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Subsystems;
 import frc.robot.commands.path.PathfindFactory;
-import frc.robot.commands.pose.ResetToAlliancePoseCommand;
-import frc.robot.commands.vision.UpdateRobotPoseFromVision;
+import frc.robot.commands.vision.VisionPoseUpdateFactory;
 import frc.robot.subsystems.pose.PoseChangeRequest;
 import frc.robot.util.GameInfo;
 
@@ -50,9 +49,7 @@ public class PathTestingControls extends ControlBinding {
         }));
 
         joystick.leftTrigger().onTrue(
-                UpdateRobotPoseFromVision.resetFromMainPoseEstimator().ignoringDisable(true)
+                VisionPoseUpdateFactory.resetFromMainPoseEstimator().ignoringDisable(true)
         );
-
-        SmartDashboard.putData("Test Reset Pose Tare", new ResetToAlliancePoseCommand());
     }
 }
