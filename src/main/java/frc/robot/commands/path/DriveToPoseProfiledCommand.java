@@ -1,4 +1,4 @@
-package frc.robot.commands;
+package frc.robot.commands.path;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.controller.ProfiledPIDController;

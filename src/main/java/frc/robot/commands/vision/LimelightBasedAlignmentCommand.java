@@ -1,4 +1,4 @@
-package frc.robot.commands;
+package frc.robot.commands.vision;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.MathUtil;
@@ -7,7 +7,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
@@ -22,6 +21,7 @@ import java.util.Optional;
 
 import static edu.wpi.first.units.Units.*;
 
+@Deprecated
 public class LimelightBasedAlignmentCommand extends Command {
     private final SwerveRequest.RobotCentric alignDrive = new SwerveRequest.RobotCentric();
     private final Angle targetAngle;    // offset angle to align

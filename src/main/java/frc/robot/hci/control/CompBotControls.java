@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Robot;
 import frc.robot.Subsystems;
-import frc.robot.commands.ZeroYawCommand;
+import frc.robot.commands.pose.ZeroYawCommand;
 import frc.robot.subsystems.scoring.AlgaePickRequest;
 import frc.robot.subsystems.scoring.AutoScoreCoralCommand;
 import frc.robot.subsystems.scoring.CoralScoringRequest;

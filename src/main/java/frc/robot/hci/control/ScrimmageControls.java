@@ -9,9 +9,9 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Robot;
 import frc.robot.Subsystems;
 import frc.robot.commands.*;
+import frc.robot.commands.pose.ResetToAlliancePoseCommand;
 import frc.robot.commands.vision.AlignDriveInCommand;
 import frc.robot.commands.vision.PipelineSwitcher;
-import frc.robot.commands.vision.SimpleAlignCommand;
 import frc.robot.commands.vision.UpdateRobotPoseFromVision;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Elevator;
@@ -104,7 +104,7 @@ public class ScrimmageControls extends ControlBinding {
         SmartDashboard.putData("Reset Pose From Vision",
                 UpdateRobotPoseFromVision.resetFromMainPoseEstimator().ignoringDisable(true));
 
-        SmartDashboard.putData("Reset Alliance Pose", new ResetPoseCommand().ignoringDisable(true));
+        SmartDashboard.putData("Reset Alliance Pose", new ResetToAlliancePoseCommand().ignoringDisable(true));
 
         SmartDashboard.putData("Set LLs to Apriltag", new PipelineSwitcher(Pipeline.April));
         SmartDashboard.putData("Set LLs to Viewfinder", new PipelineSwitcher(Pipeline.View));
