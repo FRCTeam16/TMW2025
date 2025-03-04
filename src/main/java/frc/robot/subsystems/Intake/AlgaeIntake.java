@@ -11,11 +11,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.subsystems.Lifecycle;
+import frc.robot.util.MotorVoltageFilter;
 
 public class AlgaeIntake extends SubsystemBase implements Lifecycle {
     private final TalonFX algaeIntakeMotor = new TalonFX(Robot.robotConfig.getCanID("algaeIntakeMotor"));
     private final NeutralOut brake = new NeutralOut();
     private final DutyCycleOut intakeDutyCycleOut = new DutyCycleOut(1);
+    private final MotorVoltageFilter motorVoltageFilter = new MotorVoltageFilter(5, algaeIntakeMotor); //TODO: 5 isnt a real number here
 
 
     private double forwardSpeed = 0.65;
@@ -57,6 +59,7 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle {
 
     public Command ejectCommand() {
         return this.run(() -> algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(backwardSpeed))).withName("Algae Eject");
+
     }
 
     public Command holdAlgaeCommand() {
