@@ -4,15 +4,20 @@
 
 package frc.robot;
 
+import au.grapplerobotics.CanBridge;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.generated.RobotConfig;
+import frc.robot.subsystems.vision.Pipeline;
 import frc.robot.util.BSLogger;
-import au.grapplerobotics.CanBridge;
+import frc.robot.util.GameInfo;
 
 import java.util.Queue;
 
@@ -21,28 +26,52 @@ public class Robot extends TimedRobot {
 
   public static final RobotConfig robotConfig = RobotConfig.getInstance();
   private final RobotContainer m_robotContainer;
-  public static Queue<Pose2d> poseUpdates = new java.util.LinkedList<>();
+
 
   public Robot() {
-    m_robotContainer = new RobotContainer();
+    DataLogManager.start();
+    m_robotContainer = RobotContainer.getInstance();
     CanBridge.runTCP();
+
+    // Setup serial communications
+    addPeriodic(Subsystems.ledSubsystem::Report, 0.1);
+  }
+
+  @Override
+  public void robotInit() {
+
+    // Set up starting config
+    if (GameInfo.isRedAlliance()) {
+      BSLogger.log("Robot", "robotInit:: setting pose for red");
+      Subsystems.swerveSubsystem.getPigeon2().setYaw(0);
+      Subsystems.swerveSubsystem.resetPose(new Pose2d(14, 7.3, Rotation2d.fromDegrees(0)));
+    } else if (GameInfo.isBlueAlliance()){
+      BSLogger.log("Robot", "robotInit:: setting pose for red");
+//      Subsystems.swerveSubsystem.getPigeon2().setYaw(180);
+      Subsystems.swerveSubsystem.resetPose(new Pose2d(8, 3, Rotation2d.fromDegrees(180)));
+    } else {
+      BSLogger.log("Robot", "robotInit:: setting pose for unknown alliance");
+      Subsystems.swerveSubsystem.getPigeon2().setYaw(0);
+//      Subsystems.swerveSubsystem.resetPose(new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
+    }
+
+    // Allow other interested parties to respond
+    m_robotContainer.robotInit();
   }
 
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
-    SmartDashboard.putNumber("Yaw", Subsystems.swerveSubsystem.getPigeon2().getYaw().getValueAsDouble());
-
-
-    if (!poseUpdates.isEmpty()) {
-      Pose2d pose = poseUpdates.poll();
-      System.out.println("Resetting pose to: " + pose);
-      Subsystems.swerveSubsystem.resetPose(pose);
-    }
+    SmartDashboard.putNumber("Yaw", Subsystems.swerveSubsystem.getPigeon2().getYaw().getValueAsDouble() % 360.0);
+    SmartDashboard.putNumber("Rot", Subsystems.swerveSubsystem.getState().Pose.getRotation().getDegrees());
+    Subsystems.poseManager.update();
   }
 
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    // We may want to switch to the view pipeline when disabled for thermal reasons
+//    Subsystems.visionSubsystem.selectPipeline(Pipeline.View);
+  }
 
   @Override
   public void disabledPeriodic() {}
@@ -52,6 +81,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
+    Subsystems.visionSubsystem.selectPipeline(Pipeline.April);
     BSLogger.log("Robot", "autoInit:: Started at:" + Timer.getFPGATimestamp());
     autonomousCommand = m_robotContainer.getAutonomousCommand();
     BSLogger.log("Robot", "autoInit:: got robotCommand: " + Timer.getFPGATimestamp());
@@ -75,6 +105,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
+    Subsystems.visionSubsystem.selectPipeline(Pipeline.April);
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }

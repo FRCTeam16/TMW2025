@@ -4,12 +4,12 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
-import edu.wpi.first.util.sendable.Sendable;
-import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Subsystems;
+import frc.robot.subsystems.vision.Limelight;
 import frc.robot.subsystems.vision.LimelightPoseEstimator;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
@@ -27,17 +27,18 @@ import java.util.Optional;
  * <a href="https://docs.limelightvision.io/docs/docs-limelight/tutorials/tutorial-swerve-pose-estimation">Swerve Pose Estimation Tutorial</a>
  * <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/state-space/state-space-pose-estimators.html">State Space Pose Estimators</a>
  */
-public class VisionOdometryUpdater implements Sendable {
+public class VisionOdometryUpdater {
 
     /**
      * Maximum distance in meters for a tag to be considered in the pose estimation.
      */
-    public static final double MAX_TAG_DIST_METERS = 1.0;
+    public static final double MAX_TAG_DIST_METERS = 2.0;
 
     private final CommandSwerveDrivetrain drivetrain;
     private final SwerveDrivePoseEstimator mainPoseEstimator;
     private final List<LimelightPoseEstimator> visionPoseEstimators;
     private final StructPublisher<Pose2d> posePublisher;
+    private final DoublePublisher distancePublisher;
 
     /**
      * Constructs a VisionOdometryUpdater.
@@ -52,22 +53,22 @@ public class VisionOdometryUpdater implements Sendable {
                 drivetrain.getPigeon2().getRotation2d(),
                 drivetrain.getState().ModulePositions,
                 drivetrain.getState().Pose
-                // TODO add stdev for drive and vision measurements
         );
         this.visionPoseEstimators = visionSubsystem.getLimelights().stream()
-                .map(limelight -> new LimelightPoseEstimator(limelight.getName()))
+                .map(Limelight::getPoseEstimator)
                 .toList();
 
         this.posePublisher = NetworkTableInstance.getDefault()
                 .getStructTopic("VisionOdometryUpdater/Pose", Pose2d.struct).publish();
+        this.distancePublisher = NetworkTableInstance.getDefault()
+                .getDoubleTopic("VisionOdometryUpdater/TargetDistance").publish();
 
-        this.visionPoseEstimators.forEach(visionPoseEstimator -> 
-        SmartDashboard.putData("VisionPoseEstimator-"+visionPoseEstimator.getName(), visionPoseEstimator));
+        // TODO: Move to be encapsulated in Limelight
+        this.visionPoseEstimators.forEach(visionPoseEstimator ->
+                SmartDashboard.putData("VisionPoseEstimator-" + visionPoseEstimator.getName(), visionPoseEstimator));
 
-        //
-        Subsystems.swerveSubsystem.setVisionMeasurementStdDevs(VecBuilder.fill(0.5, 0.5, 99)); // Example tuning values
-
-
+        // Defaults
+        Subsystems.swerveSubsystem.setVisionMeasurementStdDevs(VecBuilder.fill(0.7, 0.7, 999999)); // Example tuning values
     }
 
     /**
@@ -76,7 +77,7 @@ public class VisionOdometryUpdater implements Sendable {
      * This method should be called periodically to ensure the robot's pose estimate is up-to-date.
      */
     public void updateOdometry() {
-        Rotation2d robotRotation2d = drivetrain.getPigeon2().getRotation2d();
+        Rotation2d robotRotation2d = drivetrain.getState().Pose.getRotation();
 
         // Update main pose odometry estimation
         mainPoseEstimator.update(
@@ -89,15 +90,21 @@ public class VisionOdometryUpdater implements Sendable {
                 .flatMap(Optional::stream)
                 .filter(pose -> pose.avgTagDist < MAX_TAG_DIST_METERS)
                 .forEach(pose -> {
+//                    double visionStdDev = BSMath.map(pose.avgTagDist, 0, MAX_TAG_DIST_METERS, 0.3, 0.9);
+//                    Vector<N3> vector = VecBuilder.fill(visionStdDev, visionStdDev, 99);
+//                    mainPoseEstimator.addVisionMeasurement(pose.pose, pose.timestampSeconds, vector);
                     mainPoseEstimator.addVisionMeasurement(pose.pose, pose.timestampSeconds);
-
-                    // We need to figure out why this isn't working
-                    // Subsystems.swerveSubsystem.addVisionMeasurement(pose.pose, pose.timestampSeconds);
-                    
                 });
 
         // Publish pose to network tables
         posePublisher.set(mainPoseEstimator.getEstimatedPosition());
+        Optional<Double> distance = this.getTargetDistance();
+        if (distance.isPresent()) {
+            distancePublisher.set(distance.get());
+        } else {
+            distancePublisher.set(9999);
+        }
+
     }
 
 
@@ -106,21 +113,22 @@ public class VisionOdometryUpdater implements Sendable {
     }
 
     public Pose2d getEstimatedPose() {
-         return mainPoseEstimator.getEstimatedPosition();
+        return mainPoseEstimator.getEstimatedPosition();
     }
+
 
     public List<LimelightPoseEstimator> getVisionPoseEstimators() {
         return visionPoseEstimators;
     }
 
-    @Override
-    public void initSendable(SendableBuilder sendableBuilder) {
-        sendableBuilder.setSmartDashboardType("VisionOdometryUpdater");
-        sendableBuilder.addDoubleProperty("MainPose/X", () -> mainPoseEstimator.getEstimatedPosition().getX(), null);
-        sendableBuilder.addDoubleProperty("MainPose/Y", () -> mainPoseEstimator.getEstimatedPosition().getY(), null);
-        sendableBuilder.addDoubleProperty("MainPose/Rotation", () -> mainPoseEstimator.getEstimatedPosition().getRotation().getDegrees(), null);
-    
+    public Optional<Double> getTargetDistance() {
+        Rotation2d robotRotation2d = drivetrain.getState().Pose.getRotation();
+        double averageDistance = visionPoseEstimators.stream()
+                .map(visionPoseEstimator -> visionPoseEstimator.estimatePose(robotRotation2d.getMeasure()))
+                .flatMap(Optional::stream)
+                .mapToDouble(pe -> pe.avgTagDist)
+                .average()
+                .orElse(99999);
+        return averageDistance == 99999 ? Optional.empty() : Optional.of(averageDistance);
     }
-
-
 }

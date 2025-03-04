@@ -57,10 +57,13 @@ public class RobotConfig {
         return switch (this.config) {
             case LOWRIDA -> Stream.of(
 //                    new VisionTypes.LimelightInfo("limelight", Inches.of(6), Degrees.of(26.84)),
-                            new VisionTypes.LimelightInfo("limelight-lfour", Inches.of(6), Degrees.of(26.84)),
-                            new VisionTypes.LimelightInfo("limelight-right", Inches.of(6), Degrees.of(-26.84)))
+//                            new VisionTypes.LimelightInfo("limelight-lfour", Inches.of(6), Degrees.of(26.84)),
+                            new VisionTypes.LimelightInfo("limelight-rightxyz", Inches.of(6), Degrees.of(-26.84)))
                     .map(Limelight::new).collect(Collectors.toSet());
-            default -> Collections.emptySet();
+            default -> //Collections.emptyList();
+                    Stream.of(
+                            new VisionTypes.LimelightInfo("limelight", Inches.of(22.125), Degrees.of(-35)))
+                    .map(Limelight::new).collect(Collectors.toSet());
         };
     }
 

@@ -1,7 +1,6 @@
 package frc.robot.subsystems.vision;
 
 import edu.wpi.first.wpilibj.DataLogManager;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.Lifecycle;
 import frc.robot.util.BSLogger;
@@ -19,7 +18,6 @@ public class VisionSubsystem extends SubsystemBase implements Lifecycle {
             if (tmpLimelight == null) {
                 tmpLimelight = limelight;
             }
-            SmartDashboard.putData("Subsystems/VisionSubsystem/" + limelight.getName(), limelight);
         }
         if (tmpLimelight != null) {
             this.defaultLimelight = tmpLimelight;
@@ -30,8 +28,18 @@ public class VisionSubsystem extends SubsystemBase implements Lifecycle {
     }
 
     @Override
-    public void periodic() {
-        super.periodic();
+    public void robotInit() {
+        selectPipeline(Pipeline.View);
+    }
+
+    @Override
+    public void teleopInit() {
+        selectPipeline(Pipeline.April);
+    }
+
+    @Override
+    public void autoInit() {
+        selectPipeline(Pipeline.April);
     }
 
     public Optional<Limelight> getDefaultLimelight() {
@@ -53,4 +61,19 @@ public class VisionSubsystem extends SubsystemBase implements Lifecycle {
         }
     }
 
+    /**
+     * Determines the best target info from all limelights
+     *
+     * @return target info
+     */
+    public Optional<VisionTypes.TargetInfo> getTargetInfo() {
+        return getLimelights().stream()
+                .map(Limelight::getTargetInfo)
+                .max(Comparator.comparing(VisionTypes.TargetInfo::targetArea));
+
+    }
+
+    public void selectPipeline(Pipeline pipeline) {
+        getLimelights().forEach(limelight -> limelight.setPipeline(pipeline));
+    }
 }

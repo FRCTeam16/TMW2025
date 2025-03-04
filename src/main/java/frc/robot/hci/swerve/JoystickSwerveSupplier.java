@@ -1,10 +1,11 @@
-package frc.robot.hci;
+package frc.robot.hci.swerve;
 
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
+import frc.robot.Subsystems;
 import frc.robot.util.GameInfo;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -23,21 +24,54 @@ public class JoystickSwerveSupplier implements SwerveSupplier {
         this.isRedAlliance = GameInfo.isRedAlliance();
     }
 
+    private double applyDeadband(double value, double deadband) {
+        if (Math.abs(value) > deadband) {
+            return value;
+        } else {
+            return 0.0;
+        }
+    }
+
+    protected double applyLimiter(double value) {
+        boolean isElevatorUp = Subsystems.elevator.isElevatorUp();
+        if (isElevatorUp) {
+            return value * 0.1;
+        } else {
+            return value;
+        }
+    }
+
+    protected double getBaseX() {
+        return applyLimiter(applyDeadband(
+                -driveStick.getY(), 0.08) * (isRedAlliance ? 1 : 1));
+    }
+
+    protected double getBaseY() {
+        return applyLimiter(applyDeadband(
+                -driveStick.getX(), 0.05) * (isRedAlliance ? 1 : 1));
+    }
+
+    protected double getBaseRotationalRate() {
+        return applyLimiter(applyDeadband(
+                -steerStick.getX(), 0.05) * (isRedAlliance ? 1 : 1));
+    }
+
+
     @Override
     public LinearVelocity supplyX() {
-        double base = driveStick.getY() * (isRedAlliance ? -1 : 1);
+        double base = getBaseX();
         return MetersPerSecond.of(base).times(Constants.MaxSpeed.in(MetersPerSecond));
     }
 
     @Override
     public LinearVelocity supplyY() {
-        double base = driveStick.getX() * (isRedAlliance ? -1 : 1);
+        double base = getBaseY();
         return MetersPerSecond.of(base).times(Constants.MaxSpeed.in(MetersPerSecond));
     }
 
     @Override
     public AngularVelocity supplyRotationalRate() {
-        double base = steerStick.getX() * (isRedAlliance ? -1 : 1);
+        double base = getBaseRotationalRate();
         return RadiansPerSecond.of(base).times(Constants.MaxAngularRate.in(RadiansPerSecond));
     }
 }

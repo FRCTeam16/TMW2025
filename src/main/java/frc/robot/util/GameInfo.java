@@ -11,6 +11,7 @@ public class GameInfo {
     }
 
     public static boolean isBlueAlliance() {
-        return !isRedAlliance();
+        Optional<DriverStation.Alliance> alliance = DriverStation.getAlliance();
+        return alliance.filter(value -> value == DriverStation.Alliance.Blue).isPresent();
     }
 }

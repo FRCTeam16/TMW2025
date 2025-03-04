@@ -16,13 +16,13 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 
 /**
- * Class that estimates the robot pose using Limelight measurements from AprilTags.
+ * Class that returns the Limelight estimated pose measurements from AprilTags.
  */
-public class LimelightPoseEstimator implements Sendable  {
+public class LimelightPoseEstimator implements Sendable {
     private final boolean useMegaTag2; // set to false to use MegaTag1
     private final String limelightName;
-    private LimelightHelpers.PoseEstimate lastPoseEstimate = null;
     private final StructPublisher<Pose2d> publisher;
+    private LimelightHelpers.PoseEstimate lastPoseEstimate = null;
 
     /**
      * Constructs a LimelightPoseEstimator with the specified Limelight name and MegaTag2 usage.
@@ -33,7 +33,6 @@ public class LimelightPoseEstimator implements Sendable  {
     public LimelightPoseEstimator(String limelightName, boolean useMegaTag2) {
         this.limelightName = limelightName;
         this.useMegaTag2 = useMegaTag2;
-
         this.publisher = NetworkTableInstance.getDefault()
                 .getStructTopic("LimelightPoseEstimator/" + limelightName + "/pose", Pose2d.struct).publish();
     }
@@ -77,11 +76,9 @@ public class LimelightPoseEstimator implements Sendable  {
         }
         // Filters out pose estimates if the robot is moving too fast
         StatusSignal<AngularVelocity> angularVelocity = Subsystems.swerveSubsystem.getPigeon2().getAngularVelocityZWorld();
-        if (Math.abs(angularVelocity.getValue().in(DegreesPerSecond)) > 720) { // if our angular velocity is greater than 720 degrees per second, ignore vision updates
+        if (Math.abs(angularVelocity.getValue().in(DegreesPerSecond)) > 100) { // if our angular velocity is greater than 720 degrees per second, ignore vision updates
             return Optional.empty();
         }
-
-        // TODO Consider adding global ambiguity checks?
 
         if (poseEstimate.isPresent()) {
             LimelightHelpers.PoseEstimate estimate = poseEstimate.get();
@@ -101,10 +98,7 @@ public class LimelightPoseEstimator implements Sendable  {
      */
     private Optional<LimelightHelpers.PoseEstimate> doMegaTag2Estimate() {
         LimelightHelpers.PoseEstimate visionPoseEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limelightName); // TODO Check red switch here?
-        if (visionPoseEstimate == null) {
-            return Optional.empty();
-        }
-        return Optional.of(visionPoseEstimate);
+        return Optional.ofNullable(visionPoseEstimate);
     }
 
     /**
@@ -113,7 +107,10 @@ public class LimelightPoseEstimator implements Sendable  {
      * @return An Optional containing the pose estimate if available, otherwise an empty Optional.
      */
     private Optional<LimelightHelpers.PoseEstimate> doMegaTag1Estimate() {
-        LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName); // TODO: Check red switch here?
+        LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName);
+        if (mt1 == null) {
+            return Optional.empty();
+        }
 
         if (mt1.tagCount == 1 && mt1.rawFiducials.length == 1) {
             if (mt1.rawFiducials[0].ambiguity > .7) {
@@ -134,14 +131,9 @@ public class LimelightPoseEstimator implements Sendable  {
         sendableBuilder.setSmartDashboardType("LimelightPoseEstimator");
         sendableBuilder.addStringProperty("Limelight Name", () -> limelightName, null);
         sendableBuilder.addBooleanProperty("Use MegaTag2", () -> useMegaTag2, null);
-        if (lastPoseEstimate != null) {
-            sendableBuilder.addIntegerProperty("TagCount", () -> lastPoseEstimate.tagCount, null);
-            sendableBuilder.addDoubleProperty("Distance", () -> lastPoseEstimate.avgTagDist, null);
-            sendableBuilder.addDoubleProperty("TagArea", () -> lastPoseEstimate.avgTagArea, null);
-            sendableBuilder.addDoubleProperty("EstPose/X", () -> lastPoseEstimate.pose.getX(), null);
-            sendableBuilder.addDoubleProperty("EstPose/Y", () -> lastPoseEstimate.pose.getY(), null);
-            sendableBuilder.addDoubleProperty("EstPose/Rotation", () -> lastPoseEstimate.pose.getRotation().getDegrees(), null);
-        }
+        sendableBuilder.addIntegerProperty("TagCount", () -> lastPoseEstimate != null ? lastPoseEstimate.tagCount : 0, null);
+        sendableBuilder.addDoubleProperty("Distance", () -> lastPoseEstimate != null ? lastPoseEstimate.avgTagDist : 0.0, null);
+        sendableBuilder.addDoubleProperty("TagArea", () -> lastPoseEstimate != null ? lastPoseEstimate.avgTagArea : 0.0, null);
     }
 
     public String getName() {

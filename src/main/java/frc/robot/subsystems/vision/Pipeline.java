@@ -1,8 +1,11 @@
 package frc.robot.subsystems.vision;
 
+import javax.swing.text.html.Option;
+import java.util.Optional;
+
 public enum Pipeline {
     April(0),
-    Note(1);
+    View(1);
 
 
     public final int pipelineNumber;
@@ -11,12 +14,13 @@ public enum Pipeline {
         this.pipelineNumber = number;
     }
 
-    public static Pipeline findPipeline(int value) {
+    public static Optional<Pipeline> fromPipelineIndex(int value) {
         for (var pipeline : Pipeline.values()) {
             if (pipeline.pipelineNumber == value) {
-                return pipeline;
+                return Optional.of(pipeline);
             }
         }
-        return null;
+        return Optional.empty();
     }
+
 }

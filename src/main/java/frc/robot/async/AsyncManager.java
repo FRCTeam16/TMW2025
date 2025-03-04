@@ -1,5 +1,7 @@
 package frc.robot.async;
 
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.util.BSLogger;
 
@@ -9,7 +11,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class AsyncManager {
+public class AsyncManager implements Sendable  {
     private final AsyncWorkThread thread = new AsyncWorkThread(0.005); // 5ms
     private final AtomicBoolean running = new AtomicBoolean(false);
     private final List<AsyncTask> tasks = Collections.synchronizedList(new ArrayList<>());
@@ -18,6 +20,16 @@ public class AsyncManager {
     public AsyncManager() {
         thread.setDaemon(true);
         this.register("reportOverruns", this::reportOverruns);
+    }
+
+    @Override
+    public void initSendable(SendableBuilder sendableBuilder) {
+        sendableBuilder.setSmartDashboardType("AsyncManager");
+        sendableBuilder.addStringArrayProperty("Tasks", this::getTaskNames, null);
+    }
+
+    private String[] getTaskNames() {
+        return tasks.stream().map(AsyncTask::getName).sorted().toArray(String[]::new);
     }
 
     public void start() {

@@ -1,7 +1,7 @@
 package frc.robot.subsystems.vision;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
-import frc.robot.hci.SwerveSupplier;
+import frc.robot.hci.swerve.SwerveSupplier;
 import frc.robot.util.PIDHelper;
 import frc.robot.util.VisionUtil;
 import edu.wpi.first.wpilibj.DriverStation;
