@@ -2,7 +2,7 @@ package frc.robot.hci.control;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.commands.LimelightBasedAlignmentCommand;
+import frc.robot.commands.vision.LimelightBasedAlignmentCommand;
 
 public class AlignmentTestControls extends ControlBinding {
 
