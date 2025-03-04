@@ -3,13 +3,15 @@
   "robotLength": 1.016,
   "holonomicMode": true,
   "pathFolders": [
-    "SharedCoordRef",
+    "Arkansas",
     "OnePush",
+    "SharedCoordRef",
     "Spin",
     "Tests",
     "ThreePiece"
   ],
   "autoFolders": [
+    "Arkansas",
     "Tests"
   ],
   "defaultMaxVel": 3.0,

@@ -1,9 +1,13 @@
 package frc.robot.auto;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Constants;
+import frc.robot.util.BSLogger;
 
 import java.util.HashMap;
 import java.util.function.Supplier;
@@ -50,11 +54,37 @@ public class AutoManager {
         return pathRegistry.getPath(pathName);
     }
 
+    public Command followPathCommand(String pathName) {
+        try {
+            // Load the path you want to follow using its name in the GUI
+            PathPlannerPath path = PathPlannerPath.fromPathFile("Example Path");
+
+            // Create a path following command using AutoBuilder. This will also trigger event markers.
+            return AutoBuilder.followPath(path);
+        } catch (Exception e) {
+            BSLogger.log("AutoManager", "Error getting auto path: " + e.getMessage());
+            return Commands.none();
+        }
+    }
+
+    public Command pathfindThenFollowPathCommand(String pathName) {
+        try {
+            // Load the path you want to follow using its name in the GUI
+            PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+
+            // Create a path following command using AutoBuilder. This will also trigger event markers.
+            return AutoBuilder.pathfindThenFollowPath(path, Constants.pathConstraints);
+        } catch (Exception e) {
+            BSLogger.log("AutoManager", "Error getting auto path: " + e.getMessage());
+            return Commands.none();
+        }
+    }
+
     /**
      * Registers an autonomous strategy with the given name and supplier.
      *
      * @param strategyName the name of the strategy
-     * @param strategy the supplier of the command for the strategy
+     * @param strategy     the supplier of the command for the strategy
      */
     public void registerStrategy(String strategyName, Supplier<Command> strategy) {
         registerStrategy(strategyName, strategyName, strategy, false);
@@ -63,9 +93,9 @@ public class AutoManager {
     /**
      * Registers an autonomous strategy with the given display name, strategy name, and supplier.
      *
-     * @param displayName the display name of the strategy
+     * @param displayName  the display name of the strategy
      * @param strategyName the name of the strategy
-     * @param strategy the supplier of the command for the strategy
+     * @param strategy     the supplier of the command for the strategy
      */
     public void registerStrategy(String displayName, String strategyName, Supplier<Command> strategy) {
         registerStrategy(displayName, strategyName, strategy, false);
@@ -74,10 +104,10 @@ public class AutoManager {
     /**
      * Registers an autonomous strategy with the given display name, strategy name, supplier, and default flag.
      *
-     * @param displayName the display name of the strategy
+     * @param displayName  the display name of the strategy
      * @param strategyName the name of the strategy
-     * @param strategy the supplier of the command for the strategy
-     * @param isDefault whether the strategy should be the default option
+     * @param strategy     the supplier of the command for the strategy
+     * @param isDefault    whether the strategy should be the default option
      */
     public void registerStrategy(String displayName, String strategyName, Supplier<Command> strategy, boolean isDefault) {
         if (isDefault) {

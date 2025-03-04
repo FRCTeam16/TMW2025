@@ -20,7 +20,7 @@ import java.util.function.Supplier;
 
 public class Elevator extends SubsystemBase implements Lifecycle {
     public static final double GRAVITY_VOLTS = -0.5;
-    public static final double ELEVATOR_POSITION_THRESHOLD = 0.1;
+    public static final double ELEVATOR_POSITION_THRESHOLD = 0.2;
     private final TalonFX left = new TalonFX(Robot.robotConfig.getCanID("elevatorLeftMotor"));
     private final TalonFX right = new TalonFX(Robot.robotConfig.getCanID("elevatorRightMotor"));
 
@@ -30,6 +30,7 @@ public class Elevator extends SubsystemBase implements Lifecycle {
 
     private double openLoopMotorSpeed = -0.2;
     private double currentSetpoint = 0;
+    private ElevatorSetpoint requestedSetpoint = Elevator.ElevatorSetpoint.Zero;
     private boolean lazyHold;
     private double openLoopMax = 0.3;
 
@@ -73,6 +74,11 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     }
 
     @Override
+    public void robotInit() {
+        left.setPosition(0);
+    }
+
+    @Override
     public void teleopInit() {
         this.currentSetpoint = this.getCurrentPosition();
     }
@@ -93,15 +99,16 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     }
 
     private void moveToPosition(ElevatorSetpoint setpoint) {
+        requestedSetpoint = setpoint;
         moveToEncoderPosition(setpoint.val);
     }
 
     private void moveToEncoderPosition(double encoderPosition) {
         BSLogger.log("Elevator", "Moving to position: " + encoderPosition);
-        if (!MathUtil.isNear(0, encoderPosition, 0.05)) {
-            encoderPosition += encoderOffset;
-            BSLogger.log("Elevator", "Moving to adjusted position: " + encoderPosition);
-        }
+//        if (!MathUtil.isNear(0, encoderPosition, 0.05)) {
+//            encoderPosition += encoderOffset;
+//            BSLogger.log("Elevator", "Moving to adjusted position: " + encoderPosition);
+//        }
         this.currentSetpoint = encoderPosition;
         left.setControl(motionMagicV.withPosition(encoderPosition));
     }
@@ -154,8 +161,9 @@ public class Elevator extends SubsystemBase implements Lifecycle {
         builder.addDoubleProperty("Current Position", this::getCurrentPosition, null);
         builder.addBooleanProperty("Is In Position", this::isInPosition, null);
         builder.addDoubleProperty("Current Setpoint", () -> currentSetpoint, this::moveToEncoderPosition);
+        builder.addStringProperty("Requested", () -> requestedSetpoint != null ? requestedSetpoint.name() : "none", null);
         builder.addBooleanProperty("Coral Obstruction", this::isElevatorObstructedByCoral, null);
-        builder.addDoubleProperty("Encoder Offset", () -> encoderOffset, (v) -> encoderOffset = v);
+//        builder.addDoubleProperty("Encoder Offset", () -> encoderOffset, (v) -> encoderOffset = v);
 
         builder.addDoubleProperty("Open Loop Motor Speed", () -> openLoopMotorSpeed, (speed) -> openLoopMotorSpeed = speed);
         builder.addDoubleProperty("Open Loop Max", () -> openLoopMax, (max) -> openLoopMax = max);
@@ -194,6 +202,7 @@ public class Elevator extends SubsystemBase implements Lifecycle {
 
     public static class ElevatorMoveToPositionCommand extends Command {
         private final ElevatorSetpoint setpoint;
+        private boolean abort = false;
 
         public ElevatorMoveToPositionCommand(ElevatorSetpoint setpoint) {
             this.setpoint = setpoint;
@@ -203,7 +212,8 @@ public class Elevator extends SubsystemBase implements Lifecycle {
         @Override
         public void initialize() {
             if (Subsystems.elevator.isElevatorObstructedByCoral()) {
-                this.cancel();
+                BSLogger.log("ElevatorMoveToPositionCommand", "Coral obstruction detected, setting abort");
+                abort = true;
                 return;
             }
             Subsystems.elevator.moveToPosition(this.setpoint);
@@ -211,7 +221,7 @@ public class Elevator extends SubsystemBase implements Lifecycle {
 
         @Override
         public boolean isFinished() {
-            return Subsystems.elevator.isInPosition();
+            return abort || Subsystems.elevator.isInPosition();
         }
     }
 

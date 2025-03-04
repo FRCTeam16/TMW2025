@@ -94,6 +94,10 @@ public class Climber extends SubsystemBase implements Lifecycle {
         return this.run(() -> runOpenLoop(-value)).withName("Climber Open Loop Up");
     }
 
+    public Command zeroClimberPosition() {
+        return this.runOnce(() -> this.climberMotor.setPosition(0));
+    }
+
     public Command defaultHoldPositionCommand() {
         return this.run(() -> {
             final double currentPosition = getPosition();
@@ -137,4 +141,26 @@ public class Climber extends SubsystemBase implements Lifecycle {
             return Subsystems.climber.isInPosition();
         }
     }
+
+    public static class ClimberMoveToPositionNoWait extends Command {
+        private final ClimberPosition position;
+
+        public ClimberMoveToPositionNoWait(ClimberPosition position) {
+            addRequirements(Subsystems.climber);
+            this.position = position;
+        }
+
+        @Override
+        public void initialize() {
+            Subsystems.climber.moveToPosition(this.position.position);
+        }
+
+        @Override
+        public boolean isFinished() {
+            return true;
+        }
+    }
+
+
+
 }

@@ -1,5 +1,6 @@
 package frc.robot;
 
+import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 
@@ -9,4 +10,11 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 public class Constants {
     public static final LinearVelocity MaxSpeed = MetersPerSecond.of(4.402);
     public static final AngularVelocity MaxAngularRate = RotationsPerSecond.of(1.25);
+
+    /**
+     * Pathfinding constraints for the robot.
+     */
+    public static PathConstraints pathConstraints =
+            new PathConstraints(1, 1.0, 1.0, 1.0);
+
 }

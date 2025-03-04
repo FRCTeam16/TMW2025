@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Subsystems;
 import frc.robot.subsystems.RotationController;
 import frc.robot.subsystems.TranslationController;
+import frc.robot.subsystems.pose.UpdateTranslationFromVision;
 import frc.robot.subsystems.vision.LimelightHelpers;
 import frc.robot.util.BSLogger;
 
@@ -24,20 +25,26 @@ public class AlignDriveInCommand extends Command {
     private final Distance LIMELIGHT_OFFSET = Inches.of(12.279);
 
     private final boolean isLeft;
-    private final Distance targetDistance;
     RotationController rotationController = Subsystems.rotationController;
+    private Distance targetDistance;
     private Angle targetRotation;
     private PIDController alignController = Subsystems.alignTranslationController;
     private TranslationController distanceController = Subsystems.translationController;
 
     private SwerveRequest.RobotCentric robotCentric = new SwerveRequest.RobotCentric();
     private SwerveRequest.Idle idle = new SwerveRequest.Idle();
+    private SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
 
 
     public AlignDriveInCommand(boolean isLeft) {
         this.isLeft = isLeft;
         this.targetDistance = Meters.of(isLeft ? TARGET_DISTANCE : TARGET_DISTANCE);
         this.addRequirements(Subsystems.swerveSubsystem);
+    }
+
+    public AlignDriveInCommand withTargetDistance(Distance distance) {
+        this.targetDistance = distance;
+        return this;
     }
 
     @Override
@@ -50,6 +57,7 @@ public class AlignDriveInCommand extends Command {
             optTagPose.ifPresent(pose2d -> {
                 targetRotation = pose2d.getRotation().getMeasure().plus(Degrees.of(180));
             });
+            Subsystems.poseManager.pushRequest(new UpdateTranslationFromVision());
         }
 
         rotationController.reset();
@@ -125,6 +133,11 @@ public class AlignDriveInCommand extends Command {
         }
         // Default if no distance read
         return Degrees.of((isLeft) ? 22.5 : -23);
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        Subsystems.swerveSubsystem.setControl(brake);
     }
 
     @Override

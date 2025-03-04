@@ -44,7 +44,7 @@ public class DriveToPoseCommand extends Command {
         distancePID.reset();
         anglePID.reset();
 
-        distancePID.setSetpoint(0);
+        distancePID.setSetpoint(0.35);
 
         Rotation2d targetAngle = targetPose.getRotation();
         anglePID.setSetpoint(targetAngle.getDegrees());
@@ -88,7 +88,7 @@ public class DriveToPoseCommand extends Command {
 
         // Construct the chassis speeds command (assuming field-relative control)
         ChassisSpeeds chassisSpeeds = new ChassisSpeeds(vx, vy, rotationOutput);
-        BSLogger.log("DriveToPoseCommand", "Chass   is Speeds: " + chassisSpeeds);
+        BSLogger.log("DriveToPoseCommand", "Chassis Speeds: " + chassisSpeeds);
         drivetrain.setControl(applyRobotSpeeds.withSpeeds(chassisSpeeds));
     }
 

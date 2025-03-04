@@ -5,9 +5,9 @@
 package frc.robot;
 
 import au.grapplerobotics.CanBridge;
+import com.pathplanner.lib.commands.PathfindingCommand;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
@@ -15,11 +15,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.generated.RobotConfig;
+import frc.robot.subsystems.vision.LimelightHelpers;
 import frc.robot.subsystems.vision.Pipeline;
 import frc.robot.util.BSLogger;
 import frc.robot.util.GameInfo;
-
-import java.util.Queue;
 
 public class Robot extends TimedRobot {
   private Command autonomousCommand;
@@ -57,6 +56,10 @@ public class Robot extends TimedRobot {
 
     // Allow other interested parties to respond
     m_robotContainer.robotInit();
+
+    // Finally start warmup
+    // DO THIS AFTER CONFIGURATION OF YOUR DESIRED PATHFINDER
+    PathfindingCommand.warmupCommand().schedule();
   }
 
   @Override
@@ -71,16 +74,20 @@ public class Robot extends TimedRobot {
   public void disabledInit() {
     // We may want to switch to the view pipeline when disabled for thermal reasons
 //    Subsystems.visionSubsystem.selectPipeline(Pipeline.View);
+    LimelightHelpers.SetIMUMode("limelight", 1);
   }
 
   @Override
-  public void disabledPeriodic() {}
+  public void disabledPeriodic() {
+    Subsystems.visionOdometryUpdater.updateOdometry();
+  }
 
   @Override
   public void disabledExit() {}
 
   @Override
   public void autonomousInit() {
+    LimelightHelpers.SetIMUMode("limelight", 2);
     Subsystems.visionSubsystem.selectPipeline(Pipeline.April);
     BSLogger.log("Robot", "autoInit:: Started at:" + Timer.getFPGATimestamp());
     autonomousCommand = m_robotContainer.getAutonomousCommand();
@@ -105,6 +112,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
+    LimelightHelpers.SetIMUMode("limelight", 2);
     Subsystems.visionSubsystem.selectPipeline(Pipeline.April);
     if (autonomousCommand != null) {
       autonomousCommand.cancel();

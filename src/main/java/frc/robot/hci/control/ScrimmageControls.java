@@ -115,6 +115,8 @@ public class ScrimmageControls extends ControlBinding {
         // reset the field-centric heading on left bumper press
         SmartDashboard.putData("Seed Field Centric", Commands.runOnce(() -> Subsystems.poseManager.pushRequest(new SeedFieldCentricRequest()))
                 .ignoringDisable(true));
+
+        SmartDashboard.putData("Zero Climber", Subsystems.climber.zeroClimberPosition().ignoringDisable(true));
     }
 
     void bindDebugControls() {
