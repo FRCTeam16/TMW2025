@@ -5,6 +5,8 @@ import frc.robot.subsystems.DMS.DMSDataCollector;
 import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.wpilibj.Timer;
 
+import static edu.wpi.first.units.Units.Amps;
+
 class RunCoralIntakeTestCommand extends AbstractRunMotorTest {
     
     private final MedianFilter currentFilter;
@@ -26,8 +28,10 @@ class RunCoralIntakeTestCommand extends AbstractRunMotorTest {
 
     @Override
     protected double[] getMotorCurrents() {
-        double rawCurrent = Subsystems.coralIntake.();
-        double filteredCurrent = currentFilter.calculate(rawCurrent); // Apply median filter
+        double rawCurrentTop = Subsystems.coralIntake.getTopMotorCurrent().in(Amps); // Get the raw current value
+        double rawCurrentBottom = Subsystems.coralIntake.getBottomMotorCurrent().in(Amps); // Get the raw current value
+        // TOP
+        double filteredCurrent = currentFilter.calculate(rawCurrentTop); // Apply median filter
         return new double[]{filteredCurrent}; // Return the filtered value in an array
     }
 }

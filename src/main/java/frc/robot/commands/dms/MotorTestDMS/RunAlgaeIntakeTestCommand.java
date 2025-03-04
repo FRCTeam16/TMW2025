@@ -1,11 +1,12 @@
 package frc.robot.commands.dms.MotorTestDMS;
-import frc.robot.Subsystems;
-import frc.robot.subsystems.DMS.DMSDataCollector;
+
 import com.ctre.phoenix6.hardware.core.CoreTalonFX;
+import frc.robot.Subsystems;
+import frc.robot.subsystems.DMS.SingleMotorDataCollector;
 
-class RunAlgaeIntakeTestCommand extends AbstractRunMotorTest {
+class RunAlgaeIntakeTestCommand extends AbstractRunMotorTest<SingleMotorDataCollector> {
 
-    public RunAlgaeIntakeTestCommand(DMSDataCollector dmsDataCollector) {
+    public RunAlgaeIntakeTestCommand(SingleMotorDataCollector dmsDataCollector) {
         super(dmsDataCollector);
     }
 
@@ -24,7 +25,9 @@ class RunAlgaeIntakeTestCommand extends AbstractRunMotorTest {
     @Override
         protected
         double[] getMotorCurrents() {
-            return new double[]{((CoreTalonFX) Subsystems.algaeIntake.getMotor()).getStatorCurrent().getValueAsDouble()};
+        // FIXME
+        return new double[0];
+//            return new double[]{((CoreTalonFX) Subsystems.algaeIntake.getMotor()).getStatorCurrent().getValueAsDouble()};
         }
 
   

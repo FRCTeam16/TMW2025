@@ -17,7 +17,7 @@ public class DisplayDMSDataCommand extends Command {
 
     @Override
     public void initialize() {
-        this.driveDataCollector.getScore();
+        this.driveDataCollector.getCollectedData();
     }
 
     @Override

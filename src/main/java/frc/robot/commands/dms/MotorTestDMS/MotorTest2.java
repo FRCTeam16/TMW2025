@@ -1,15 +1,12 @@
 package frc.robot.commands.dms.MotorTestDMS;
-import com.ctre.phoenix6.swerve.SwerveRequest;
-import frc.robot.subsystems.DMS.DMSDataCollector;
-import frc.robot.subsystems.Intake.AlgaeArm;
-import frc.robot.subsystems.Intake.AlgaeIntake;
-import frc.robot.subsystems.Intake.CoralIntake;
-import frc.robot.subsystems.Climber;
-import frc.robot.subsystems.Elevator;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
 
-public class MotorTest2 extends AbstractRunMotorTest {
+import frc.robot.subsystems.DMS.SwerveDataCollector;
+
+public class MotorTest2 extends AbstractRunMotorTest<SwerveDataCollector> {
+
+    public MotorTest2(SwerveDataCollector dmsDataCollector) {
+        super(dmsDataCollector);
+    }
 
     @Override
     protected void startMotor() {

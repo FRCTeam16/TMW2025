@@ -31,7 +31,7 @@ public class SwerveDataCollector extends AbstractDataCollector<DriveInfo<Integer
     }
 
     @Override
-    public DriveInfo<Integer> getScore() {
+    public DriveInfo<Integer> getCollectedData() {
         double[] currentFLArray = currentData.FL.stream().mapToDouble(Double::doubleValue).toArray();
         double[] currentFRArray = currentData.FR.stream().mapToDouble(Double::doubleValue).toArray();
         double[] currentRLArray = currentData.RL.stream().mapToDouble(Double::doubleValue).toArray();

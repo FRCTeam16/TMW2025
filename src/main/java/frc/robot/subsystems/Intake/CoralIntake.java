@@ -11,7 +11,7 @@ import com.ctre.phoenix6.signals.S1FloatStateValue;
 import com.ctre.phoenix6.signals.S2CloseStateValue;
 import com.ctre.phoenix6.signals.S2FloatStateValue;
 import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.math.filter.MedianFilter;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -134,6 +134,14 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
             topMotor.setControl(dutyCycleOutTop.withOutput(0.15));
             bottomMotor.setControl(dutyCycleOutBottom.withOutput(-0.25));
         });
+    }
+
+    public Current getTopMotorCurrent() {
+        return topMotor.getStatorCurrent().getValue();
+    }
+
+    public Current getBottomMotorCurrent() {
+        return bottomMotor.getStatorCurrent().getValue();
     }
 
     private class ShootCoralCommand extends Command {

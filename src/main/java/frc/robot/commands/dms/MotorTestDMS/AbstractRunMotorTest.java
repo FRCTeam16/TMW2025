@@ -1,10 +1,11 @@
 package frc.robot.commands.dms.MotorTestDMS;
 
-import frc.robot.subsystems.DMS.DMSDataCollector;
+import frc.robot.subsystems.DMS.AbstractDataCollector;
 
-public abstract class AbstractRunMotorTest {
-    public AbstractRunMotorTest(DMSDataCollector dmsDataCollector) {
-        //TODO Auto-generated constructor stub
+public abstract class AbstractRunMotorTest<T extends AbstractDataCollector<?>> {
+    protected final T dataCollector;
+    public AbstractRunMotorTest(T dataCollector) {
+        this.dataCollector = dataCollector;
     }
     protected abstract void startMotor();
     protected abstract void stopMotor();
