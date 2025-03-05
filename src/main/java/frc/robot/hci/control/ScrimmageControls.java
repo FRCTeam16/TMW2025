@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Robot;
 import frc.robot.Subsystems;
 import frc.robot.commands.*;
+import frc.robot.commands.dms.RunDMSCommand;
 import frc.robot.commands.pose.GenericPoseRequestCommand;
 import frc.robot.commands.vision.AlignDriveInCommand;
 import frc.robot.commands.vision.PipelineSwitcher;
@@ -118,6 +119,8 @@ public class ScrimmageControls extends ControlBinding {
                 .ignoringDisable(true));
 
         SmartDashboard.putData("Zero Climber", Subsystems.climber.zeroClimberPosition().ignoringDisable(true));
+
+        SmartDashboard.putData("Run DMS", new RunDMSCommand());
     }
 
     void bindDebugControls() {

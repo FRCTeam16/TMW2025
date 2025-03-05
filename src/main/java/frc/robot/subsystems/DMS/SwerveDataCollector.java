@@ -10,6 +10,8 @@ import java.util.function.DoubleToIntFunction;
  * Collects data from the DMS for analysis.
  * <p>
  * Uses https://www.itl.nist.gov/div898/handbook/eda/section3/eda35h.htm
+ *
+ * https://crispinagar.github.io/blogs/mad-anomaly-detection.html
  */
 public class SwerveDataCollector extends AbstractDataCollector<DriveInfo<Integer>> {
     private final DriveInfo<List<Double>> currentData = new DriveInfo<>(new ArrayList<>());
@@ -73,6 +75,12 @@ public class SwerveDataCollector extends AbstractDataCollector<DriveInfo<Integer
 
         // 4. Compute MAD (median of absolute deviations)
         double MAD = median(absDevs);
+
+        // Handle zero or near-zero MAD
+        double minMAD = 1e-6; // Minimum threshold for MAD
+        if (MAD < minMAD) {
+            MAD = minMAD;
+        }
 
         // 5. Compute each motor's median
         double medianFL = median(FL);
@@ -141,17 +149,6 @@ public class SwerveDataCollector extends AbstractDataCollector<DriveInfo<Integer
         return result;
     }
 
-    private double[] calculateModifiedZ(List<Double> data) {
-        Collections.sort(data);
-        // assume even number of observations
-        double median = (data.get(1) + data.get(2)) / 2;
-        double[] deviations = data.stream().mapToDouble(c -> c - median).toArray();
-        double medianDeviation = (deviations[1] + deviations[2]) / 2;
-
-        double[] modifiedZ = data.stream().mapToDouble(c -> (0.6745 * (c - median) ) / medianDeviation).toArray();
-        return modifiedZ;
-    }
-
     /*
      * 0: No outliers in current or velocity
      * 1: Outliers in velocity only
@@ -159,7 +156,7 @@ public class SwerveDataCollector extends AbstractDataCollector<DriveInfo<Integer
      * 3: Outliers in both current and velocity
      * 4: Error
      */
-    private int calculateStatus(Boolean currentStatus, Boolean velocityStatus) {
+    public static int calculateStatus(Boolean currentStatus, Boolean velocityStatus) {
         return (currentStatus ? 2 : 0) + (velocityStatus ? 1 : 0);
 //        if (!currentStatus && !velocityStatus) {
 //            return 0;

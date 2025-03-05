@@ -5,6 +5,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.Constants;
 import frc.robot.Subsystems;
 import frc.robot.subsystems.DMS.SwerveDataCollector;
+import frc.robot.util.BSLogger;
 
 import java.util.Arrays;
 
@@ -20,6 +21,7 @@ class RunDriveTestCommand extends AbstractRunDMSMotorTestCommand {
 
     @Override
     void startMotors() {
+        BSLogger.log("DMS RunDriveTestCommand", "startMotors");
         Subsystems.swerveSubsystem.setControl(
                 applyRobotSpeeds.withSpeeds(
                         new ChassisSpeeds(Constants.MaxSpeed.in(MetersPerSecond), 0, 0)));
@@ -27,6 +29,8 @@ class RunDriveTestCommand extends AbstractRunDMSMotorTestCommand {
 
     @Override
     void stopMotors() {
+        BSLogger.log("DMS RunDriveTestCommand", "stopMotors");
+
         Subsystems.swerveSubsystem.setControl(
                 applyRobotSpeeds.withSpeeds(new ChassisSpeeds()));
     }
