@@ -5,7 +5,7 @@ import frc.robot.Subsystems;
 import frc.robot.util.BSLogger;
 
 public class IntakeCoralCommand extends Command {
-    private static final String STOP_CORAL_INTAKE_TASK = "StopCoralIntakeTask";
+    public static final String STOP_CORAL_INTAKE_TASK = "StopCoralIntakeTask";
     private final CoralIntake coralIntake;
     int step = 1;
 

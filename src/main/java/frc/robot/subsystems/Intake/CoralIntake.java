@@ -18,6 +18,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.Subsystems;
 import frc.robot.subsystems.Lifecycle;
+import frc.robot.util.BSLogger;
+
+import static frc.robot.subsystems.Intake.IntakeCoralCommand.STOP_CORAL_INTAKE_TASK;
 
 public class CoralIntake extends SubsystemBase implements Lifecycle {
     public static final double COMMAND_TIMEOUT_SECONDS = 5.0;
@@ -42,6 +45,10 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
     private boolean bottomSensorDetected;
 
 
+    private boolean coralIntakeMode = false;
+    private int coralIntakeStep = 1;
+
+
     public CoralIntake() {
         CANdiConfiguration candiConfig = new CANdiConfiguration()
                 .withDigitalInputs(new DigitalInputsConfigs()
@@ -59,13 +66,66 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
         Subsystems.asyncManager.register("CoralPeriodicDetect", this::updateDetectorState);
     }
 
+    @Override
+    public void teleopInit() {
+        coralIntakeMode = false;
+        this.setDefaultCommand(this.stopCommand());
+    }
+
+    @Override
+    public void autoInit() {
+        this.removeDefaultCommand();
+    }
+
     private void updateDetectorState() {
         topSensorDetected = topSensorFilter.calculate(candi.getS1Closed().getValue());
         bottomSensorDetected = bottomSensorFilter.calculate(candi.getS2Closed().getValue());
     }
 
+    public void startIntakeAuto() {
+        if (!coralIntakeMode) {
+            this.intakeFast();
+            coralIntakeMode = true;
+            coralIntakeStep = 1;
+            Subsystems.asyncManager.register(STOP_CORAL_INTAKE_TASK, () -> {
+                if (coralIntakeStep < 3 && Subsystems.coralIntake.coralDetectedAtBottomSensor()) {
+                    BSLogger.log("IntakeCoralCommandAsync", "Async STOPPING INTAKE CMD");
+                    coralIntakeStep = 3;
+                    Subsystems.coralIntake.stop();
+                }
+            });
+        }
+        coralIntakeMode = true;
+    }
+
+    public void stopIntakeAuto() {
+        Subsystems.asyncManager.unregister(STOP_CORAL_INTAKE_TASK);
+        coralIntakeMode = false;
+        this.stop();
+    }
+
     @Override
     public void periodic() {
+        if (coralIntakeMode) {
+            if (coralIntakeStep == 1) {
+                //if first laser sees coral while default action: change action to action 2
+                if (this.coralDetectedAtTopSensor()) {
+                    BSLogger.log("CoralIntakeCommand", "Coral detected at first sensor");
+                    this.intakeSlow();
+                    coralIntakeStep = 2;
+                }
+            }
+
+            //second action when intake: runForward(slow)
+            if (coralIntakeStep == 2) {
+                //if second laser sees coral while second action: change action to action 3
+                if (this.coralDetectedAtBottomSensor()) {
+                    BSLogger.log("CoralIntakeCommand", "Coral detected at second sensor");
+                    this.stop();
+                    coralIntakeStep = 3;
+                }
+            }
+        }
     }
 
     @Override

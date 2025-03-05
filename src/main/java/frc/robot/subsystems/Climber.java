@@ -34,7 +34,7 @@ public class Climber extends SubsystemBase implements Lifecycle {
                 .withKP(5.0);
         SoftwareLimitSwitchConfigs softwareLimitSwitchConfigs = new SoftwareLimitSwitchConfigs()
                 .withForwardSoftLimitEnable(true)
-                .withForwardSoftLimitThreshold(82)
+                .withForwardSoftLimitThreshold(116)
                 .withReverseSoftLimitEnable(true)
                 .withReverseSoftLimitThreshold(-70);
         MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs()
@@ -48,6 +48,16 @@ public class Climber extends SubsystemBase implements Lifecycle {
                 .withSoftwareLimitSwitch(softwareLimitSwitchConfigs);
 
         climberMotor.getConfigurator().apply(climberConfiguration);
+        this.setDefaultCommand(new DefaultHoldPositionCommand());
+    }
+
+    @Override
+    public void autoInit() {
+        this.removeDefaultCommand();
+    }
+
+    @Override
+    public void teleopInit() {
         this.setDefaultCommand(new DefaultHoldPositionCommand());
     }
 

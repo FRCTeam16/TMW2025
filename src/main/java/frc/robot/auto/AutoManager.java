@@ -23,7 +23,7 @@ public class AutoManager {
 
     private static final PathRegistry pathRegistry = new PathRegistry();
     private final SendableChooser<String> chooser = new SendableChooser<>();
-    private final HashMap<String, Supplier<Command>> strategyLookup = new HashMap<>();
+    private final HashMap<String, Command> strategyLookup = new HashMap<>();
 
     /**
      * Constructs an AutoManager instance.
@@ -115,7 +115,7 @@ public class AutoManager {
         } else {
             chooser.addOption(displayName, strategyName);
         }
-        strategyLookup.put(strategyName, strategy);
+        strategyLookup.put(strategyName, strategy.get());
     }
 
     /**
@@ -127,7 +127,7 @@ public class AutoManager {
         Command selected = null;
 
         if (strategyLookup.containsKey(chooser.getSelected())) {
-            selected = strategyLookup.get(chooser.getSelected()).get();
+            selected = strategyLookup.get(chooser.getSelected());
         } else {
             selected = Commands.print("[AutoManager] ERROR: Could not find requested auto: " + chooser.getSelected());
         }
