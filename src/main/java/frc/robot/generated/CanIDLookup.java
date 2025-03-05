@@ -35,7 +35,7 @@ public class CanIDLookup {
         canIDMap = new HashMap<>(defaultCanIDs);
 
         // Work around Java limitations
-        canIDMap.put("algaeIntakeMotor", 5);
+        //
 
         if (config == RobotConfig.ConfigName.LOWRIDA) {
             canIDMap.putAll(lowridaIDMap);

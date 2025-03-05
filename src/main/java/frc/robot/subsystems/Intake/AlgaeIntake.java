@@ -1,5 +1,6 @@
 package frc.robot.subsystems.Intake;
 
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.NeutralOut;
@@ -17,7 +18,7 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle {
     private final TalonFX algaeIntakeMotor = new TalonFX(Robot.robotConfig.getCanID("algaeIntakeMotor"));
     private final NeutralOut brake = new NeutralOut();
     private final DutyCycleOut intakeDutyCycleOut = new DutyCycleOut(1);
-    private final MotorVoltageFilter motorVoltageFilter = new MotorVoltageFilter(5, algaeIntakeMotor); //TODO: 5 isnt a real number here
+//    private final MotorVoltageFilter motorVoltageFilter = new MotorVoltageFilter(5, algaeIntakeMotor); //TODO: 5 isnt a real number here
 
 
     private double forwardSpeed = 0.65;
@@ -25,10 +26,15 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle {
     private double holdSpeed = 0.15;
 
     public AlgaeIntake() {
-        TalonFXConfiguration intakeConfiguration = new TalonFXConfiguration();
+
+        MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs()
+                .withNeutralMode(NeutralModeValue.Brake);
+
+        TalonFXConfiguration intakeConfiguration = new TalonFXConfiguration()
+                .withMotorOutput(motorOutputConfigs);
         algaeIntakeMotor.getConfigurator().apply(intakeConfiguration);
-        algaeIntakeMotor.setNeutralMode(NeutralModeValue.Brake);
-        this.setDefaultCommand(this.stopCommand());
+
+        this.setDefaultCommand(new DefaultHoldCommand());
     }
 
     public void setForwardSpeed(double speed) {
@@ -68,6 +74,19 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle {
 
     public Command stopCommand() {
         return this.run(() -> algaeIntakeMotor.setControl(brake)).withName("Algae Stop");
+    }
+
+    class DefaultHoldCommand extends Command {
+        DefaultHoldCommand() {
+            addRequirements(AlgaeIntake.this);
+            setName("Algae Hold");
+        }
+
+        @Override
+        public void initialize() {
+            algaeIntakeMotor.setControl(brake);
+//            algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(0.25));
+        }
     }
 
 
