@@ -112,7 +112,7 @@ public class ArkansasStrategy extends AutoPathStrategy {
 
 
                 AutoBuilder.pathfindToPose(thirdPose, Constants.pathConstraints),
-                AutoBuilder.pathfindToPose(secondPose, Constants.pathConstraints),
+                AutoBuilder.pathfindToPose(secondPose, Constants.pathConstraints, 1.0),
                 AutoBuilder.pathfindToPose(forthPose, Constants.pathConstraints),
 
                 // TODO: This does not work to follow path

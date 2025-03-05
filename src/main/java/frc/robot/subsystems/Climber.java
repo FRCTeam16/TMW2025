@@ -6,11 +6,13 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.Subsystems;
+import frc.robot.util.BSLogger;
 
 public class Climber extends SubsystemBase implements Lifecycle {
 
@@ -26,7 +28,8 @@ public class Climber extends SubsystemBase implements Lifecycle {
     public Climber() {
         TalonFXConfiguration climberConfiguration = new TalonFXConfiguration();
         MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs()
-                .withInverted(InvertedValue.Clockwise_Positive);
+                .withInverted(InvertedValue.Clockwise_Positive)
+                .withNeutralMode(NeutralModeValue.Brake);
         Slot0Configs slot0Configs = new Slot0Configs()
                 .withKP(5.0);
         SoftwareLimitSwitchConfigs softwareLimitSwitchConfigs = new SoftwareLimitSwitchConfigs()
@@ -45,7 +48,7 @@ public class Climber extends SubsystemBase implements Lifecycle {
                 .withSoftwareLimitSwitch(softwareLimitSwitchConfigs);
 
         climberMotor.getConfigurator().apply(climberConfiguration);
-        this.setDefaultCommand(this.defaultHoldPositionCommand());
+        this.setDefaultCommand(new DefaultHoldPositionCommand());
     }
 
     private double getPosition() {
@@ -98,18 +101,11 @@ public class Climber extends SubsystemBase implements Lifecycle {
         return this.runOnce(() -> this.climberMotor.setPosition(0));
     }
 
-    public Command defaultHoldPositionCommand() {
-        return this.run(() -> {
-            final double currentPosition = getPosition();
-            moveToPosition(currentPosition);
-        }).withName("Default Hold Climber Position");
-    }
-
 
     public enum ClimberPosition {
         UP(0),
-        CLIMB(-60), // -53.3
-        DOWN(81),   // 100
+        CLIMB(-48), // -53.3
+        DOWN(115),   // 100
         PICKUP(60); // 53.3
 
         private final double position;
@@ -123,16 +119,38 @@ public class Climber extends SubsystemBase implements Lifecycle {
         }
     }
 
+    public class DefaultHoldPositionCommand extends Command {
+
+        public DefaultHoldPositionCommand() {
+            addRequirements(Climber.this);
+        }
+
+        @Override
+        public void initialize() {
+            Subsystems.climber.moveToPosition(Subsystems.climber.getPosition());
+        }
+    }
+
+
     public static class ClimberMoveToPositionCommand extends Command {
         private final ClimberPosition position;
 
         public ClimberMoveToPositionCommand(ClimberPosition position) {
-            addRequirements(Subsystems.climber);
+            this.addRequirements(Subsystems.climber);
+            if (ClimberPosition.PICKUP == position) {
+                addRequirements(Subsystems.funnelSubsystem);
+            }
+
             this.position = position;
         }
 
         @Override
         public void initialize() {
+            if (ClimberPosition.PICKUP == position) {
+                BSLogger.log("Climber", "Closing Latch");
+                Subsystems.funnelSubsystem.closeLatch();;
+            }
+            BSLogger.log("Climber", "Moving to position: " + position.name());
             Subsystems.climber.moveToPosition(this.position.position);
         }
 
@@ -147,11 +165,19 @@ public class Climber extends SubsystemBase implements Lifecycle {
 
         public ClimberMoveToPositionNoWait(ClimberPosition position) {
             addRequirements(Subsystems.climber);
+            if (ClimberPosition.PICKUP == position) {
+                addRequirements(Subsystems.funnelSubsystem);
+            }
             this.position = position;
         }
 
         @Override
         public void initialize() {
+            if (ClimberPosition.PICKUP == position) {
+                BSLogger.log("Climber", "Closing Latch");
+                Subsystems.funnelSubsystem.closeLatch();
+            }
+            BSLogger.log("Climber", "Moving to position: " + position.name());
             Subsystems.climber.moveToPosition(this.position.position);
         }
 
@@ -160,7 +186,4 @@ public class Climber extends SubsystemBase implements Lifecycle {
             return true;
         }
     }
-
-
-
 }

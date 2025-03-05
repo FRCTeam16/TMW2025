@@ -11,7 +11,7 @@ public class IntakeCoralCommand extends Command {
 
     public IntakeCoralCommand() {
         this.coralIntake = Subsystems.coralIntake;
-        addRequirements(coralIntake, Subsystems.funnelSubsystem);
+        addRequirements(coralIntake);
     }
 
     @Override
@@ -26,7 +26,6 @@ public class IntakeCoralCommand extends Command {
 
         // Start with fast intake
         coralIntake.intakeFast();
-        Subsystems.funnelSubsystem.startConveyor();
     }
 
     @Override
@@ -70,6 +69,5 @@ public class IntakeCoralCommand extends Command {
     public void end(boolean interrupted) {
         Subsystems.asyncManager.unregister(STOP_CORAL_INTAKE_TASK);
         coralIntake.stop();
-        Subsystems.funnelSubsystem.stopConveyor();
     }
 }

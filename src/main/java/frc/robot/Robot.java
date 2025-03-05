@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.generated.RobotConfig;
+import frc.robot.subsystems.scoring.ScoreSubsystem;
 import frc.robot.subsystems.vision.LimelightHelpers;
 import frc.robot.subsystems.vision.Pipeline;
 import frc.robot.util.BSLogger;

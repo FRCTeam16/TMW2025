@@ -42,10 +42,11 @@ public class ScrimmageControls extends ControlBinding {
     private final Trigger algaeHighElevator = joystick.povUp();
     private final Trigger algaeLowElevator = joystick.povDown();
 
+    private final Trigger enableClimb = joystick.leftTrigger();
     private final Trigger climberUp = joystick.povLeft();
-    private final Trigger climberDown = joystick.rightBumper();
+    private final Trigger climberDown = joystick.povRight();
     private final Trigger climberPickup = joystick.leftBumper();
-    private final Trigger climberClimb = joystick.povRight();
+    private final Trigger climberClimb = joystick.rightBumper();
 
     private final Trigger resetPose = joystick.back();
 
@@ -81,8 +82,9 @@ public class ScrimmageControls extends ControlBinding {
 
         climberUp.onTrue(new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.UP));
         climberDown.onTrue(new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.DOWN));
-        climberPickup.onTrue(new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.PICKUP));
-        climberClimb.onTrue(new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.CLIMB));
+        enableClimb.and(climberPickup).onTrue(new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.PICKUP));
+        enableClimb.and(climberClimb).onTrue(new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.CLIMB));
+
 
         manualAlgaeToggleButton.toggleOnTrue(Subsystems.algaeArm.openLoopCommand(manualAlgaeArmControl));
         manualElevatorToggleButton.toggleOnTrue(Subsystems.elevator.openLoopCommand(manualElevatorControl));
@@ -106,7 +108,6 @@ public class ScrimmageControls extends ControlBinding {
         SmartDashboard.putData("Reset Pose From Vision",
                 VisionPoseUpdateFactory.resetFromMainPoseEstimator().ignoringDisable(true));
 
-//        SmartDashboard.putData("Reset Alliance Pose", new ResetToAlliancePoseCommand().ignoringDisable(true));
         SmartDashboard.putData("Reset Alliance Pose", new GenericPoseRequestCommand<>(ResetToAlliancePoseRequest.class));
 
         SmartDashboard.putData("Set LLs to Apriltag", new PipelineSwitcher(Pipeline.April));
@@ -120,12 +121,10 @@ public class ScrimmageControls extends ControlBinding {
     }
 
     void bindDebugControls() {
-        SmartDashboard.putData("Move Funnel to 5", Subsystems.funnelSubsystem.movePivotToPosition(5));
-        SmartDashboard.putData("Move Funnel to 0", Subsystems.funnelSubsystem.movePivotToPosition(0));
-
         SmartDashboard.putData("TestTargetCalc", new TestTargetPoseCalc().ignoringDisable(true));
 
-
+        SmartDashboard.putData("Open Latch", Subsystems.funnelSubsystem.openLatchCommand().ignoringDisable(true));
+        SmartDashboard.putData("Close Latch", Subsystems.funnelSubsystem.closeLatchCommand().ignoringDisable(true));
     }
 
     Supplier<Double> algaeArmDampener() {

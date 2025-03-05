@@ -1,9 +1,10 @@
 package frc.robot.subsystems.Intake;
 
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
@@ -26,8 +27,9 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
     public static final double ALLOWED_POSITION_ERROR = 0.1;
 
     private final TalonFX algaeArmMotor = new TalonFX(Robot.robotConfig.getCanID("algaeArmMotor"));
+//    private final CANcoder algaeArmEncoder = new CANcoder(Robot.robotConfig.getCanID("algaeArmEncoder"));
 
-    private final TalonFXConfiguration armConfiguration;
+    private static final double GRAVITY_COMPENSATION = -0.49;
 
     private final DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
     private final PositionVoltage positionVoltage = new PositionVoltage(0).withSlot(0);
@@ -37,15 +39,26 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
 
 
     public AlgaeArm() {
-        armConfiguration = new TalonFXConfiguration();
-        armConfiguration.Slot0.kP = 0.6;
-        armConfiguration.Slot0.kI = 0;
-        armConfiguration.Slot0.kD = 0;
-        armConfiguration.Slot0.kG = -0.49; // Gravity compensation
-        armConfiguration.MotionMagic.MotionMagicCruiseVelocity = 0;
-        armConfiguration.MotionMagic.MotionMagicAcceleration = 0;
+
+        Slot0Configs slot0 = new Slot0Configs()
+                .withKP(0.6)
+                .withKG(GRAVITY_COMPENSATION);
+
+        MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs()
+                .withMotionMagicCruiseVelocity(0)
+                .withMotionMagicAcceleration(0);
+
+        MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs()
+                .withNeutralMode(NeutralModeValue.Brake);
+
+        FeedbackConfigs feedbackConfigs = new FeedbackConfigs();
+
+        TalonFXConfiguration armConfiguration = new TalonFXConfiguration()
+                .withSlot0(slot0)
+                .withMotionMagic(motionMagicConfigs)
+                .withMotorOutput(motorOutputConfigs)
+                .withFeedback(feedbackConfigs);
         algaeArmMotor.getConfigurator().apply(armConfiguration);
-        algaeArmMotor.setNeutralMode(NeutralModeValue.Brake);
 
         this.algaeArmMotor.setPosition(0);
         this.setDefaultCommand(new DefaultHoldAlgaeArmCommand(this));
@@ -80,7 +93,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
     }
 
     private double calculateGravityCompensation(Angle angle) {
-        return Math.cos(angle.in(Radians)) * armConfiguration.Slot0.kG;
+        return Math.cos(angle.in(Radians)) * GRAVITY_COMPENSATION;
     }
 
     private void runOpenLoop(double speed) {
