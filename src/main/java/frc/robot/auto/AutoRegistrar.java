@@ -18,7 +18,8 @@ public class AutoRegistrar {
         autoManager.registerStrategy("Debug Auto Path", "Debug Auto Path", DebugAutoPathStrategy::new);
 //        autoManager.registerStrategy("Arkansas Left Red", "Arkansas Left", () -> new ArkansasStrategy(true, true));
         autoManager.registerStrategy("Arkansas Right Red", "Arkansas Right", () -> new ArkansasStrategy(false, true));
-        autoManager.registerStrategy("EP", "EP", EPStrategy::new);
+//        autoManager.registerStrategy("EP", "EP", EPStrategy::new);
+        autoManager.registerStrategy("TestDP", TestDPStrategy::new);
 //        autoManager.registerStrategy("Spin", "Spin", SpinStrategy::new);
 //        autoManager.registerStrategy("Cresent", "Cresent", CresentStrategy::new);
 //        autoManager.registerStrategy("ThreePiece", "ThreePiece", ThreePieceStrategy::new);

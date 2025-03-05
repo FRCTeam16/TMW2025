@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Subsystems;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -23,6 +24,8 @@ public class DriveToPoseCommand extends Command {
     private static final double ANGLE_TOLERANCE = 2;
     private final CommandSwerveDrivetrain drivetrain = Subsystems.swerveSubsystem;
     private final Pose2d targetPose;
+
+    private final LinearVelocity MAX_SPEED = MetersPerSecond.of(2);
 
     // PID controllers for translation and rotation
     private final TranslationController distancePID = Subsystems.translationController;
@@ -44,7 +47,7 @@ public class DriveToPoseCommand extends Command {
         distancePID.reset();
         anglePID.reset();
 
-        distancePID.setSetpoint(0.35);
+        distancePID.setSetpoint(0);
 
         Rotation2d targetAngle = targetPose.getRotation();
         anglePID.setSetpoint(targetAngle.getDegrees());
@@ -71,7 +74,7 @@ public class DriveToPoseCommand extends Command {
 
         // Calculate the distance error and compute the translational speed command.
         double distanceError = currentTranslation.getDistance(targetTranslation);
-        double driveSpeed = distancePID.calculate(distanceError);
+        double driveSpeed = MAX_SPEED.times(distancePID.calculate(distanceError)).in(MetersPerSecond);
 
         // Determine the drive angle (in field coordinates) from the current position to the target.
         double driveAngle = Math.atan2(
@@ -79,9 +82,14 @@ public class DriveToPoseCommand extends Command {
                 targetTranslation.getX() - currentTranslation.getX()
         );
 
+        // Set direction to drive
+        double ymul = targetTranslation.getY() > currentTranslation.getY() ? -1 : 1;
+        double xmul = targetTranslation.getX() > currentTranslation.getX() ? -1 : 1;
+
+
         // Decompose the commanded speed into x and y components.
-        double vx = driveSpeed * Math.cos(driveAngle);
-        double vy = driveSpeed * Math.sin(driveAngle);
+        double vx = xmul * driveSpeed * Math.cos(driveAngle);
+        double vy = ymul * driveSpeed * Math.sin(driveAngle);
 
         double baseRotation = anglePID.calculate(currentPose.getRotation().getDegrees());
         double rotationOutput = Degrees.of(baseRotation).times(DegreesPerSecond.of(360).in(RadiansPerSecond)).in(Radians);

@@ -6,6 +6,7 @@ import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
@@ -52,6 +53,8 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
                 .withNeutralMode(NeutralModeValue.Brake);
 
         FeedbackConfigs feedbackConfigs = new FeedbackConfigs();
+//                .withFeedbackRemoteSensorID()
+//                .withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANcoder)
 
         TalonFXConfiguration armConfiguration = new TalonFXConfiguration()
                 .withSlot0(slot0)

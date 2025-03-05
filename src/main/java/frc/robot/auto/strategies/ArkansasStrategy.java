@@ -8,6 +8,8 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants;
 import frc.robot.Subsystems;
+import frc.robot.commands.DriveRobotCentricCommand;
+import frc.robot.commands.path.DriveToPoseCommand;
 import frc.robot.commands.pose.GenericPoseRequestCommand;
 import frc.robot.commands.vision.AlignDriveInCommand;
 import frc.robot.subsystems.Climber;
@@ -24,7 +26,7 @@ public class ArkansasStrategy extends AutoPathStrategy {
 
         final Pose2d firstPose;
         Pose2d thirdPose;
-        Pose2d forthPose;
+        Pose2d fourthPose;
 
 
         if (!isRed) {
@@ -38,13 +40,13 @@ public class ArkansasStrategy extends AutoPathStrategy {
                     new Pose2d(12.275, 5.4, Rotation2d.fromDegrees(-60));   // testing at shelter
 
             thirdPose = new Pose2d(15.86, 7.21, Rotation2d.fromDegrees(-125));
-            forthPose = new Pose2d(13.9, 5.62, Rotation2d.fromDegrees(-120));
+            fourthPose = new Pose2d(13.9, 5.62, Rotation2d.fromDegrees(-120));
         }
 
 
 //        Pose2d secondPose = new Pose2d(15, 6.13, Rotation2d.fromDegrees(-120));
         thirdPose = new Pose2d(15.95, 7.41, Rotation2d.fromDegrees(-125));
-        forthPose = new Pose2d(14.4, 5.52, Rotation2d.fromDegrees(-120));
+        fourthPose = new Pose2d(14.4, 5.52, Rotation2d.fromDegrees(-120));
 
 
         addCommands(
@@ -52,15 +54,19 @@ public class ArkansasStrategy extends AutoPathStrategy {
                 new Climber.ClimberMoveToPositionNoWait(Climber.ClimberPosition.DOWN),
 
                 //  Subsystems.autoManager.pathfindThenFollowPathCommand(key+"1"),
-                AutoBuilder.pathfindToPose(firstPose, Constants.pathConstraints),
+                AutoBuilder.pathfindToPose(firstPose, Constants.pathConstraints, 0.5),
                 new Climber.ClimberMoveToPositionNoWait(Climber.ClimberPosition.DOWN),
                 doScoreSequence(false),
 
 
 //                AutoBuilder.pathfindToPose(secondPose, Constants.pathConstraints),
+
+
                 Commands.runOnce(Subsystems.coralIntake::startIntakeAuto),
                 AutoBuilder.pathfindToPose(thirdPose, Constants.pathConstraints),
-                AutoBuilder.pathfindToPose(forthPose, Constants.pathConstraints),
+//                new DriveToPoseCommand(thirdPose),
+                AutoBuilder.pathfindToPose(fourthPose, Constants.pathConstraints, 0.5),
+//                new DriveToPoseCommand(fourthPose),
                 Commands.runOnce(Subsystems.coralIntake::stopIntakeAuto),
 
                 // TODO: This does not work
@@ -70,15 +76,16 @@ public class ArkansasStrategy extends AutoPathStrategy {
         );
     }
 
+    // FIXME: Don't worry about doing this if we don't have a coral
     public Command doScoreSequence(boolean isLeft) {
         return Commands.sequence(
                 new Climber.ClimberMoveToPositionNoWait(Climber.ClimberPosition.DOWN),
-                new AlignDriveInCommand(isLeft).withTimeout(1),
+                new AlignDriveInCommand(isLeft).withTimeout(0.75),
                 new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4).withTimeout(5),
-                Subsystems.coralIntake.shootCoralCommand().withTimeout(1.0),
+                Subsystems.coralIntake.shootCoralCommand().withTimeout(0.5),
                 Commands.parallel(
                         Subsystems.coralIntake.stopCommand(),
-                        new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.Zero).withTimeout(2)
+                        new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.Zero).withTimeout(1)
                 )
         ).withName("Scoring Sequence");
     }

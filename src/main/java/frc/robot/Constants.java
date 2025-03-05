@@ -15,6 +15,6 @@ public class Constants {
      * Pathfinding constraints for the robot.
      */
     public static PathConstraints pathConstraints =
-            new PathConstraints(1, 1.0, 1.0, 1.0);
+            new PathConstraints(2.5, 2.5, 1.0, 1.0);
 
 }

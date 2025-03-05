@@ -197,13 +197,24 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
     }
 
     private class ShootCoralCommand extends Command {
+        boolean startedWithSensor = false;
+
         public ShootCoralCommand() {
             addRequirements(CoralIntake.this);
         }
 
         @Override
         public void initialize() {
+            startedWithSensor = coralDetectedAtBottomSensor();
             CoralIntake.this.intakeFast();
+        }
+
+        @Override
+        public boolean isFinished() {
+            if (startedWithSensor) {
+                return !coralDetectedAtBottomSensor();
+            }
+            return false;
         }
 
         @Override
