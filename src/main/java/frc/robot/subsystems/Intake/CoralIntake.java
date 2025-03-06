@@ -185,7 +185,6 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
     }
 
     public Command shootCoralCommand() {
-        System.out.println("Intake Shoot Command Active");
         return new ShootCoralCommand().withTimeout(COMMAND_TIMEOUT_SECONDS);
     }
 
@@ -205,6 +204,7 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
 
         @Override
         public void initialize() {
+            BSLogger.log("ShootCoralCommand", "shooting");
             startedWithSensor = coralDetectedAtBottomSensor();
             CoralIntake.this.intakeFast();
         }

@@ -31,12 +31,12 @@ public class ArkansasStrategy extends AutoPathStrategy {
         final double FW =  fieldLayout.getFieldWidth();
 
         final Pose2d rr_firstScorePose = new Pose2d(12.275, 5.4, Rotation2d.fromDegrees(-60));
-        final Pose2d rr_coralStationPose = new Pose2d(15.95, 7.41, Rotation2d.fromDegrees(-125));
+        final Pose2d rr_coralStationPose = new Pose2d(16.3, 7.75, Rotation2d.fromDegrees(-125));
         final Pose2d rr_secondScorePose = new Pose2d(14.4, 5.52, Rotation2d.fromDegrees(-120));
 
         final Pose2d rl_firstScorePose = new Pose2d(12.275, FW - 5.4, Rotation2d.fromDegrees(60));
-        final Pose2d rl_coralStationPose = new Pose2d(15.95, FW - 7.41, Rotation2d.fromDegrees(-125));
-        final Pose2d rl_secondScorePose = new Pose2d(14.4, FW - 5.52, Rotation2d.fromDegrees(-120));
+        final Pose2d rl_coralStationPose = new Pose2d(16.3, FW - 7.75, Rotation2d.fromDegrees(125));
+        final Pose2d rl_secondScorePose = new Pose2d(14.4, FW - 5.52, Rotation2d.fromDegrees(120));
 
         final Pose2d br_firstScorePose = FlippingUtil.flipFieldPose(rr_firstScorePose);
         final Pose2d br_coralStationPose = FlippingUtil.flipFieldPose(rr_coralStationPose);

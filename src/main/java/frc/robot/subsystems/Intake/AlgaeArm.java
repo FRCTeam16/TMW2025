@@ -2,6 +2,7 @@ package frc.robot.subsystems.Intake;
 
 import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -35,6 +36,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
 
     private final DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
     private final PositionVoltage positionVoltage = new PositionVoltage(0).withSlot(0);
+    private final MotionMagicVoltage motionMagic = new MotionMagicVoltage(0);
 
     private double targetPosition = 0;
     private double openLoopMax = 0.3;
@@ -43,16 +45,23 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
     public AlgaeArm() {
         CANcoderConfiguration encoderConfiguration = new CANcoderConfiguration()
             .withMagnetSensor(new MagnetSensorConfigs()
-            .withMagnetOffset(0.219));
+            .withMagnetOffset(-0.114));
         algaeArmEncoder.getConfigurator().apply(encoderConfiguration);
 
         Slot0Configs slot0 = new Slot0Configs()
-                .withKP(0.6)
+                .withKP(28)
+                .withKD(0.5)
                 .withKG(GRAVITY_COMPENSATION);
 
+        SoftwareLimitSwitchConfigs softwareLimitSwitchConfigs = new SoftwareLimitSwitchConfigs()
+        .withForwardSoftLimitEnable(true)
+        .withForwardSoftLimitThreshold(0.232)
+        .withReverseSoftLimitEnable(true)
+        .withReverseSoftLimitThreshold(-0.005);
+
         MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs()
-                .withMotionMagicCruiseVelocity(0)
-                .withMotionMagicAcceleration(0);
+                .withMotionMagicCruiseVelocity(2)
+                .withMotionMagicAcceleration(1);
 
         MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs()
                 .withNeutralMode(NeutralModeValue.Brake)
@@ -66,26 +75,30 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
                 .withSlot0(slot0)
                 .withMotionMagic(motionMagicConfigs)
                 .withMotorOutput(motorOutputConfigs)
+                .withSoftwareLimitSwitch(softwareLimitSwitchConfigs)
                 .withFeedback(feedbackConfigs);
         algaeArmMotor.getConfigurator().apply(armConfiguration);
 
-        this.algaeArmMotor.setPosition(0);
+        // this.algaeArmMotor.setPosition(0);
         this.setDefaultCommand(new DefaultHoldAlgaeArmCommand(this));
     }
 
     @Override
     public void teleopInit() {
+        targetPosition = getMotorPosition();
     }
 
+    @Override
+    public void autoInit() {
+        targetPosition = getMotorPosition();
+    }
+
+
     private void setArmPosition(double position) {
-        // TODO: Consider a method to allow pass in of translated angles?
-//        BSLogger.log("AlgaeArm", "Setting position to: " + position + " | Estimated angle: " + getEstimatedAngle());
         this.targetPosition = position;
-        // TODO: Check for near zero here and don't do anything, assume we are held
         algaeArmMotor.setControl(
-                positionVoltage.withPosition(position)
+                motionMagic.withPosition(position)
                         .withFeedForward(calculateGravityCompensation(getEstimatedAngle())));
-//        algaeArmMotor.setControl(new NeutralOut());
     }
 
     /**
@@ -96,7 +109,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
         double rotations = getMotorPosition();
 
         // Convert rotations to degrees
-        double degrees = 90.0 - (rotations / 8.6) * 90.0;
+        double degrees = 90.0 - (rotations / 0.23) * 90.0;
 
         return Degrees.of(degrees);
     }
@@ -108,11 +121,12 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
     private void runOpenLoop(double speed) {
         double clampedSpeed = MathUtil.clamp(speed, -openLoopMax, openLoopMax);
         algaeArmMotor.setControl(dutyCycleOut.withOutput(clampedSpeed));
+        this.targetPosition = algaeArmMotor.getPosition().getValueAsDouble();
     }
 
     public void holdPosition() {
-        double currentPosition = getMotorPosition();
-        setArmPosition(currentPosition);
+        // double currentPosition = getMotorPosition();
+        setArmPosition(targetPosition);
     }
 
     private void setPosition(AlgaeArmPosition position) {
@@ -166,11 +180,10 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
 
 
     public enum AlgaeArmPosition {
-        Start(0.0),
-        ReefLow(5.0),
-        ReefHigh(6.0),
-        Processor(0.0),
-        Shooting(3.0);
+        Up(0.002),
+        Ground(0.22),
+        Processor(0.185),
+        Shooting(0.05);
 
         private final double position;
 
@@ -183,22 +196,23 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
         }
     }
 
-    public class SetArmPositionCommand extends Command {
+    public static class SetArmPositionCommand extends Command {
         private final AlgaeArm.AlgaeArmPosition position;
+
 
         public SetArmPositionCommand(AlgaeArm.AlgaeArmPosition position) {
             this.position = position;
-            addRequirements(AlgaeArm.this);
+            addRequirements(Subsystems.algaeArm);
         }
 
         @Override
         public void initialize() {
-            AlgaeArm.this.setArmPosition(position.position);
+            Subsystems.algaeArm.setArmPosition(position.position);
         }
 
         @Override
         public boolean isFinished() {
-            return AlgaeArm.this.isInPosition();
+            return Subsystems.algaeArm.isInPosition();
         }
     }
 

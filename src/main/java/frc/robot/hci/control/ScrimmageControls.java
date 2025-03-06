@@ -16,6 +16,8 @@ import frc.robot.commands.vision.PipelineSwitcher;
 import frc.robot.commands.vision.VisionPoseUpdateFactory;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.Intake.AlgaeArm;
+import frc.robot.subsystems.Intake.AlgaeArm.AlgaeArmPosition;
 import frc.robot.subsystems.pose.ResetToAlliancePoseRequest;
 import frc.robot.subsystems.pose.SeedFieldCentricRequest;
 import frc.robot.subsystems.vision.Pipeline;
@@ -40,12 +42,15 @@ public class ScrimmageControls extends ControlBinding {
     private final Trigger elevatorL3 = joystick.b();
     private final Trigger elevatorL4 = joystick.y();
 
+    private final Trigger algaeArmFloor = joystick.povLeft();
+    private final Trigger algaeArmProcessor = joystick.povLeft().and(joystick.leftTrigger());
+    private final Trigger algaeArmUp = joystick.povRight();
     private final Trigger algaeHighElevator = joystick.povUp();
     private final Trigger algaeLowElevator = joystick.povDown();
 
     private final Trigger enableClimb = joystick.leftTrigger();
-    private final Trigger climberUp = joystick.povLeft();
-    private final Trigger climberDown = joystick.povRight();
+    // private final Trigger climberUp = joystick.povLeft();
+    // private final Trigger climberDown = joystick.povRight();
     private final Trigger climberPickup = joystick.leftBumper();
     private final Trigger climberClimb = joystick.rightBumper();
 
@@ -78,11 +83,15 @@ public class ScrimmageControls extends ControlBinding {
         elevatorL3.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L3));
         elevatorL4.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4));
 
+        algaeArmFloor.onTrue(new AlgaeArm.SetArmPositionCommand(AlgaeArmPosition.Ground));
+        algaeArmProcessor.onTrue(new AlgaeArm.SetArmPositionCommand(AlgaeArmPosition.Processor));
+        algaeArmUp.onTrue(new AlgaeArm.SetArmPositionCommand(AlgaeArmPosition.Up));
+
         algaeHighElevator.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.AlgaeReefHigh));
         algaeLowElevator.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.AlgaeReefLow));
 
-        climberUp.onTrue(new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.UP));
-        climberDown.onTrue(new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.DOWN));
+        // climberUp.onTrue(new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.UP));
+        // climberDown.onTrue(new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.DOWN));
         enableClimb.and(climberPickup).onTrue(new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.PICKUP));
         enableClimb.and(climberClimb).onTrue(new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.CLIMB));
 
