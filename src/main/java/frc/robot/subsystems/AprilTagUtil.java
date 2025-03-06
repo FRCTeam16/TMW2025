@@ -42,6 +42,10 @@ public class AprilTagUtil implements Sendable {
         sendableBuilder.addDoubleProperty("offsetDistance", this::getOffsetDistance, this::setOffsetDistance);
     }
 
+    public AprilTagFieldLayout getFieldLayout() {
+        return fieldLayout;
+    }
+
     public Optional<Pose2d> getScoringPoseForTag(int aprilTagID, boolean isLeft) {
         if (aprilTagID < 0) {
             return Optional.empty();

@@ -1,77 +1,126 @@
 package frc.robot.auto.strategies;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.util.FlippingUtil;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants;
 import frc.robot.Subsystems;
-import frc.robot.commands.DriveRobotCentricCommand;
-import frc.robot.commands.path.DriveToPoseCommand;
 import frc.robot.commands.pose.GenericPoseRequestCommand;
 import frc.robot.commands.vision.AlignDriveInCommand;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.Intake.IntakeCoralCommand;
 import frc.robot.subsystems.pose.UpdateTranslationFromVision;
 import frc.robot.util.GameInfo;
 
 public class ArkansasStrategy extends AutoPathStrategy {
 
-
     public ArkansasStrategy(boolean isLeft, boolean isRed) {
-        String key = isLeft ? "Arkansas Left " : "Arkansas Right ";
 
-        final Pose2d firstPose;
-        Pose2d thirdPose;
-        Pose2d fourthPose;
+        final Pose2d firstScorePose;
+        final Pose2d coralStationPose;
+        final Pose2d secondScorePose;
 
+        // Baseline coordinates
+        final AprilTagFieldLayout fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
+        final double FW =  fieldLayout.getFieldWidth();
 
-        if (!isRed) {
-            firstPose = isLeft ?
-                    new Pose2d(5.275, 5.4, Rotation2d.fromDegrees(-120)) :
-                    new Pose2d(5.275, 2.469, Rotation2d.fromDegrees(120));
+        final Pose2d rr_firstScorePose = new Pose2d(12.275, 5.4, Rotation2d.fromDegrees(-60));
+        final Pose2d rr_coralStationPose = new Pose2d(15.95, 7.41, Rotation2d.fromDegrees(-125));
+        final Pose2d rr_secondScorePose = new Pose2d(14.4, 5.52, Rotation2d.fromDegrees(-120));
 
+        final Pose2d rl_firstScorePose = new Pose2d(12.275, FW - 5.4, Rotation2d.fromDegrees(60));
+        final Pose2d rl_coralStationPose = new Pose2d(15.95, FW - 7.41, Rotation2d.fromDegrees(-125));
+        final Pose2d rl_secondScorePose = new Pose2d(14.4, FW - 5.52, Rotation2d.fromDegrees(-120));
+
+        final Pose2d br_firstScorePose = FlippingUtil.flipFieldPose(rr_firstScorePose);
+        final Pose2d br_coralStationPose = FlippingUtil.flipFieldPose(rr_coralStationPose);
+        final Pose2d br_secondScorePose = FlippingUtil.flipFieldPose(rr_secondScorePose);
+
+        final Pose2d bl_firstScorePose = FlippingUtil.flipFieldPose(rl_firstScorePose);
+        final Pose2d bl_coralStationPose = FlippingUtil.flipFieldPose(rl_coralStationPose);
+        final Pose2d bl_secondScorePose = FlippingUtil.flipFieldPose(rl_secondScorePose);
+
+        if (isRed && !isLeft) {
+            // Red Right
+            firstScorePose = rr_firstScorePose;
+            coralStationPose = rr_coralStationPose;
+            secondScorePose = rr_secondScorePose;
+        } else if (isRed && isLeft) {
+            // Red Left
+            firstScorePose = rl_firstScorePose;
+            coralStationPose = rl_coralStationPose;
+            secondScorePose = rl_secondScorePose;
+        } else if (!isRed && !isLeft) {
+            // Blue Right
+            firstScorePose = br_firstScorePose;
+            coralStationPose = br_coralStationPose;
+            secondScorePose = br_secondScorePose;
+        } else /*if (!isRed && isLeft) */ {
+            // Blue Left
+            firstScorePose = bl_firstScorePose;
+            coralStationPose = bl_coralStationPose;
+            secondScorePose = bl_secondScorePose;
+        }
+
+        final Pose2d simulationPose;
+        Pose2d sim_red_right = new Pose2d(10, 5.6, Rotation2d.fromDegrees(135));
+        Pose2d sim_red_left = new Pose2d(10, 3, Rotation2d.fromDegrees(-135));
+        if (GameInfo.isRedAlliance()) {
+            simulationPose = isLeft ? sim_red_left : sim_red_right;
         } else {
-            firstPose = isLeft ?
-                    new Pose2d(12.275, 2.469, Rotation2d.fromDegrees(60)) :
-                    new Pose2d(12.275, 5.4, Rotation2d.fromDegrees(-60));   // testing at shelter
-
-            thirdPose = new Pose2d(15.86, 7.21, Rotation2d.fromDegrees(-125));
-            fourthPose = new Pose2d(13.9, 5.62, Rotation2d.fromDegrees(-120));
+            simulationPose = isLeft ?
+                    FlippingUtil.flipFieldPose(sim_red_left) :
+                    FlippingUtil.flipFieldPose(sim_red_right);
         }
 
 
-//        Pose2d secondPose = new Pose2d(15, 6.13, Rotation2d.fromDegrees(-120));
-        thirdPose = new Pose2d(15.95, 7.41, Rotation2d.fromDegrees(-125));
-        fourthPose = new Pose2d(14.4, 5.52, Rotation2d.fromDegrees(-120));
+        System.out.println("Arkansas Strategy: " + (isRed ? "Red" : "Blue") + " " + (isLeft ? "Left" : "Right"));
+        System.out.println("First Score Pose: " + firstScorePose);
+        System.out.println("Coral Station Pose: " + coralStationPose);
+        System.out.println("Second Score Pose: " + secondScorePose);
+
+        Command initialPoseCommand = RobotBase.isReal() ?
+                new GenericPoseRequestCommand<>(UpdateTranslationFromVision.class) :
+                Commands.runOnce(() -> Subsystems.swerveSubsystem.resetPose(simulationPose));
+
 
 
         addCommands(
-                new GenericPoseRequestCommand<>(UpdateTranslationFromVision.class),
+                //
+                // Initial setup
+                //
+                initialPoseCommand,
+//                new GenericPoseRequestCommand<>(UpdateTranslationFromVision.class),
                 new Climber.ClimberMoveToPositionNoWait(Climber.ClimberPosition.DOWN),
 
+                //
+                // Go to first score pose
+                //
                 //  Subsystems.autoManager.pathfindThenFollowPathCommand(key+"1"),
-                AutoBuilder.pathfindToPose(firstPose, Constants.pathConstraints, 0.5),
+                AutoBuilder.pathfindToPose(firstScorePose, Constants.pathConstraints, 0.5),
                 new Climber.ClimberMoveToPositionNoWait(Climber.ClimberPosition.DOWN),
+
                 doScoreSequence(false),
 
-
-//                AutoBuilder.pathfindToPose(secondPose, Constants.pathConstraints),
-
+                //
+                // Go to coral station
 
                 Commands.runOnce(Subsystems.coralIntake::startIntakeAuto),
-                AutoBuilder.pathfindToPose(thirdPose, Constants.pathConstraints),
-//                new DriveToPoseCommand(thirdPose),
-                AutoBuilder.pathfindToPose(fourthPose, Constants.pathConstraints, 0.5),
-//                new DriveToPoseCommand(fourthPose),
-                Commands.runOnce(Subsystems.coralIntake::stopIntakeAuto),
+                AutoBuilder.pathfindToPose(coralStationPose, Constants.pathConstraints),
 
-                // TODO: This does not work
-//                Subsystems.autoManager.followPathCommand(key + "2"),
+                //
+                // Go to second score pose
+                //
+                AutoBuilder.pathfindToPose(secondScorePose, Constants.pathConstraints, 0.5),
+                Commands.runOnce(Subsystems.coralIntake::stopIntakeAuto),
                 doScoreSequence(false),
+
                 Commands.print("Finished Arkansas Left Strategy")
         );
     }
@@ -79,14 +128,16 @@ public class ArkansasStrategy extends AutoPathStrategy {
     // FIXME: Don't worry about doing this if we don't have a coral
     public Command doScoreSequence(boolean isLeft) {
         return Commands.sequence(
-                new Climber.ClimberMoveToPositionNoWait(Climber.ClimberPosition.DOWN),
-                new AlignDriveInCommand(isLeft).withTimeout(0.75),
-                new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4).withTimeout(5),
-                Subsystems.coralIntake.shootCoralCommand().withTimeout(0.5),
-                Commands.parallel(
-                        Subsystems.coralIntake.stopCommand(),
-                        new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.Zero).withTimeout(1)
+                        new Climber.ClimberMoveToPositionNoWait(Climber.ClimberPosition.DOWN),
+                        new AlignDriveInCommand(isLeft).withTimeout(0.75),
+                        new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4).withTimeout(5),
+                        Subsystems.coralIntake.shootCoralCommand().withTimeout(0.5),
+                        Commands.parallel(
+                                Subsystems.coralIntake.stopCommand(),
+                                new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.Zero).withTimeout(1)
+                        )
                 )
-        ).withName("Scoring Sequence");
+                .withName("Scoring Sequence");
+//                .unless(!Subsystems.coralIntake.coralDetectedAtBottomSensor())
     }
 }

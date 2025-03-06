@@ -8,9 +8,9 @@ import frc.robot.subsystems.Elevator;
 public class DebugAutoStrategy extends SequentialCommandGroup {
     public DebugAutoStrategy() {
         this.addCommands(
-                new PrintCommand("Debug Auto Strategy"),
-                new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4).withTimeout(5),
-                new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.Zero).withTimeout(5)
+                new PrintCommand("Debug Auto Strategy")
+//                new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4).withTimeout(5),
+//                new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.Zero).withTimeout(5)
         );
 
     }
