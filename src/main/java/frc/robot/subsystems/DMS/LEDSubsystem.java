@@ -22,14 +22,15 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
     private Timer timer = new Timer();
     private SerialPort serial;
     private DMSPhase currentPhase = DMSPhase.Stopped;
-    private DMSStats driveDmsStatus = new DMSStats();
-    private DMSStats steerDmsStatus = new DMSStats();
-    private DriveInfo<Integer> driveStatus = new DriveInfo<>(0);
-    private DriveInfo<Integer> steerStatus = new DriveInfo<>(0);
+    // private DMSStats driveDmsStatus = new DMSStats();
+    // private DMSStats steerDmsStatus = new DMSStats();
+    // private DriveInfo<Integer> driveStatus = new DriveInfo<>(0);
+    // private DriveInfo<Integer> steerStatus = new DriveInfo<>(0);
     private int lastComm = 0;
-    private int noCommCounter = 0;  // avoid intermittent counter by looking for a set number before reporting this
+    private int noCommCounter = 0; // avoid intermittent counter by looking for a set number before reporting this
     private int secondsToClimb = 30;
-
+    private DriveInfo<Integer> driveDMSScores;
+    private DriveInfo<Integer> steerDMSScores;
 
     /**
      * Creates a new LEDSubsystem.
@@ -109,14 +110,14 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
         buffer[4] = (byte) elevatorPosition;
 
         // DMS info
-        buffer[5] = driveStatus.FL.byteValue();
-        buffer[6] = steerStatus.FL.byteValue();
-        buffer[7] = driveStatus.FR.byteValue();
-        buffer[8] = steerStatus.FR.byteValue();
-        buffer[9] = driveStatus.RL.byteValue();
-        buffer[10] = steerStatus.RL.byteValue();
-        buffer[11] = driveStatus.RR.byteValue();
-        buffer[12] = steerStatus.RR.byteValue();
+        buffer[5] = driveDMSScores.FL.byteValue();
+        buffer[6] = steerDMSScores.FL.byteValue();
+        buffer[7] = driveDMSScores.FR.byteValue();
+        buffer[8] = steerDMSScores.FR.byteValue();
+        buffer[9] = driveDMSScores.RL.byteValue();
+        buffer[10] = steerDMSScores.RL.byteValue();
+        buffer[11] = driveDMSScores.RR.byteValue();
+        buffer[12] = steerDMSScores.RR.byteValue();
 
         buffer[13] = (byte) 0; // climber
         buffer[14] = (byte) 0; // elevatorLeft
@@ -152,11 +153,12 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
         System.out.println("*********************** STARTING DMS ****************************");
         timer.reset();
         timer.start();
-        driveDmsStatus = new DMSStats();
-        steerDmsStatus = new DMSStats();
+        // driveDmsStatus = new DMSStats();
+        // steerDmsStatus = new DMSStats();
 
-        driveStatus = new DriveInfo<>(0);
-        steerStatus = new DriveInfo<>(0);
+        // driveStatus = new DriveInfo<>(0);
+        // steerStatus = new DriveInfo<>(0);
+    
 
         currentPhase = DMSPhase.RunDriveMotors;
     }
@@ -169,8 +171,8 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
         System.out.println("*********************** STOPPING DMS ****************************");
         currentPhase = DMSPhase.Stopped;
 
-        driveStatus = new DriveInfo<>(0);
-        steerStatus = new DriveInfo<>(0);
+        // driveStatus = new DriveInfo<>(0);
+        // steerStatus = new DriveInfo<>(0);
         timer.stop();
     }
 
@@ -205,87 +207,114 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
     }
 
     private void runMotorTest() {
-/*
-        final double now = timer.get();
-        if (now < MOTOR_TEST_TIME) {
-            Subsystems.swerveSubsystem.setControl(Subsystems.swerveSubsystem.DMSDriveRequest);
-
-            if (now > INITIAL_IGNORE_TIME) {
-                driveDmsStatus.addDriveCurrent(Subsystems.swerveSubsystem.getDriveOutputCurrent());
-                driveDmsStatus.addDriveVelocity(Subsystems.swerveSubsystem.getDriveVelocity());
-
-                DMSStats.print("(DVel)", driveDmsStatus.velocity);
-                DMSStats.print("(DAmp)", driveDmsStatus.current);
-
-                double velAvg = DMSStats.average(driveDmsStatus.velocity);
-                double ampAvg = DMSStats.average(driveDmsStatus.current);
-                System.out.println("Vel Avg: " + velAvg + " | Amp Avg: " + ampAvg);
-
-                driveStatus = driveDmsStatus.calculateStatus();
-                DMSStats.print("[Drive Status]", driveStatus);
-            }
-        } else {
-            SmartDashboard.putNumber("DMS/Result/FL/Drive/Status", driveStatus.FL);
-            SmartDashboard.putNumber("DMS/Result/FL/Drive/Vel", driveDmsStatus.velocity.FL);
-            SmartDashboard.putNumber("DMS/Result/FL/Drive/Amp", driveDmsStatus.current.FL);
-            SmartDashboard.putNumber("DMS/Result/FR/Drive/Status", driveStatus.FR);
-            SmartDashboard.putNumber("DMS/Result/FR/Drive/Vel", driveDmsStatus.velocity.FR);
-            SmartDashboard.putNumber("DMS/Result/FR/Drive/Amp", driveDmsStatus.current.FR);
-            SmartDashboard.putNumber("DMS/Result/RL/Drive/Status", driveStatus.RL);
-            SmartDashboard.putNumber("DMS/Result/RL/Drive/Vel", driveDmsStatus.velocity.RL);
-            SmartDashboard.putNumber("DMS/Result/RL/Drive/Amp", driveDmsStatus.current.RL);
-            SmartDashboard.putNumber("DMS/Result/RR/Drive/Status", driveStatus.RR);
-            SmartDashboard.putNumber("DMS/Result/RR/Drive/Vel", driveDmsStatus.velocity.RR);
-            SmartDashboard.putNumber("DMS/Result/RR/Drive/Amp", driveDmsStatus.current.RR);
-
-            Subsystems.swerveSubsystem.setControl(new SwerveRequest.PointWheelsAt().withModuleDirection(Rotation2d.fromDegrees(0)));
-            currentPhase = DMSPhase.RunSteerMotors;
-            timer.reset();
-        }*/
+        /*
+         * final double now = timer.get();
+         * if (now < MOTOR_TEST_TIME) {
+         * Subsystems.swerveSubsystem.setControl(Subsystems.swerveSubsystem.
+         * DMSDriveRequest);
+         * 
+         * if (now > INITIAL_IGNORE_TIME) {
+         * driveDmsStatus.addDriveCurrent(Subsystems.swerveSubsystem.
+         * getDriveOutputCurrent());
+         * driveDmsStatus.addDriveVelocity(Subsystems.swerveSubsystem.getDriveVelocity()
+         * );
+         * 
+         * DMSStats.print("(DVel)", driveDmsStatus.velocity);
+         * DMSStats.print("(DAmp)", driveDmsStatus.current);
+         * 
+         * double velAvg = DMSStats.average(driveDmsStatus.velocity);
+         * double ampAvg = DMSStats.average(driveDmsStatus.current);
+         * System.out.println("Vel Avg: " + velAvg + " | Amp Avg: " + ampAvg);
+         * 
+         * driveStatus = driveDmsStatus.calculateStatus();
+         * DMSStats.print("[Drive Status]", driveStatus);
+         * }
+         * } else {
+         * SmartDashboard.putNumber("DMS/Result/FL/Drive/Status", driveStatus.FL);
+         * SmartDashboard.putNumber("DMS/Result/FL/Drive/Vel",
+         * driveDmsStatus.velocity.FL);
+         * SmartDashboard.putNumber("DMS/Result/FL/Drive/Amp",
+         * driveDmsStatus.current.FL);
+         * SmartDashboard.putNumber("DMS/Result/FR/Drive/Status", driveStatus.FR);
+         * SmartDashboard.putNumber("DMS/Result/FR/Drive/Vel",
+         * driveDmsStatus.velocity.FR);
+         * SmartDashboard.putNumber("DMS/Result/FR/Drive/Amp",
+         * driveDmsStatus.current.FR);
+         * SmartDashboard.putNumber("DMS/Result/RL/Drive/Status", driveStatus.RL);
+         * SmartDashboard.putNumber("DMS/Result/RL/Drive/Vel",
+         * driveDmsStatus.velocity.RL);
+         * SmartDashboard.putNumber("DMS/Result/RL/Drive/Amp",
+         * driveDmsStatus.current.RL);
+         * SmartDashboard.putNumber("DMS/Result/RR/Drive/Status", driveStatus.RR);
+         * SmartDashboard.putNumber("DMS/Result/RR/Drive/Vel",
+         * driveDmsStatus.velocity.RR);
+         * SmartDashboard.putNumber("DMS/Result/RR/Drive/Amp",
+         * driveDmsStatus.current.RR);
+         * 
+         * Subsystems.swerveSubsystem.setControl(new
+         * SwerveRequest.PointWheelsAt().withModuleDirection(Rotation2d.fromDegrees(0)))
+         * ;
+         * currentPhase = DMSPhase.RunSteerMotors;
+         * timer.reset();
+         * }
+         */
     }
 
     private void runSteerTest() {
-/*
-
-        final double now = timer.get();
-        if (now < MOTOR_TEST_TIME) {
-            Subsystems.swerveSubsystem.setControl(Subsystems.swerveSubsystem.DMSSteerRequest);
-
-            if (now > INITIAL_IGNORE_TIME) {
-                steerDmsStatus.addDriveCurrent(Subsystems.swerveSubsystem.getSteerOutputCurrent());
-                steerDmsStatus.addDriveVelocity(Subsystems.swerveSubsystem.getSteerVelocity());
-
-                DMSStats.print("(SVel)", steerDmsStatus.velocity);
-                DMSStats.print("(SAmp)", steerDmsStatus.current);
-
-                double velAvg = DMSStats.average(steerDmsStatus.velocity);
-                double ampAvg = DMSStats.average(steerDmsStatus.current);
-                System.out.println("Vel Avg: " + velAvg + " | Amp Avg: " + ampAvg);
-
-                steerStatus = steerDmsStatus.calculateStatus();
-                DMSStats.print("[Steer Status]", steerStatus);
-            }
-        } else {
-            // Stop motors
-            Subsystems.swerveSubsystem.setControl(new SwerveRequest.PointWheelsAt().withModuleDirection(Rotation2d.fromDegrees(0)));
-
-            currentPhase = DMSPhase.DisplayResults;
-            SmartDashboard.putNumber("DMS/Result/FL/Steer/Status", steerStatus.FL);
-            SmartDashboard.putNumber("DMS/Result/FL/Steer/Vel", steerDmsStatus.velocity.FL);
-            SmartDashboard.putNumber("DMS/Result/FL/Steer/Amp", steerDmsStatus.current.FL);
-            SmartDashboard.putNumber("DMS/Result/FR/Steer/Status", steerStatus.FR);
-            SmartDashboard.putNumber("DMS/Result/FR/Steer/Vel", steerDmsStatus.velocity.FR);
-            SmartDashboard.putNumber("DMS/Result/FR/Steer/Amp", steerDmsStatus.current.FR);
-            SmartDashboard.putNumber("DMS/Result/RL/Steer/Status", steerStatus.RL);
-            SmartDashboard.putNumber("DMS/Result/RL/Steer/Vel", steerDmsStatus.velocity.RL);
-            SmartDashboard.putNumber("DMS/Result/RL/Steer/Amp", steerDmsStatus.current.RL);
-            SmartDashboard.putNumber("DMS/Result/RR/Steer/Status", steerStatus.RR);
-            SmartDashboard.putNumber("DMS/Result/RR/Steer/Vel", steerDmsStatus.velocity.RR);
-            SmartDashboard.putNumber("DMS/Result/RR/Steer/Amp", steerDmsStatus.current.RR);
-
-            timer.reset();
-        }
-*/
+        /*
+         * 
+         * final double now = timer.get();
+         * if (now < MOTOR_TEST_TIME) {
+         * Subsystems.swerveSubsystem.setControl(Subsystems.swerveSubsystem.
+         * DMSSteerRequest);
+         * 
+         * if (now > INITIAL_IGNORE_TIME) {
+         * steerDmsStatus.addDriveCurrent(Subsystems.swerveSubsystem.
+         * getSteerOutputCurrent());
+         * steerDmsStatus.addDriveVelocity(Subsystems.swerveSubsystem.getSteerVelocity()
+         * );
+         * 
+         * DMSStats.print("(SVel)", steerDmsStatus.velocity);
+         * DMSStats.print("(SAmp)", steerDmsStatus.current);
+         * 
+         * double velAvg = DMSStats.average(steerDmsStatus.velocity);
+         * double ampAvg = DMSStats.average(steerDmsStatus.current);
+         * System.out.println("Vel Avg: " + velAvg + " | Amp Avg: " + ampAvg);
+         * 
+         * steerStatus = steerDmsStatus.calculateStatus();
+         * DMSStats.print("[Steer Status]", steerStatus);
+         * }
+         * } else {
+         * // Stop motors
+         * Subsystems.swerveSubsystem.setControl(new
+         * SwerveRequest.PointWheelsAt().withModuleDirection(Rotation2d.fromDegrees(0)))
+         * ;
+         * 
+         * currentPhase = DMSPhase.DisplayResults;
+         * SmartDashboard.putNumber("DMS/Result/FL/Steer/Status", steerStatus.FL);
+         * SmartDashboard.putNumber("DMS/Result/FL/Steer/Vel",
+         * steerDmsStatus.velocity.FL);
+         * SmartDashboard.putNumber("DMS/Result/FL/Steer/Amp",
+         * steerDmsStatus.current.FL);
+         * SmartDashboard.putNumber("DMS/Result/FR/Steer/Status", steerStatus.FR);
+         * SmartDashboard.putNumber("DMS/Result/FR/Steer/Vel",
+         * steerDmsStatus.velocity.FR);
+         * SmartDashboard.putNumber("DMS/Result/FR/Steer/Amp",
+         * steerDmsStatus.current.FR);
+         * SmartDashboard.putNumber("DMS/Result/RL/Steer/Status", steerStatus.RL);
+         * SmartDashboard.putNumber("DMS/Result/RL/Steer/Vel",
+         * steerDmsStatus.velocity.RL);
+         * SmartDashboard.putNumber("DMS/Result/RL/Steer/Amp",
+         * steerDmsStatus.current.RL);
+         * SmartDashboard.putNumber("DMS/Result/RR/Steer/Status", steerStatus.RR);
+         * SmartDashboard.putNumber("DMS/Result/RR/Steer/Vel",
+         * steerDmsStatus.velocity.RR);
+         * SmartDashboard.putNumber("DMS/Result/RR/Steer/Amp",
+         * steerDmsStatus.current.RR);
+         * 
+         * timer.reset();
+         * }
+         */
 
     }
 
@@ -300,5 +329,17 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
         Stopped, RunDriveMotors, RunSteerMotors, DisplayResults
     }
 
+    public void resetDMSScores() {
+        this.driveDMSScores = new DriveInfo<Integer>(0);
+        this.steerDMSScores = new DriveInfo<Integer>(0);
+    }
+
+    public void submitDriveDMSScores(DriveInfo<Integer> driveScores) {
+        this.driveDMSScores = driveScores;
+    }
+
+    public void submitSteerDMSScores(DriveInfo<Integer> steerScores) {
+        this.steerDMSScores = steerScores;
+    }
 
 }

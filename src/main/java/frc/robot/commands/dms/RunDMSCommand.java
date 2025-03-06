@@ -14,6 +14,7 @@ public class RunDMSCommand extends SequentialCommandGroup {
 
     public RunDMSCommand() {
         addCommands(
+                Subsystems.ledSubsystem.runOnce(() -> Subsystems.ledSubsystem.resetDMSScores()),
                 new RunDriveTestCommand(driveDataCollector),
                 new WaitCommand(1.0),
                 new RunSteerTestCommand(steerDataCollector),

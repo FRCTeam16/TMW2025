@@ -186,7 +186,7 @@ public class Elevator extends SubsystemBase implements Lifecycle {
         TROUGH(-16.5),
         L2(-25.75),
         L3(-38),
-        L4(-57.0),
+        L4(-56.5),
         AlgaeBarge(-38.5),
         AlgaeProcessor(0.0),
         AlgaeReefHigh(-20),

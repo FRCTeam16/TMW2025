@@ -7,6 +7,7 @@ import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
@@ -28,7 +29,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
     public static final double ALLOWED_POSITION_ERROR = 0.1;
 
     private final TalonFX algaeArmMotor = new TalonFX(Robot.robotConfig.getCanID("algaeArmMotor"));
-//    private final CANcoder algaeArmEncoder = new CANcoder(Robot.robotConfig.getCanID("algaeArmEncoder"));
+   private final CANcoder algaeArmEncoder = new CANcoder(Robot.robotConfig.getCanID("algaeArmEncoder"));
 
     private static final double GRAVITY_COMPENSATION = -0.49;
 
@@ -40,6 +41,10 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
 
 
     public AlgaeArm() {
+        CANcoderConfiguration encoderConfiguration = new CANcoderConfiguration()
+            .withMagnetSensor(new MagnetSensorConfigs()
+            .withMagnetOffset(0.219));
+        algaeArmEncoder.getConfigurator().apply(encoderConfiguration);
 
         Slot0Configs slot0 = new Slot0Configs()
                 .withKP(0.6)
@@ -50,11 +55,12 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
                 .withMotionMagicAcceleration(0);
 
         MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs()
-                .withNeutralMode(NeutralModeValue.Brake);
+                .withNeutralMode(NeutralModeValue.Brake)
+                .withInverted(InvertedValue.Clockwise_Positive);
 
-        FeedbackConfigs feedbackConfigs = new FeedbackConfigs();
-//                .withFeedbackRemoteSensorID()
-//                .withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANcoder)
+        FeedbackConfigs feedbackConfigs = new FeedbackConfigs()
+               .withFeedbackRemoteSensorID(Robot.robotConfig.getCanID("algaeArmEncoder"))
+               .withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANcoder);
 
         TalonFXConfiguration armConfiguration = new TalonFXConfiguration()
                 .withSlot0(slot0)

@@ -18,7 +18,7 @@ public class ProfiledRotationController extends ProfiledPIDController {
     private double tolerance = 2.0;
 
     public ProfiledRotationController() {
-        super(1.4, 0.0, 0.04, new TrapezoidProfile.Constraints(maxDegreesPerSecond, maxDegreesPerSecond * 2));
+        super(1.6, 0.0, 0.04, new TrapezoidProfile.Constraints(maxDegreesPerSecond, maxDegreesPerSecond * 2));
     }
 
     public ProfiledRotationController(double kp, double ki, double kd) {

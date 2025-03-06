@@ -1,9 +1,11 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
@@ -12,9 +14,11 @@ import frc.robot.Subsystems;
 import frc.robot.subsystems.vision.Limelight;
 import frc.robot.subsystems.vision.LimelightPoseEstimator;
 import frc.robot.subsystems.vision.VisionSubsystem;
+import frc.robot.util.BSMath;
 
 import java.util.List;
 import java.util.Optional;
+
 
 /**
  * Class that updates the odometry of the robot using vision measurements.
@@ -32,7 +36,7 @@ public class VisionOdometryUpdater {
     /**
      * Maximum distance in meters for a tag to be considered in the pose estimation.
      */
-    public static final double MAX_TAG_DIST_METERS = 2.0;
+    public static final double MAX_TAG_DIST_METERS = 3.0;
 
     private final CommandSwerveDrivetrain drivetrain;
     private final SwerveDrivePoseEstimator mainPoseEstimator;
@@ -92,9 +96,9 @@ public class VisionOdometryUpdater {
                 .flatMap(Optional::stream)
                 .filter(pose -> pose.avgTagDist < MAX_TAG_DIST_METERS)
                 .forEach(pose -> {
-//                    double visionStdDev = BSMath.map(pose.avgTagDist, 0, MAX_TAG_DIST_METERS, 0.3, 0.9);
-//                    Vector<N3> vector = VecBuilder.fill(visionStdDev, visionStdDev, 99);
-//                    mainPoseEstimator.addVisionMeasurement(pose.pose, pose.timestampSeconds, vector);
+                //    double visionStdDev = BSMath.map(pose.avgTagDist, 0, MAX_TAG_DIST_METERS, 0.3, 0.9);
+                //    Vector<N3> vector = VecBuilder.fill(visionStdDev, visionStdDev, 99);
+                //    mainPoseEstimator.addVisionMeasurement(pose.pose, pose.timestampSeconds, vector);
                     mainPoseEstimator.addVisionMeasurement(pose.pose, pose.timestampSeconds);
                 });
 
