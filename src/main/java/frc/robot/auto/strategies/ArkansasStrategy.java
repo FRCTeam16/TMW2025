@@ -16,6 +16,7 @@ import frc.robot.commands.vision.AlignDriveInCommand;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.pose.UpdateTranslationFromVision;
+import frc.robot.util.BSLogger;
 import frc.robot.util.GameInfo;
 
 public class ArkansasStrategy extends AutoPathStrategy {
@@ -29,6 +30,7 @@ public class ArkansasStrategy extends AutoPathStrategy {
         // Baseline coordinates
         final AprilTagFieldLayout fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
         final double FW =  fieldLayout.getFieldWidth();
+        final double FL = fieldLayout.getFieldLength();
 
         final Pose2d rr_firstScorePose = new Pose2d(12.275, 5.4, Rotation2d.fromDegrees(-60));
         final Pose2d rr_coralStationPose = new Pose2d(16.3, 7.75, Rotation2d.fromDegrees(-125));
@@ -38,13 +40,15 @@ public class ArkansasStrategy extends AutoPathStrategy {
         final Pose2d rl_coralStationPose = new Pose2d(16.3, FW - 7.75, Rotation2d.fromDegrees(125));
         final Pose2d rl_secondScorePose = new Pose2d(14.4, FW - 5.52, Rotation2d.fromDegrees(120));
 
-        final Pose2d br_firstScorePose = FlippingUtil.flipFieldPose(rr_firstScorePose);
-        final Pose2d br_coralStationPose = FlippingUtil.flipFieldPose(rr_coralStationPose);
-        final Pose2d br_secondScorePose = FlippingUtil.flipFieldPose(rr_secondScorePose);
+        final Pose2d br_firstScorePose = new Pose2d(FL - 12.275, FW - 5.4, Rotation2d.fromDegrees(120));
+        final Pose2d br_coralStationPose = new Pose2d(FL - 16.3, FW - 7.75, Rotation2d.fromDegrees(45));
+        final Pose2d br_secondScorePose = new Pose2d(FL - 14.4, FW - 5.52, Rotation2d.fromDegrees(60));
 
-        final Pose2d bl_firstScorePose = FlippingUtil.flipFieldPose(rl_firstScorePose);
-        final Pose2d bl_coralStationPose = FlippingUtil.flipFieldPose(rl_coralStationPose);
-        final Pose2d bl_secondScorePose = FlippingUtil.flipFieldPose(rl_secondScorePose);
+        final Pose2d bl_firstScorePose = new Pose2d(FL - 12.275, 5.4, Rotation2d.fromDegrees(-120));
+        final Pose2d bl_coralStationPose = new Pose2d(FL - 16.3, 7.75, Rotation2d.fromDegrees(-45));
+        final Pose2d bl_secondScorePose = new Pose2d(FL - 14.4, 5.52, Rotation2d.fromDegrees(-60));
+
+
 
         if (isRed && !isLeft) {
             // Red Right
@@ -80,10 +84,10 @@ public class ArkansasStrategy extends AutoPathStrategy {
         }
 
 
-        System.out.println("Arkansas Strategy: " + (isRed ? "Red" : "Blue") + " " + (isLeft ? "Left" : "Right"));
-        System.out.println("First Score Pose: " + firstScorePose);
-        System.out.println("Coral Station Pose: " + coralStationPose);
-        System.out.println("Second Score Pose: " + secondScorePose);
+        BSLogger.log("ArkansasStrat", "Arkansas Strategy: " + (isRed ? "Red" : "Blue") + " " + (isLeft ? "Left" : "Right"));
+        BSLogger.log("ArkansasStrat", "First Score Pose: " + firstScorePose);
+        BSLogger.log("ArkansasStrat", "Coral Station Pose: " + coralStationPose);
+        BSLogger.log("ArkansasStrat", "Second Score Pose: " + secondScorePose);
 
         Command initialPoseCommand = RobotBase.isReal() ?
                 new GenericPoseRequestCommand<>(UpdateTranslationFromVision.class) :
@@ -103,6 +107,7 @@ public class ArkansasStrategy extends AutoPathStrategy {
                 // Go to first score pose
                 //
                 //  Subsystems.autoManager.pathfindThenFollowPathCommand(key+"1"),
+                Commands.runOnce(() -> BSLogger.log("ArkansasStrat", "Path to pose: " + firstScorePose)),
                 AutoBuilder.pathfindToPose(firstScorePose, Constants.pathConstraints, 0.5),
                 new Climber.ClimberMoveToPositionNoWait(Climber.ClimberPosition.DOWN),
 
@@ -112,11 +117,13 @@ public class ArkansasStrategy extends AutoPathStrategy {
                 // Go to coral station
 
                 Commands.runOnce(Subsystems.coralIntake::startIntakeAuto),
+                Commands.runOnce(() -> BSLogger.log("ArkansasStrat", "Path to pose: " + coralStationPose)),
                 AutoBuilder.pathfindToPose(coralStationPose, Constants.pathConstraints),
 
                 //
                 // Go to second score pose
                 //
+                Commands.runOnce(() -> BSLogger.log("ArkansasStrat", "Path to pose: " + secondScorePose)),
                 AutoBuilder.pathfindToPose(secondScorePose, Constants.pathConstraints, 0.5),
                 Commands.runOnce(Subsystems.coralIntake::stopIntakeAuto),
                 doScoreSequence(false),

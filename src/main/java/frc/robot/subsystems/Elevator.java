@@ -34,7 +34,7 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     private boolean lazyHold;
     private double openLoopMax = 0.3;
 
-    private double elevatorUpThreshold = -10.0;
+    private double elevatorUpThreshold = -20.0;
 
     private Alert coralObstructionAlert = new Alert("Coral is obstructing elevator path", Alert.AlertType.kError);
 
@@ -49,7 +49,7 @@ public class Elevator extends SubsystemBase implements Lifecycle {
 
         MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs()
                 .withMotionMagicCruiseVelocity(80)  // 80
-                .withMotionMagicAcceleration(120)     // 140
+                .withMotionMagicAcceleration(160)     // 140
                 .withMotionMagicJerk(0)
                 .withMotionMagicExpo_kA(0.0)
                 .withMotionMagicExpo_kV(0.01);
