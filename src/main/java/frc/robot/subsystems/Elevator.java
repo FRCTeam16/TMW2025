@@ -48,8 +48,8 @@ public class Elevator extends SubsystemBase implements Lifecycle {
                 .withKG(GRAVITY_VOLTS);
 
         MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs()
-                .withMotionMagicCruiseVelocity(77)  // 80
-                .withMotionMagicAcceleration(110)     // 140
+                .withMotionMagicCruiseVelocity(80)  // 80
+                .withMotionMagicAcceleration(120)     // 140
                 .withMotionMagicJerk(0)
                 .withMotionMagicExpo_kA(0.0)
                 .withMotionMagicExpo_kV(0.01);
