@@ -85,7 +85,7 @@ public class AlignDriveInCommand extends Command {
         Angle tx = Degrees.of(rawtx);
         double targetAngleRads = calculateYTargetDirect(tx).in(Radians);
 
-        LinearVelocity speed = MetersPerSecond.of(1.0);
+        LinearVelocity speed = MetersPerSecond.of(1.5);
         LinearVelocity xspeed = speed.times(Math.cos(targetAngleRads));
         LinearVelocity yspeed = speed.times(Math.sin(targetAngleRads));
 

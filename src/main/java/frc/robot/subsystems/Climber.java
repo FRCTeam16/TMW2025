@@ -114,7 +114,7 @@ public class Climber extends SubsystemBase implements Lifecycle {
 
     public enum ClimberPosition {
         UP(0),
-        CLIMB(-45), // -53.3                         -48 was w
+        CLIMB(-65), // -53.3                         -48 was w
         DOWN(125),   // 100   125 is w/9-4-4           130 was w/5-5-5 ratio
         PICKUP(70); // 53.3    70 is w/9-4-4 ratio     75 was w/5-5-5 ratio
 
