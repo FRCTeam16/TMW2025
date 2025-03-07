@@ -34,7 +34,7 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     private boolean lazyHold;
     private double openLoopMax = 0.3;
 
-    private double encoderOffset = 0;
+    private double elevatorUpThreshold = -6.0;
 
     private Alert coralObstructionAlert = new Alert("Coral is obstructing elevator path", Alert.AlertType.kError);
 
@@ -48,8 +48,8 @@ public class Elevator extends SubsystemBase implements Lifecycle {
                 .withKG(GRAVITY_VOLTS);
 
         MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs()
-                .withMotionMagicCruiseVelocity(70)  // 80
-                .withMotionMagicAcceleration(100)     // 140
+                .withMotionMagicCruiseVelocity(77)  // 80
+                .withMotionMagicAcceleration(110)     // 140
                 .withMotionMagicJerk(0)
                 .withMotionMagicExpo_kA(0.0)
                 .withMotionMagicExpo_kV(0.01);
@@ -172,13 +172,14 @@ public class Elevator extends SubsystemBase implements Lifecycle {
         builder.addDoubleProperty("Left Motor Current", () -> left.getStatorCurrent().getValueAsDouble(), null);
         builder.addDoubleProperty("Right Motor Current", () -> right.getStatorCurrent().getValueAsDouble(), null);
         builder.addBooleanProperty("Lazy Mode", () -> lazyHold, this::setLazyHold);
+        builder.addDoubleProperty("elevatorUpThreshold", () -> elevatorUpThreshold, (t) -> elevatorUpThreshold = t);
     }
 
     /**
      * Returns true if the elevator is above a default position
      */
     public boolean isElevatorUp() {
-        return getCurrentPosition() < -2;
+        return getCurrentPosition() < elevatorUpThreshold;
     }
 
     public enum ElevatorSetpoint {
