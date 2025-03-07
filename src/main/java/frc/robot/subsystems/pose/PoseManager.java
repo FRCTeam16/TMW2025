@@ -24,6 +24,7 @@ public class PoseManager implements Sendable {
 
     private boolean initialPoseSet = false;
     private DriverStation.Alliance initialPoseSide = null;
+    private int seenAllianceCount = 0;
 
     @Override
     public void initSendable(SendableBuilder sendableBuilder) {
@@ -41,6 +42,14 @@ public class PoseManager implements Sendable {
      */
     public void updateInitialStartingPoseAndGyro() {
         if (!initialPoseSet) {
+            if (DriverStation.getAlliance().isPresent() && !initialPoseSet) {
+                if (seenAllianceCount++ < 50) {
+                    BSLogger.log("PoseManager", "See alliance but waiting " + seenAllianceCount + "/50");
+                    return;
+                }
+            }
+
+
             if (GameInfo.isRedAlliance()) {
                 if (!initialPoseSet) {
                     initialPoseSet = true;
