@@ -34,7 +34,7 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     private boolean lazyHold;
     private double openLoopMax = 0.3;
 
-    private double elevatorUpThreshold = -6.0;
+    private double elevatorUpThreshold = -10.0;
 
     private Alert coralObstructionAlert = new Alert("Coral is obstructing elevator path", Alert.AlertType.kError);
 

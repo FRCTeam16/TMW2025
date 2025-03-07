@@ -38,8 +38,8 @@ public class Climber extends SubsystemBase implements Lifecycle {
                 .withReverseSoftLimitEnable(true)
                 .withReverseSoftLimitThreshold(-70);
         MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs()
-                .withMotionMagicAcceleration(20)
-                .withMotionMagicCruiseVelocity(20);
+                .withMotionMagicAcceleration(40)
+                .withMotionMagicCruiseVelocity(40);
 
         climberConfiguration
                 .withMotionMagic(motionMagicConfigs)
