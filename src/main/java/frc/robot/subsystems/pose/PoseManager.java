@@ -64,8 +64,9 @@ public class PoseManager implements Sendable {
                     initialPoseSide = Alliance.Blue;
                 }
                 BSLogger.log("PoseManager", "setting initial pose for blue");
-                Subsystems.swerveSubsystem.getPigeon2().setYaw(180);
-                Subsystems.swerveSubsystem.resetPose(new Pose2d(7.45, 4, Rotation2d.fromDegrees(180)));
+                Subsystems.swerveSubsystem.resetPose(new Pose2d(7.45, 4, Rotation2d.fromDegrees(0)));
+                Subsystems.swerveSubsystem.getPigeon2().setYaw(0);
+                
             } else {
                 // BSLogger.log("PoseManager", "No alliance information available yet");
                 Subsystems.swerveSubsystem.getPigeon2().setYaw(0);
