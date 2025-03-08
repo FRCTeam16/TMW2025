@@ -33,19 +33,19 @@ public class ArkansasStrategy extends AutoPathStrategy {
         final double FL = fieldLayout.getFieldLength();
 
         final Pose2d rr_firstScorePose = new Pose2d(12.275, 5.4, Rotation2d.fromDegrees(-60));
-        final Pose2d rr_coralStationPose = new Pose2d(16.6, 7.81, Rotation2d.fromDegrees(-125));
+        final Pose2d rr_coralStationPose = new Pose2d(16.6, 7.75, Rotation2d.fromDegrees(-125));
         final Pose2d rr_secondScorePose = new Pose2d(14.4, 5.52, Rotation2d.fromDegrees(-120));
 
         final Pose2d rl_firstScorePose = new Pose2d(12.275, FW - 5.4, Rotation2d.fromDegrees(60));
-        final Pose2d rl_coralStationPose = new Pose2d(16.6, FW - 7.81, Rotation2d.fromDegrees(125));
+        final Pose2d rl_coralStationPose = new Pose2d(16.6, FW - 7.75, Rotation2d.fromDegrees(125));
         final Pose2d rl_secondScorePose = new Pose2d(14.4, FW - 5.52, Rotation2d.fromDegrees(120));
 
         final Pose2d br_firstScorePose = new Pose2d(FL - 12.275, FW - 5.4, Rotation2d.fromDegrees(120));
-        final Pose2d br_coralStationPose = new Pose2d(FL - 16.6, FW - 7.81, Rotation2d.fromDegrees(45));
+        final Pose2d br_coralStationPose = new Pose2d(FL - 16.6, FW - 7.75, Rotation2d.fromDegrees(45));
         final Pose2d br_secondScorePose = new Pose2d(FL - 14.4, FW - 5.52, Rotation2d.fromDegrees(60));
 
         final Pose2d bl_firstScorePose = new Pose2d(FL - 12.275, 5.4, Rotation2d.fromDegrees(-120));
-        final Pose2d bl_coralStationPose = new Pose2d(FL - 16.6, 7.81, Rotation2d.fromDegrees(-45));
+        final Pose2d bl_coralStationPose = new Pose2d(FL - 16.6, 7.75, Rotation2d.fromDegrees(-45));
         final Pose2d bl_secondScorePose = new Pose2d(FL - 14.4, 5.52, Rotation2d.fromDegrees(-60));
 
 
