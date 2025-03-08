@@ -35,7 +35,7 @@ public class JoystickSwerveSupplier implements SwerveSupplier {
     protected double applyLimiter(double value) {
         boolean isElevatorUp = Subsystems.elevator.isElevatorUp();
         if (isElevatorUp) {
-            return value * 0.1;
+            return value * 0.3;
         } else {
             return value;
         }
