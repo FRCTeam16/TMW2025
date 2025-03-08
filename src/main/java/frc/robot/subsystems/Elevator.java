@@ -34,7 +34,7 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     private boolean lazyHold;
     private double openLoopMax = 0.3;
 
-    private double elevatorUpThreshold = -20.0;
+    private double elevatorUpThreshold = -26.0;
 
     private Alert coralObstructionAlert = new Alert("Coral is obstructing elevator path", Alert.AlertType.kError);
 
@@ -94,17 +94,21 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     }
 
     private void setOpenLoop(double speed) {
-        double clampedSpeed =MathUtil.clamp(speed, -openLoopMax, openLoopMax);
+        double clampedSpeed = MathUtil.clamp(speed, -openLoopMax, openLoopMax);
         left.setControl(dutyCycleOut.withOutput(clampedSpeed));
     }
 
     private void moveToPosition(ElevatorSetpoint setpoint) {
+        if (setpoint == null) {
+            return;
+        }
+        BSLogger.log("Elevator", "moveToPosition: " + setpoint.name() );
         requestedSetpoint = setpoint;
         moveToEncoderPosition(setpoint.val);
     }
 
     private void moveToEncoderPosition(double encoderPosition) {
-        BSLogger.log("Elevator", "Moving to position: " + encoderPosition);
+        BSLogger.log("Elevator", "moveToEncoderPosition: " + encoderPosition);
 //        if (!MathUtil.isNear(0, encoderPosition, 0.05)) {
 //            encoderPosition += encoderOffset;
 //            BSLogger.log("Elevator", "Moving to adjusted position: " + encoderPosition);

@@ -97,7 +97,7 @@ public class ScrimmageControls extends ControlBinding {
 
 
         manualAlgaeToggleButton.toggleOnTrue(Subsystems.algaeArm.openLoopCommand(manualAlgaeArmControl));
-        manualElevatorToggleButton.toggleOnTrue(Subsystems.elevator.openLoopCommand(manualElevatorControl));
+        enableClimb.and(manualElevatorToggleButton).toggleOnTrue(Subsystems.elevator.openLoopCommand(manualElevatorControl));
 
 //        alignLeft.whileTrue(PathfindFactory.limelightAlignToVisibleAprilTag(true));
 //        alignRight.whileTrue(PathfindFactory.limelightAlignToVisibleAprilTag(false));

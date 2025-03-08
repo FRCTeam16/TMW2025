@@ -3,6 +3,7 @@ package frc.robot.hci.swerve;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
 import frc.robot.Subsystems;
@@ -22,6 +23,8 @@ public class JoystickSwerveSupplier implements SwerveSupplier {
         this.driveStick = driveStick;
         this.controller = controller;
         this.isRedAlliance = GameInfo.isRedAlliance();
+
+        SmartDashboard.setDefaultNumber("ElevGovSpeed", 0.4);
     }
 
     private double applyDeadband(double value, double deadband) {
@@ -35,7 +38,7 @@ public class JoystickSwerveSupplier implements SwerveSupplier {
     protected double applyLimiter(double value) {
         boolean isElevatorUp = Subsystems.elevator.isElevatorUp();
         if (isElevatorUp) {
-            return value * 0.3;
+            return value * SmartDashboard.getNumber("ElevGovSpeed", 0.4);
         } else {
             return value;
         }
