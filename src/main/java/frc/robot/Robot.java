@@ -62,7 +62,7 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() {
     // We may want to switch to the view pipeline when disabled for thermal reasons
-//    Subsystems.visionSubsystem.selectPipeline(Pipeline.View);
+   Subsystems.visionSubsystem.selectPipeline(Pipeline.April);
     LimelightHelpers.SetIMUMode("limelight", 1);
   }
 
