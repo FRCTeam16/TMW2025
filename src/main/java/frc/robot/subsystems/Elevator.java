@@ -216,9 +216,9 @@ public class Elevator extends SubsystemBase implements Lifecycle {
 
         @Override
         public void initialize() {
-            if (Subsystems.elevator.isElevatorObstructedByCoral()) {
+            this.abort = Subsystems.elevator.isElevatorObstructedByCoral();
+            if (abort) {
                 BSLogger.log("ElevatorMoveToPositionCommand", "Coral obstruction detected, setting abort");
-                abort = true;
                 return;
             }
             Subsystems.elevator.moveToPosition(this.setpoint);
