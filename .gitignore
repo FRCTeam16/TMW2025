@@ -191,3 +191,5 @@ compile_commands.json
 simgui-ds.json
 .OutlineViewer/
 .DataLogTool/
+.SysId/
+control-docs/
