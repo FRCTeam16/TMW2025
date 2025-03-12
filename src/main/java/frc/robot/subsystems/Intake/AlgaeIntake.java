@@ -6,35 +6,55 @@ import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.subsystems.Lifecycle;
-import frc.robot.util.MotorVoltageFilter;
+import frc.robot.util.MotorStatorCurrentFilter;
+import static edu.wpi.first.units.Units.Amps;
 
 public class AlgaeIntake extends SubsystemBase implements Lifecycle {
     private final TalonFX algaeIntakeMotor = new TalonFX(Robot.robotConfig.getCanID("algaeIntakeMotor"));
     private final NeutralOut brake = new NeutralOut();
     private final DutyCycleOut intakeDutyCycleOut = new DutyCycleOut(1);
-//    private final MotorVoltageFilter motorVoltageFilter = new MotorVoltageFilter(5, algaeIntakeMotor); //TODO: 5 isnt a real number here
+    private final MotorStatorCurrentFilter detector = new MotorStatorCurrentFilter(Amps.of(30),
+            algaeIntakeMotor.getStatorCurrent().asSupplier());
+    private final MotorStatorCurrentFilter dropDetector = new MotorStatorCurrentFilter(Amps.of(-20),
+            algaeIntakeMotor.getStatorCurrent().asSupplier());
 
 
     private double forwardSpeed = 0.65;
     private double backwardSpeed = -0.3;
     private double holdSpeed = 0.15;
+    private boolean algaeDetected = false;
 
     public AlgaeIntake() {
-
         MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs()
                 .withNeutralMode(NeutralModeValue.Brake);
-
         TalonFXConfiguration intakeConfiguration = new TalonFXConfiguration()
                 .withMotorOutput(motorOutputConfigs);
         algaeIntakeMotor.getConfigurator().apply(intakeConfiguration);
 
         this.setDefaultCommand(new DefaultHoldCommand());
+    }
+
+    @Override
+    public void periodic() {
+        detector.update();
+        if (detector.isOverThreshold()) {
+            algaeDetected = true;
+        }
+
+        dropDetector.update();
+        if (algaeDetected && dropDetector.isUnderThreshold()) {
+            algaeDetected = false;
+        }
+    }
+
+    public boolean isAlgaeDetected() {
+        return this.algaeDetected;
     }
 
     public void setForwardSpeed(double speed) {
@@ -49,27 +69,37 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle {
         this.holdSpeed = speed;
     }
 
-
     @Override
     public void initSendable(SendableBuilder builder) {
         super.initSendable(builder);
         builder.setSmartDashboardType("AlgaeIntake");
-        builder.addDoubleProperty("forwardSpeed", () -> forwardSpeed, this::setForwardSpeed);
-        builder.addDoubleProperty("backwardSpeed", () -> backwardSpeed, this::setBackwardSpeed);
-        builder.addDoubleProperty("holdSpeed", () -> holdSpeed, this::setHoldSpeed);
+        builder.addDoubleProperty("filteredCurrent", () -> detector.getCurrent().in(Amps), null);
+        builder.addBooleanProperty("filteredThreshold", detector::isOverThreshold, null);
+        builder.addBooleanProperty("algaeDetected", () -> algaeDetected, null);
+
+        if (Constants.DebugSendables.AlgaeIntake) {
+            builder.addDoubleProperty("forwardSpeed", () -> forwardSpeed, this::setForwardSpeed);
+            builder.addDoubleProperty("backwardSpeed", () -> backwardSpeed, this::setBackwardSpeed);
+            builder.addDoubleProperty("holdSpeed", () -> holdSpeed, this::setHoldSpeed);
+        }
     }
 
     public Command intakeCommand() {
-        return this.run(() -> algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(forwardSpeed))).withName("Algae Intake");
+        return this.run(() -> algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(forwardSpeed)))
+                .withName("Algae Intake");
     }
 
     public Command ejectCommand() {
-        return this.run(() -> algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(backwardSpeed))).withName("Algae Eject");
+        return this.startRun(
+            () -> this.algaeDetected = false,
+            () -> algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(backwardSpeed))
+            ).withName("Algae Eject");
 
     }
 
     public Command holdAlgaeCommand() {
-        return this.run(() -> algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(holdSpeed))).withName("Algae Hold");
+        return this.run(() -> algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(holdSpeed)))
+                .withName("Algae Hold");
     }
 
     public Command stopCommand() {
@@ -85,9 +115,6 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle {
         @Override
         public void initialize() {
             algaeIntakeMotor.setControl(brake);
-//            algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(0.25));
         }
     }
-
-
 }

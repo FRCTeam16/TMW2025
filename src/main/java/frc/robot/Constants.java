@@ -17,4 +17,10 @@ public class Constants {
     public static PathConstraints pathConstraints =
             new PathConstraints(2.5, 2.5, 1.0, 1.0);
 
+
+    public static class DebugSendables {
+        public static boolean AlgaeArm = true;
+        public static boolean AlgaeIntake = true;
+        
+    }
 }

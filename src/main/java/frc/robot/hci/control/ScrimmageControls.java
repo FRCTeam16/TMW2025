@@ -137,6 +137,10 @@ public class ScrimmageControls extends ControlBinding {
 
         SmartDashboard.putData("Open Latch", Subsystems.funnelSubsystem.openLatchCommand().ignoringDisable(true));
         SmartDashboard.putData("Close Latch", Subsystems.funnelSubsystem.closeLatchCommand().ignoringDisable(true));
+
+        new Trigger(() -> steerStick.getPOV() == 180)
+            .onTrue(Subsystems.coralIntake.ejectCommand())
+            .onFalse(Subsystems.coralIntake.stopCommand());
     }
 
     Supplier<Double> algaeArmDampener() {

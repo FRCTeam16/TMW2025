@@ -15,6 +15,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.Subsystems;
 import frc.robot.subsystems.Lifecycle;
@@ -150,9 +151,12 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
         builder.setSmartDashboardType("AlgaeArm");
         builder.addDoubleProperty("motorPosition", this::getMotorPosition, this::setArmPosition);
         builder.addDoubleProperty("targetPosition", () -> this.targetPosition, this::setArmPosition);
-        builder.addDoubleProperty("estimatedAngle", () -> this.getEstimatedAngle().in(Degrees), null);
         builder.addBooleanProperty("isInPosition", this::isInPosition, null);
-        builder.addDoubleProperty("openLoopMax", () -> openLoopMax, (v) -> openLoopMax = v);
+        builder.addDoubleProperty("estimatedAngle", () -> this.getEstimatedAngle().in(Degrees), null);
+
+        if (Constants.DebugSendables.AlgaeArm) {
+            builder.addDoubleProperty("openLoopMax", () -> openLoopMax, (v) -> openLoopMax = v);
+        }
     }
 
     public Command openLoopCommand(Supplier<Double> speed) {

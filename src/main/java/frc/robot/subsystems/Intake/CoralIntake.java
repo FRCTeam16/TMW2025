@@ -2,10 +2,13 @@ package frc.robot.subsystems.Intake;
 
 import com.ctre.phoenix6.configs.CANdiConfiguration;
 import com.ctre.phoenix6.configs.DigitalInputsConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.S1CloseStateValue;
 import com.ctre.phoenix6.signals.S1FloatStateValue;
 import com.ctre.phoenix6.signals.S2CloseStateValue;
@@ -36,20 +39,28 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
 
     private final StaticBrake stop = new StaticBrake();
 
-
     double intakeHighSpeedLeft = 0.25;
     double intakeHighSpeedRight = -0.25;
     double intakeLowSpeed = 0.2;
     double ejectSpeed = -0.3;
     private boolean topSensorDetected;
     private boolean bottomSensorDetected;
-
+    private String requestedState = "None";
 
     private boolean coralIntakeMode = false;
     private int coralIntakeStep = 1;
 
-
     public CoralIntake() {
+        MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs()
+            .withNeutralMode(NeutralModeValue.Brake);
+
+        TalonFXConfiguration configuration = new TalonFXConfiguration()
+            .withMotorOutput(motorOutputConfigs);
+
+
+        topMotor.getConfigurator().apply(configuration);
+        bottomMotor.getConfigurator().apply(configuration);
+
         CANdiConfiguration candiConfig = new CANdiConfiguration()
                 .withDigitalInputs(new DigitalInputsConfigs()
                         .withS1CloseState(S1CloseStateValue.CloseWhenHigh)
@@ -67,14 +78,26 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
     }
 
     @Override
+    public void disabledInit() {
+        setNeutralMode(NeutralModeValue.Coast);
+    }
+
+    @Override
     public void teleopInit() {
+        requestedState = "None";
         coralIntakeMode = false;
+        setNeutralMode(NeutralModeValue.Brake);
         this.setDefaultCommand(this.stopCommand());
     }
 
     @Override
     public void autoInit() {
+        setNeutralMode(NeutralModeValue.Brake);
         this.removeDefaultCommand();
+    }
+
+    private void setNeutralMode(NeutralModeValue mode) {
+        this.topMotor.getConfigurator().apply(new MotorOutputConfigs().withNeutralMode(mode));
     }
 
     private void updateDetectorState() {
@@ -82,6 +105,9 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
         bottomSensorDetected = bottomSensorFilter.calculate(candi.getS2Closed().getValue());
     }
 
+    /**
+     * Auto only intake handler
+     */
     public void startIntakeAuto() {
         if (!coralIntakeMode) {
             this.intakeFast();
@@ -108,7 +134,7 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
     public void periodic() {
         if (coralIntakeMode) {
             if (coralIntakeStep == 1) {
-                //if first laser sees coral while default action: change action to action 2
+                // if first laser sees coral while default action: change action to action 2
                 if (this.coralDetectedAtTopSensor()) {
                     BSLogger.log("CoralIntakeCommand", "Coral detected at first sensor");
                     this.intakeSlow();
@@ -116,9 +142,9 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
                 }
             }
 
-            //second action when intake: runForward(slow)
+            // second action when intake: runForward(slow)
             if (coralIntakeStep == 2) {
-                //if second laser sees coral while second action: change action to action 3
+                // if second laser sees coral while second action: change action to action 3
                 if (this.coralDetectedAtBottomSensor()) {
                     BSLogger.log("CoralIntakeCommand", "Coral detected at second sensor");
                     this.stop();
@@ -134,31 +160,38 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
         builder.setSmartDashboardType("CoralIntake");
         builder.addDoubleProperty("intakeHighSpeedLeft", () -> intakeHighSpeedLeft, (v) -> intakeHighSpeedLeft = v);
         builder.addDoubleProperty("intakeHighSpeedRight", () -> intakeHighSpeedRight, (v) -> intakeHighSpeedRight = v);
-
         builder.addDoubleProperty("intakeLowSpeed", () -> intakeLowSpeed, (v) -> intakeLowSpeed = v);
         builder.addDoubleProperty("ejectSpeed", () -> ejectSpeed, (v) -> ejectSpeed = v);
+
         builder.addBooleanProperty("coralDetectedAtTop", this::coralDetectedAtTopSensor, null); // s2
         builder.addBooleanProperty("coralDetectedAtBottom", this::coralDetectedAtBottomSensor, null); // s1
         builder.addBooleanProperty("rawTopSensor", () -> candi.getS1Closed().getValue(), null);
         builder.addBooleanProperty("rawBotSensor", () -> candi.getS2Closed().getValue(), null);
+        builder.addStringProperty("requestedState", () -> requestedState, null);
+
+        builder.addDoubleProperty("motorOutput", () -> topMotor.getDutyCycle().getValueAsDouble(), null);
     }
 
     void intakeFast() {
+        requestedState = "intakeFast";
         topMotor.setControl(dutyCycleOutTop.withOutput(intakeHighSpeedLeft));
         bottomMotor.setControl(dutyCycleOutBottom.withOutput(intakeHighSpeedRight));
     }
 
     void intakeSlow() {
+        requestedState = "intakeSlow";
         topMotor.setControl(dutyCycleOutTop.withOutput(intakeLowSpeed));
         bottomMotor.setControl(dutyCycleOutBottom.withOutput(-intakeLowSpeed));
     }
 
     private void eject() {
+        requestedState = "eject";
         topMotor.setControl(dutyCycleOutTop.withOutput(ejectSpeed));
         bottomMotor.setControl(dutyCycleOutBottom.withOutput(-ejectSpeed));
     }
 
     void stop() {
+        requestedState = "stop";
         topMotor.setControl(stop);
         bottomMotor.setControl(stop);
     }
@@ -170,7 +203,6 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
     public boolean coralDetectedAtTopSensor() {
         return topSensorDetected;
     }
-
 
     public Command ejectCommand() {
         return this.run(this::eject);
@@ -200,6 +232,7 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
 
         public ShootCoralCommand() {
             addRequirements(CoralIntake.this);
+            this.setName("Shoot Coral");
         }
 
         @Override

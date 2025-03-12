@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Subsystems;
 import frc.robot.subsystems.Lifecycle;
+import frc.robot.util.BSLogger;
 
 public class LEDSubsystem extends SubsystemBase implements Lifecycle {
     private static final double INITIAL_IGNORE_TIME = 1.0;
@@ -98,16 +99,20 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
             }
         }
 
-        boolean hasPart = Subsystems.coralIntake.coralDetectedAtBottomSensor();
-        int elevatorPosition = (int) Subsystems.elevator.getCurrentPosition();
+        // 0 - no part, 1 - coral, 2- algae, 3 - both
+        int hasPartCode = (Subsystems.coralIntake.coralDetectedAtBottomSensor() ? 1 : 0) + 
+            (Subsystems.algaeIntake.isAlgaeDetected() ? 2 : 0) ;
+            
+        boolean elevatorPosition = Subsystems.elevator.isInPosition();
+
 
         byte[] buffer = new byte[BUFFER_SIZE];
 
         buffer[0] = (byte) 254;
         buffer[1] = (byte) robotState; // comm status
         buffer[2] = (byte) allianceColor;
-        buffer[3] = (byte) (hasPart ? 1 : 0);
-        buffer[4] = (byte) elevatorPosition;
+        buffer[3] = (byte) hasPartCode;
+        buffer[4] = (byte) (elevatorPosition ? 1 : 0);
 
         // DMS info
         buffer[5] = driveDMSScores.FL.byteValue();
@@ -119,18 +124,18 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
         buffer[11] = driveDMSScores.RR.byteValue();
         buffer[12] = steerDMSScores.RR.byteValue();
 
-        buffer[13] = (byte) 0; // climber
-        buffer[14] = (byte) 0; // elevatorLeft
-        buffer[15] = (byte) 0; // elevatorRight
-        buffer[16] = (byte) 0; // coralLeft
-        buffer[17] = (byte) 0; // coralRight
-        buffer[18] = (byte) 0; // algaeIntake
-        buffer[19] = (byte) 0; // algaePivotMotor
-        buffer[20] = (byte) 0; // funnelPivotMotor
-        buffer[21] = (byte) 0; // funnelRollers
-        buffer[22] = (byte) 0; // climberExtra
-        buffer[23] = (byte) 0; // extra1
-        buffer[24] = (byte) 0; // extra2
+        buffer[13] = (byte) 0; // AMD climber
+        buffer[14] = (byte) 0; // AMD elevatorLeft
+        buffer[15] = (byte) 0; // AMD elevatorRight
+        buffer[16] = (byte) 0; // AMD coralLeft
+        buffer[17] = (byte) 0; // AMD coralRight
+        buffer[18] = (byte) 0; // AMD algaeIntake
+        buffer[19] = (byte) 0; // AMD algaePivotMotor
+        buffer[20] = (byte) 0; // extra
+        buffer[21] = (byte) 0; // extra
+        buffer[22] = (byte) 0; // barge distance
+        buffer[23] = (byte) 0; // april tag distance threshold (boolean)
+        buffer[24] = (byte) 0; // extra
         buffer[25] = (byte) 255;
 
         this.serial.write(buffer, buffer.length);
@@ -335,10 +340,21 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
     }
 
     public void submitDriveDMSScores(DriveInfo<Integer> driveScores) {
+        BSLogger.log("LEDSubsystem", "AMD Drive Scores");
+        BSLogger.log("LEDSubsystem", "FL: " + driveScores.FL);
+        BSLogger.log("LEDSubsystem", "FR: " + driveScores.FR);
+        BSLogger.log("LEDSubsystem", "RL: " + driveScores.RL);
+        BSLogger.log("LEDSubsystem", "RR: " + driveScores.RR);
         this.driveDMSScores = driveScores;
     }
 
     public void submitSteerDMSScores(DriveInfo<Integer> steerScores) {
+        BSLogger.log("LEDSubsystem", "AMD Steer Scores");
+        BSLogger.log("LEDSubsystem", "FL: " + steerScores.FL);
+        BSLogger.log("LEDSubsystem", "FR: " + steerScores.FR);
+        BSLogger.log("LEDSubsystem", "RL: " + steerScores.RL);
+        BSLogger.log("LEDSubsystem", "RR: " + steerScores.RR);
+
         this.steerDMSScores = steerScores;
     }
 

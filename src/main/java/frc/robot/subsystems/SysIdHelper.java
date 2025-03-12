@@ -65,11 +65,24 @@ public class SysIdHelper {
         m_sysIdRoutineToApply = m_sysIdRoutineTranslation;
     }
 
+    public SysIdHelper withRoutineToApply(Routine routine) {
+        this.m_sysIdRoutineToApply = switch(routine) {
+            case Translation -> m_sysIdRoutineTranslation;
+            case Steer -> m_sysIdRoutineSteer;
+            case Rotation -> m_sysIdRoutineRotation;
+        };
+        return this;
+    }
+
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
         return m_sysIdRoutineToApply.quasistatic(direction);
     }
 
     public Command sysIdDynamic(SysIdRoutine.Direction direction) {
         return m_sysIdRoutineToApply.dynamic(direction);
+    }
+
+    public enum Routine {
+        Translation, Steer, Rotation
     }
 }

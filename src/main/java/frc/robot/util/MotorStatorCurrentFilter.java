@@ -1,26 +1,42 @@
 package frc.robot.util;
 
-import com.ctre.phoenix6.hardware.TalonFX;
+import static edu.wpi.first.units.Units.Amp;
+import static edu.wpi.first.units.Units.Amps;
+
+import java.util.function.Supplier;
 
 import edu.wpi.first.math.filter.LinearFilter;
+import edu.wpi.first.units.measure.Current;
 
+// FIXME: Rename
 public class MotorStatorCurrentFilter {
-    private LinearFilter filter = LinearFilter.movingAverage(5); // taps == Num of values
-    private TalonFX motor;
-    private double threshold;
-    private double current = 0;
-
-    public MotorStatorCurrentFilter(double Threshold, TalonFX Motor){
-        motor = Motor;
-        threshold = Threshold;
+    // private LinearFilter filter = LinearFilter.movingAverage(5); // taps == Num of values
+    private LinearFilter filter = LinearFilter.highPass(0.1, 0.02);
+    private Current threshold;
+    private Current current = Amps.of(0);
+    private Supplier<Current> currentSupplier;
+    
+        public MotorStatorCurrentFilter(Current threshold, Supplier<Current> currentSupplier){
+            this.threshold = threshold;
+            this.currentSupplier = currentSupplier;
     }
 
-    public void update(){
-        current = filter.calculate(motor.getStatorCurrent().getValueAsDouble());
+    public Current update() {
+        double absAmps = currentSupplier.get().in(Amps);
+        current = Amp.of(filter.calculate(absAmps));
+        return current;
+    }
+
+    public Current getCurrent(){
+        return current;
     }
 
     public boolean isOverThreshold(){
-        return current > threshold;
+        return current.gt(threshold);
+    }
+
+    public boolean isUnderThreshold() {
+        return current.lt(threshold);
     }
     
 }
