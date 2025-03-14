@@ -3,7 +3,6 @@ package frc.robot.subsystems.Intake;
 import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -19,7 +18,6 @@ import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.Subsystems;
 import frc.robot.subsystems.Lifecycle;
-import frc.robot.util.BSLogger;
 
 import java.util.function.Supplier;
 
@@ -33,7 +31,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
     private final TalonFX algaeArmMotor = new TalonFX(Robot.robotConfig.getCanID("algaeArmMotor"));
    private final CANcoder algaeArmEncoder = new CANcoder(Robot.robotConfig.getCanID("algaeArmEncoder"));
 
-    private static final double GRAVITY_COMPENSATION = -0.49;
+    private static final double GRAVITY_COMPENSATION = 0; //-0.49;
 
     private final DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
     private final PositionVoltage positionVoltage = new PositionVoltage(0).withSlot(0);
@@ -50,19 +48,20 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
         algaeArmEncoder.getConfigurator().apply(encoderConfiguration);
 
         Slot0Configs slot0 = new Slot0Configs()
-                .withKP(28)
-                .withKD(0.5)
+                .withKP(25)
+                .withKI(2)
+                .withKD(1)
                 .withKG(GRAVITY_COMPENSATION);
 
         SoftwareLimitSwitchConfigs softwareLimitSwitchConfigs = new SoftwareLimitSwitchConfigs()
         .withForwardSoftLimitEnable(true)
-        .withForwardSoftLimitThreshold(0.232)
+        .withForwardSoftLimitThreshold(0.24)
         .withReverseSoftLimitEnable(true)
         .withReverseSoftLimitThreshold(-0.005);
 
         MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs()
                 .withMotionMagicCruiseVelocity(2)
-                .withMotionMagicAcceleration(1);
+                .withMotionMagicAcceleration(3);
 
         MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs()
                 .withNeutralMode(NeutralModeValue.Brake)
@@ -184,8 +183,8 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
 
 
     public enum AlgaeArmPosition {
-        Up(0.002),
-        Ground(0.22),
+        Up(0.001),
+        Ground(0.233),
         Processor(0.185),
         Shooting(0.05);
 
