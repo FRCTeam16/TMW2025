@@ -4,15 +4,20 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Robot;
+import frc.robot.Subsystems;
 import frc.robot.subsystems.Lifecycle;
 import frc.robot.util.MotorStatorCurrentFilter;
+
+
 import static edu.wpi.first.units.Units.Amps;
 
 public class AlgaeIntake extends SubsystemBase implements Lifecycle {
@@ -100,6 +105,8 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle {
     public Command holdAlgaeCommand() {
         return this.run(() -> algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(holdSpeed)))
                 .withName("Algae Hold");
+
+//        return new PulseHoldAlgaeCommand();
     }
 
     public Command stopCommand() {
@@ -114,6 +121,53 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle {
 
         @Override
         public void initialize() {
+            algaeIntakeMotor.setControl(brake);
+        }
+    }
+
+    class PulseHoldAlgaeCommand extends Command {
+        private final Timer timer = new Timer();
+        private boolean pulseState = false;
+
+        private final DutyCycleOut pulse = new DutyCycleOut(holdSpeed);
+        private final StaticBrake brake = new StaticBrake();
+
+        public PulseHoldAlgaeCommand() {
+            addRequirements(Subsystems.algaeIntake);
+            setName("Pulse Hold");
+        }
+
+        @Override
+        public void initialize() {
+            timer.restart();
+            pulseState = true;
+        }
+
+        @Override
+        public void execute() {
+            if (pulseState) {
+                algaeIntakeMotor.setControl(pulse);
+                if (timer.hasElapsed(1.0)) {
+                    pulseState = false;
+                }
+            } else {
+                algaeIntakeMotor.setControl(brake);
+                if (timer.hasElapsed(0.1)) {
+                    pulseState = true;
+                }
+            }
+//            if (timer.hasElapsed(0.5)) {
+//                if (pulseState) {
+//                    algaeIntakeMotor.setControl(pulse);
+//                } else {
+//                    algaeIntakeMotor.setControl(brake);
+//                }
+//                pulseState = !pulseState;
+//            }
+        }
+
+        @Override
+        public void end(boolean interrupted) {
             algaeIntakeMotor.setControl(brake);
         }
     }
