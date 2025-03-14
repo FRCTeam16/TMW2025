@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.Subsystems;
+import frc.robot.commands.dms.CoralIntakeAMDCommand;
 import frc.robot.subsystems.Lifecycle;
 import frc.robot.util.BSLogger;
 
@@ -190,7 +191,7 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
         bottomMotor.setControl(dutyCycleOutBottom.withOutput(-ejectSpeed));
     }
 
-    void stop() {
+    public void stop() {
         requestedState = "stop";
         topMotor.setControl(stop);
         bottomMotor.setControl(stop);
@@ -225,6 +226,16 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
             topMotor.setControl(dutyCycleOutTop.withOutput(0.15));
             bottomMotor.setControl(dutyCycleOutBottom.withOutput(-0.25));
         });
+    }
+
+    public void runAMD() {
+        topMotor.setControl(dutyCycleOutTop.withOutput(0.5));
+        bottomMotor.setControl(dutyCycleOutBottom.withOutput(-0.5));
+    }
+
+    public void collectAMD(CoralIntakeAMDCommand.CoralIntakeDataCollector dataCollector) {
+        dataCollector.addCurrents(topMotor.getStatorCurrent().getValueAsDouble(),
+                bottomMotor.getStatorCurrent().getValueAsDouble());
     }
 
     private class ShootCoralCommand extends Command {

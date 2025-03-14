@@ -1,5 +1,8 @@
 package frc.robot.subsystems.DMS;
 
+import frc.robot.util.BSLogger;
+
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -44,8 +47,10 @@ public class SwerveDataCollector extends AbstractDataCollector<DriveInfo<Integer
         double[] velocityRLArray = velocityData.RL.stream().mapToDouble(Double::doubleValue).toArray();
         double[] velocityRRArray = velocityData.RR.stream().mapToDouble(Double::doubleValue).toArray();
 
-        DriveInfo<Boolean> currentOutliers = detectOutliers(currentFLArray, currentFRArray, currentRLArray, currentRRArray);
-        DriveInfo<Boolean> velocityOutliers = detectOutliers(velocityFLArray, velocityFRArray, velocityRLArray, velocityRRArray);
+        DriveInfo<Boolean> currentOutliers = detectOutliers(currentFLArray, currentFRArray, currentRLArray, currentRRArray, "current");
+        DriveInfo<Boolean> velocityOutliers = detectOutliers(velocityFLArray, velocityFRArray, velocityRLArray, velocityRRArray, "velocity");
+
+
 
         DriveInfo<Integer> score = new DriveInfo<>(0);
         score.FL = calculateStatus(currentOutliers.FL, velocityOutliers.FL);
@@ -60,7 +65,7 @@ public class SwerveDataCollector extends AbstractDataCollector<DriveInfo<Integer
      * Detects which motor(s) are outliers using the MAD approach.
      * Returns a list of motor labels that exceed the chosen z-score threshold.
      */
-    public static DriveInfo<Boolean> detectOutliers(double[] FL, double[] FR, double[] RL, double[] RR) {
+    public static DriveInfo<Boolean> detectOutliers(double[] FL, double[] FR, double[] RL, double[] RR, String label) {
         // 1. Concatenate all motor arrays into one
         double[] allData = concatArrays(FL, FR, RL, RR);
 
@@ -88,6 +93,18 @@ public class SwerveDataCollector extends AbstractDataCollector<DriveInfo<Integer
         double medianRL = median(RL);
         double medianRR = median(RR);
 
+        try(FileWriter out = new FileWriter("/home/lvuser/" + label + ".csv")) {
+            out.append("FL,FR,RL,RR\n");
+            for (int i=0;i<FL.length;i++) {
+                out.append(Double.toString(FL[i])).append(",")
+                        .append(Double.toString(FR[i])).append(",")
+                        .append(Double.toString(RL[i])).append(",")
+                        .append(Double.toString(RR[i])).append("\n");
+            }
+        } catch (Exception e) {
+            BSLogger.log("SwerveDataCollector", "Error writing CSV File");
+        }
+
         // 6. Compute z-score for each motor's median
         // Use modified Z
         double zFL = 0.6745 * (Math.abs(medianFL - globalMedian)) / MAD;
@@ -103,6 +120,26 @@ public class SwerveDataCollector extends AbstractDataCollector<DriveInfo<Integer
         if (zFR > threshold) outliers.FR = true;
         if (zRL > threshold) outliers.RL = true;
         if (zRR > threshold) outliers.RR = true;
+
+        try(FileWriter out = new FileWriter("/home/lvuser/medians"+label+".csv")) {
+            out.append("MAD,Global,FL,FR,RL,RR,zFL,zFR,zRL,zRR,oFL,oFR,oRL,oRR\n")
+                    .append(Double.toString(MAD)).append(',')
+                    .append(Double.toString(globalMedian)).append(',')
+                    .append(Double.toString(medianFL)).append(',')
+                    .append(Double.toString(medianFR)).append(',')
+                    .append(Double.toString(medianRL)).append(',')
+                    .append(Double.toString(medianRR)).append(',')
+                    .append(Double.toString(zFL)).append(',')
+                    .append(Double.toString(zFR)).append(',')
+                    .append(Double.toString(zRL)).append(',')
+                    .append(Double.toString(zRR)).append(',')
+                    .append(Boolean.toString(outliers.FL)).append(',')
+                    .append(Boolean.toString(outliers.FR)).append(',')
+                    .append(Boolean.toString(outliers.RL)).append(',')
+                    .append(Boolean.toString(outliers.RR)).append('\n');
+        } catch (Exception e) {
+            BSLogger.log("SwerveDataCollector", "Error writing medians CSV File");
+        }
 
         return outliers;
     }

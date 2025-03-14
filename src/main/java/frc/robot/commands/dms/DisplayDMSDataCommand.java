@@ -3,6 +3,7 @@ package frc.robot.commands.dms;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Subsystems;
 import frc.robot.subsystems.DMS.DriveInfo;
+import frc.robot.subsystems.DMS.LEDSubsystem;
 import frc.robot.subsystems.DMS.SwerveDataCollector;
 
 /**
@@ -23,6 +24,7 @@ public class DisplayDMSDataCommand extends Command {
         DriveInfo<Integer> steerScores = this.steerDataCollector.getScore();
         Subsystems.ledSubsystem.submitDriveDMSScores(driveScores);
         Subsystems.ledSubsystem.submitSteerDMSScores(steerScores);
+        Subsystems.ledSubsystem.startAMDPhase(LEDSubsystem.AMDPhase.Comm);
     }
 
     @Override

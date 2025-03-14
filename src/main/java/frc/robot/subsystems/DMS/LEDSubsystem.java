@@ -22,7 +22,7 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
     private boolean running = true;
     private Timer timer = new Timer();
     private SerialPort serial;
-    private DMSPhase currentPhase = DMSPhase.Stopped;
+//    private DMSPhase currentPhase = DMSPhase.Stopped;
     // private DMSStats driveDmsStatus = new DMSStats();
     // private DMSStats steerDmsStatus = new DMSStats();
     // private DriveInfo<Integer> driveStatus = new DriveInfo<>(0);
@@ -30,8 +30,11 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
     private int lastComm = 0;
     private int noCommCounter = 0; // avoid intermittent counter by looking for a set number before reporting this
     private int secondsToClimb = 30;
-    private DriveInfo<Integer> driveDMSScores;
-    private DriveInfo<Integer> steerDMSScores;
+
+    private AMDPhase currentPhase = AMDPhase.Comm;
+    private DriveInfo<Integer> driveDMSScores = new DriveInfo<>(0);
+    private DriveInfo<Integer> steerDMSScores = new DriveInfo<>(0);
+    private int coralAMDScore = 0;
 
     /**
      * Creates a new LEDSubsystem.
@@ -70,24 +73,49 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
         }
     }
 
+    public void startAMDPhase(AMDPhase amdPhase) {
+        this.currentPhase = amdPhase;
+    }
+
+    // FIXME: Move somewhere better
+    public enum AMDPhase {
+        Comm(0),
+        Drivetrain(4),
+        Elevator(5),
+        CoralShooter(6),
+        AlgaeIntake(7),
+        Climber(8),
+        AMDEnd(9);
+
+        private final int phaseNumber;
+
+        AMDPhase(int phaseNumber) {
+            this.phaseNumber = phaseNumber;
+        }
+    }
+
     public void SendData(DriveInfo<Double> driveMotor, DriveInfo<Double> steerMotor) {
 
         // Communications status
         int robotState = 0;
-        if (DriverStation.isDisabled()) {
-            robotState = 1;
-        } else if (DriverStation.isAutonomous()) {
-            robotState = 2;
-        } else if (DriverStation.isTeleop()) {
-            robotState = 3;
-        }
-        if (robotState == 0) {
-            noCommCounter++;
-            robotState = (noCommCounter < NOCOMM_THRESHOLD) ? lastComm : 0;
+        if (AMDPhase.Comm == currentPhase) {
+            if (DriverStation.isDisabled()) {
+                robotState = 1;
+            } else if (DriverStation.isAutonomous()) {
+                robotState = 2;
+            } else if (DriverStation.isTeleop()) {
+                robotState = 3;
+            }
+            if (robotState == 0) {
+                noCommCounter++;
+                robotState = (noCommCounter < NOCOMM_THRESHOLD) ? lastComm : 0;
+            } else {
+                noCommCounter = 0;
+            }
+            lastComm = robotState;
         } else {
-            noCommCounter = 0;
+            robotState = currentPhase.phaseNumber;
         }
-        lastComm = robotState;
 
         // Alliance color
         int allianceColor = 0;
@@ -108,6 +136,8 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
 
         byte[] buffer = new byte[BUFFER_SIZE];
 
+        BSLogger.log("LEDSubsystem", "Robot state is: " + robotState);
+
         buffer[0] = (byte) 254;
         buffer[1] = (byte) robotState; // comm status
         buffer[2] = (byte) allianceColor;
@@ -127,11 +157,11 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
         buffer[13] = (byte) 0; // AMD climber
         buffer[14] = (byte) 0; // AMD elevatorLeft
         buffer[15] = (byte) 0; // AMD elevatorRight
-        buffer[16] = (byte) 0; // AMD coralLeft
+        buffer[16] = (byte) coralAMDScore; // AMD coral shooter
         buffer[17] = (byte) 0; // AMD coralRight
         buffer[18] = (byte) 0; // AMD algaeIntake
         buffer[19] = (byte) 0; // AMD algaePivotMotor
-        buffer[20] = (byte) 0; // extra
+        buffer[20] = (byte) 0; // April Tag Angle
         buffer[21] = (byte) 0; // extra
         buffer[22] = (byte) 0; // barge distance
         buffer[23] = (byte) 0; // april tag distance threshold (boolean)
@@ -165,16 +195,16 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
         // steerStatus = new DriveInfo<>(0);
     
 
-        currentPhase = DMSPhase.RunDriveMotors;
+//        currentPhase = DMSPhase.RunDriveMotors;
     }
 
-    public boolean isStopped() {
-        return currentPhase == DMSPhase.Stopped;
-    }
+//    public boolean isStopped() {
+//        return currentPhase == DMSPhase.Stopped;
+//    }
 
     public void stopDMS() {
         System.out.println("*********************** STOPPING DMS ****************************");
-        currentPhase = DMSPhase.Stopped;
+//        currentPhase = DMSPhase.Stopped;
 
         // driveStatus = new DriveInfo<>(0);
         // steerStatus = new DriveInfo<>(0);
@@ -189,26 +219,26 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
             secondsToClimb = climbTimeFromDashboard;
         }
 
-        if (running) {
-
-            switch (currentPhase) {
-                case Stopped:
-                    break;
-                case RunDriveMotors:
-                    System.out.println("Running DMS: " + currentPhase + " | " + timer.get());
-                    runMotorTest();
-                    break;
-                case RunSteerMotors:
-                    System.out.println("Running DMS: " + currentPhase + " | " + timer.get());
-                    runSteerTest();
-                    break;
-                case DisplayResults:
-                    System.out.println("Running DMS: " + currentPhase + " | " + timer.get());
-                    displayResults();
-                    break;
-
-            }
-        }
+//        if (running) {
+//
+//            switch (currentPhase) {
+//                case Stopped:
+//                    break;
+//                case RunDriveMotors:
+//                    System.out.println("Running DMS: " + currentPhase + " | " + timer.get());
+//                    runMotorTest();
+//                    break;
+//                case RunSteerMotors:
+//                    System.out.println("Running DMS: " + currentPhase + " | " + timer.get());
+//                    runSteerTest();
+//                    break;
+//                case DisplayResults:
+//                    System.out.println("Running DMS: " + currentPhase + " | " + timer.get());
+//                    displayResults();
+//                    break;
+//
+//            }
+//        }
     }
 
     private void runMotorTest() {
@@ -323,11 +353,15 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
 
     }
 
-    private void displayResults() {
-        final double now = timer.get();
-        if (now > RESULTS_DISPLAY_TIME) {
-            currentPhase = DMSPhase.Stopped;
-        }
+//    private void displayResults() {
+//        final double now = timer.get();
+//        if (now > RESULTS_DISPLAY_TIME) {
+//            currentPhase = DMSPhase.Stopped;
+//        }
+//    }
+
+    public void submitCoralAMDScore(int score) {
+        this.coralAMDScore = score;
     }
 
     enum DMSPhase {
@@ -345,6 +379,12 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
         BSLogger.log("LEDSubsystem", "FR: " + driveScores.FR);
         BSLogger.log("LEDSubsystem", "RL: " + driveScores.RL);
         BSLogger.log("LEDSubsystem", "RR: " + driveScores.RR);
+
+        SmartDashboard.putNumber("AMD/swerve/driveFL", driveScores.FL);
+        SmartDashboard.putNumber("AMD/swerve/driveFR", driveScores.FR);
+        SmartDashboard.putNumber("AMD/swerve/driveRL", driveScores.RL);
+        SmartDashboard.putNumber("AMD/swerve/driveRR", driveScores.RR);
+
         this.driveDMSScores = driveScores;
     }
 
@@ -354,6 +394,12 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
         BSLogger.log("LEDSubsystem", "FR: " + steerScores.FR);
         BSLogger.log("LEDSubsystem", "RL: " + steerScores.RL);
         BSLogger.log("LEDSubsystem", "RR: " + steerScores.RR);
+
+        SmartDashboard.putNumber("AMD/swerve/steerFL", steerScores.FL);
+        SmartDashboard.putNumber("AMD/swerve/steerFR", steerScores.FR);
+        SmartDashboard.putNumber("AMD/swerve/steerRL", steerScores.RL);
+        SmartDashboard.putNumber("AMD/swerve/steerRR", steerScores.RR);
+
 
         this.steerDMSScores = steerScores;
     }
