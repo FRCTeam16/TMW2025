@@ -19,6 +19,7 @@ public class ControlBindingFactory {
             case PathTesting -> PathTestingControls.class;
             case SysId -> SysIdControls.class;
             case CoralTesting -> CoralTestingControls.class;
+            case Bayou -> BayouControls.class;
             case none -> DefaultControls.class;
         };
 
@@ -45,6 +46,7 @@ public class ControlBindingFactory {
         PathTesting,
         SysId,
         CoralTesting,
+        Bayou,
         none
     }
 }
