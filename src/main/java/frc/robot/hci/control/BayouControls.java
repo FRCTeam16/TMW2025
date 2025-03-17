@@ -110,8 +110,10 @@ public class BayouControls extends ControlBinding {
         elevatorL3.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L3));
         elevatorL4.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4));
 
-        algaeArmFloor.onTrue(new AlgaeArm.SetArmPositionCommand(AlgaeArmPosition.Ground));
-        algaeArmProcessor.onTrue(new AlgaeArm.SetArmPositionCommand(AlgaeArmPosition.Processor));
+        algaeArmFloor.whileTrue(new AlgaeArm.SetArmPositionCommand(AlgaeArmPosition.Ground))
+                .onFalse(new AlgaeArm.SetArmPositionCommand(AlgaeArmPosition.Up));
+        algaeArmProcessor.whileTrue(new AlgaeArm.SetArmPositionCommand(AlgaeArmPosition.Processor))
+                .onFalse(new AlgaeArm.SetArmPositionCommand(AlgaeArmPosition.Up));
         algaeArmUp.onTrue(new AlgaeArm.SetArmPositionCommand(AlgaeArmPosition.Up));
 
         algaeHighElevator.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.AlgaeReefHigh));
