@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Robot;
 import frc.robot.Subsystems;
+import frc.robot.commands.PickAlgaeCommand;
 import frc.robot.commands.dms.CoralIntakeAMDCommand;
 import frc.robot.commands.dms.RunDMSCommand;
 import frc.robot.commands.pose.GenericPoseRequestCommand;
@@ -116,8 +117,8 @@ public class BayouControls extends ControlBinding {
                 .onFalse(new AlgaeArm.SetArmPositionCommand(AlgaeArmPosition.Up));
         algaeArmUp.onTrue(new AlgaeArm.SetArmPositionCommand(AlgaeArmPosition.Up));
 
-        algaeHighElevator.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.AlgaeReefHigh));
-        algaeLowElevator.onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.AlgaeReefLow));
+        algaeHighElevator.whileTrue(new PickAlgaeCommand(Elevator.ElevatorSetpoint.AlgaeReefHigh));
+        algaeLowElevator.whileTrue(new PickAlgaeCommand(Elevator.ElevatorSetpoint.AlgaeReefLow));
 
         climberPickup.onTrue(new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.PICKUP));
         climberClimb.onTrue(new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.CLIMB));

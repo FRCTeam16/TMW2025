@@ -93,6 +93,9 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
         targetPosition = getMotorPosition();
     }
 
+    public void setArmPosition(AlgaeArmPosition armPosition) {
+        this.setArmPosition(armPosition.position);
+    }
 
     private void setArmPosition(double position) {
         this.targetPosition = position;
@@ -186,7 +189,8 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
         Up(0.001),
         Ground(0.233),
         Processor(0.185),
-        Shooting(0.05);
+        Shooting(0.05),
+        PickFromReef(0.11);
 
         private final double position;
 
