@@ -34,7 +34,7 @@ public class SwerveDataCollectorTest {
         System.out.println("RL: " + SwerveDataCollector.median(vd3));
         System.out.println("RR: " + SwerveDataCollector.median(vd4));
 
-        DriveInfo<Boolean> result = SwerveDataCollector.detectOutliers(vd1, vd2, vd3, vd4);
+        DriveInfo<Boolean> result = SwerveDataCollector.detectOutliers(vd1, vd2, vd3, vd4, "SwerveDataCollectorTest-medians");
         assertFalse(result.FL);
         assertFalse(result.FR);
         assertFalse(result.RL);
@@ -44,7 +44,8 @@ public class SwerveDataCollectorTest {
                 currentData1.stream().mapToDouble(Double::doubleValue).toArray(),
                 currentData2.stream().mapToDouble(Double::doubleValue).toArray(),
                 currentData3.stream().mapToDouble(Double::doubleValue).toArray(),
-                currentData4.stream().mapToDouble(Double::doubleValue).toArray()
+                currentData4.stream().mapToDouble(Double::doubleValue).toArray(),
+                "SwerveDataCollectorTest-current"
         );
         assertFalse(result.FL);
         assertFalse(result.FR);
@@ -95,7 +96,7 @@ public class SwerveDataCollectorTest {
         double[] vd3 = velocityData3.stream().mapToDouble(Double::doubleValue).toArray();
         double[] vd4 = velocityData4.stream().mapToDouble(Double::doubleValue).toArray();
 
-        DriveInfo<Boolean> result = SwerveDataCollector.detectOutliers(vd1, vd2, vd3, vd4);
+        DriveInfo<Boolean> result = SwerveDataCollector.detectOutliers(vd1, vd2, vd3, vd4, "SwerveDataCollectorTest-velocity");
         System.out.println("Result: " + result.FL + ", " + result.FR + ", " + result.RL + ", " + result.RR);
 
         assertFalse(result.FL);
@@ -172,7 +173,7 @@ public class SwerveDataCollectorTest {
         double[] vd3 = velocityData3.stream().mapToDouble(Double::doubleValue).toArray();
         double[] vd4 = velocityData4.stream().mapToDouble(Double::doubleValue).toArray();
 
-        DriveInfo<Boolean> velocityResult = SwerveDataCollector.detectOutliers(vd1, vd2, vd3, vd4);
+        DriveInfo<Boolean> velocityResult = SwerveDataCollector.detectOutliers(vd1, vd2, vd3, vd4, "SwerveDataCollectorTest-two-velocity");
         assertFalse(velocityResult.FL);
         assertTrue(velocityResult.FR);
         assertFalse(velocityResult.RL);
@@ -183,7 +184,7 @@ public class SwerveDataCollectorTest {
         double[] cd3 = currentData3.stream().mapToDouble(Double::doubleValue).toArray();
         double[] cd4 = currentData4.stream().mapToDouble(Double::doubleValue).toArray();
 
-        DriveInfo<Boolean> currentResult = SwerveDataCollector.detectOutliers(cd1, cd2, cd3, cd4);
+        DriveInfo<Boolean> currentResult = SwerveDataCollector.detectOutliers(cd1, cd2, cd3, cd4, "SwerveDataCollectorTest-two-current");
         assertFalse(currentResult.FL);
         assertFalse(currentResult.FR);
         assertTrue(currentResult.RL);

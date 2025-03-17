@@ -4,8 +4,12 @@ import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.*;
+import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.ControlModeValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.util.sendable.SendableBuilder;
@@ -20,7 +24,7 @@ import java.util.function.Supplier;
 
 public class Elevator extends SubsystemBase implements Lifecycle {
     public static final double GRAVITY_VOLTS = -0.5;
-    public static final double ELEVATOR_POSITION_THRESHOLD = 0.2;
+    public static final double ELEVATOR_POSITION_THRESHOLD = 0.3;
     private final TalonFX left = new TalonFX(Robot.robotConfig.getCanID("elevatorLeftMotor"));
     private final TalonFX right = new TalonFX(Robot.robotConfig.getCanID("elevatorRightMotor"));
 
@@ -37,7 +41,6 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     private double elevatorUpThreshold = -26.0;
 
     private Alert coralObstructionAlert = new Alert("Coral is obstructing elevator path", Alert.AlertType.kError);
-
 
 
     public Elevator() {
@@ -102,7 +105,7 @@ public class Elevator extends SubsystemBase implements Lifecycle {
         if (setpoint == null) {
             return;
         }
-        BSLogger.log("Elevator", "moveToPosition: " + setpoint.name() );
+        BSLogger.log("Elevator", "moveToPosition: " + setpoint.name());
         requestedSetpoint = setpoint;
         moveToEncoderPosition(setpoint.val);
     }
@@ -125,6 +128,9 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     }
 
     public boolean isInPosition() {
+        if (ElevatorSetpoint.Zero == requestedSetpoint && lazyHold) {
+            return true;
+        }
         double currentPos = getCurrentPosition();
         double error = Math.abs(currentPos - currentSetpoint);
         return error < ELEVATOR_POSITION_THRESHOLD &&
@@ -136,7 +142,18 @@ public class Elevator extends SubsystemBase implements Lifecycle {
     }
 
     public Command openLoopCommand(Supplier<Double> speed) {
-        return this.run(() -> this.setOpenLoop(speed.get())).withName("Elevator Manual Control");
+        return this.run(() -> {
+            double rawSpeed = speed.get();
+            boolean isOpenLoop = left.getControlMode().getValue() == ControlModeValue.DutyCycleOut;
+            if (MathUtil.isNear(0, Math.abs(rawSpeed), 0.05)) {
+                // Only apply MM if we are in open loop to avoid slip
+                if (isOpenLoop) {
+                    Subsystems.elevator.moveToEncoderPosition(this.getCurrentPosition());
+                }
+            } else {
+                this.setOpenLoop(speed.get());
+            }
+        }).withName("Elevator Manual Control");
     }
 
     @Deprecated
@@ -244,10 +261,9 @@ public class Elevator extends SubsystemBase implements Lifecycle {
         @Override
         public void execute() {
             // If we are near the bottom and not moving, apply a neutral output to the motors
-            if (Subsystems.elevator.isInPosition() &&
-                    MathUtil.isNear(0.0, Subsystems.elevator.getCurrentPosition(), 0.25)) {
-                Subsystems.elevator.left.setControl(neutralOut);
+            if (!lazyHold && Subsystems.elevator.isInPosition() && ElevatorSetpoint.Zero == Subsystems.elevator.requestedSetpoint) {
                 Subsystems.elevator.setLazyHold(true);
+                Subsystems.elevator.left.setControl(neutralOut);
             }
         }
 

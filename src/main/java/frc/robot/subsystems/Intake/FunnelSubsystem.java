@@ -5,20 +5,26 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.subsystems.Lifecycle;
 import frc.robot.util.BSLogger;
 
 public class FunnelSubsystem extends SubsystemBase implements Lifecycle {
     private PWM funnelLatch = new PWM(0);
     private double setpoint = 0.0;
+    private boolean latchOpened = true; // assume we start true
 
     @Override
     public void initSendable(SendableBuilder builder) {
         super.initSendable(builder);
         builder.setSmartDashboardType("FunnelSubsystem");
-        builder.addDoubleProperty("Position", funnelLatch::getPosition, null);;
-        builder.addDoubleProperty("Setpoint", () -> setpoint, this::setSetpoint);
         builder.addBooleanProperty("In Position", this::inPosition, null);
+
+        if (Constants.DebugSendables.Funnel) {
+            builder.addDoubleProperty("Position", funnelLatch::getPosition, null);;
+            builder.addDoubleProperty("Setpoint", () -> setpoint, this::setSetpoint);
+            builder.addBooleanProperty("Latch Opened", () -> latchOpened, null);
+        }
     }
 
     public boolean inPosition() {
@@ -33,11 +39,13 @@ public class FunnelSubsystem extends SubsystemBase implements Lifecycle {
 
     public void openLatch() {
         BSLogger.log("Funnel", "openLatch");
+        latchOpened = true;
         this.setSetpoint(1.0);
     }
 
     public void closeLatch() {
         BSLogger.log("Funnel", "closeLatch");
+        latchOpened = false;
         this.setSetpoint(0.0);
     }
 
@@ -50,4 +58,7 @@ public class FunnelSubsystem extends SubsystemBase implements Lifecycle {
         return this.runOnce(this::closeLatch);
     }
 
+    public boolean isLatchOpen() {
+        return latchOpened;
+    }
 }

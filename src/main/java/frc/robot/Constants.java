@@ -21,6 +21,6 @@ public class Constants {
     public static class DebugSendables {
         public static boolean AlgaeArm = true;
         public static boolean AlgaeIntake = true;
-        
+        public static boolean Funnel = true;
     }
 }

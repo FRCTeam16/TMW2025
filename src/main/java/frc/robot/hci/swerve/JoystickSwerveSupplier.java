@@ -1,5 +1,6 @@
 package frc.robot.hci.swerve;
 
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.Joystick;
@@ -7,24 +8,34 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
 import frc.robot.Subsystems;
+import frc.robot.subsystems.RotationController;
+import frc.robot.util.BSLogger;
 import frc.robot.util.GameInfo;
 
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
+import java.util.Optional;
+
+import static edu.wpi.first.units.Units.*;
 
 public class JoystickSwerveSupplier implements SwerveSupplier {
     private final Joystick steerStick;
     private final Joystick driveStick;
     private final CommandXboxController controller;
-    private final boolean isRedAlliance;   // TODO Centralized world state lookup?
+
+    private final RotationController rotationPID = new RotationController(0.016, 0, 0);
+
+
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private Optional<Angle> targetHeading = Optional.empty();
 
     public JoystickSwerveSupplier(Joystick driveStick, Joystick steerStick, CommandXboxController controller) {
         this.steerStick = steerStick;
         this.driveStick = driveStick;
         this.controller = controller;
-        this.isRedAlliance = GameInfo.isRedAlliance();
 
-        SmartDashboard.setDefaultNumber("ElevGovSpeed", 0.4);
+        rotationPID.setTolerance(1.0);
+
+        SmartDashboard.setDefaultNumber("Controls/ElevGovSpeed", 0.4);
+        SmartDashboard.putData("Controls/JoystickAlignPID", rotationPID);
     }
 
     private double applyDeadband(double value, double deadband) {
@@ -38,7 +49,7 @@ public class JoystickSwerveSupplier implements SwerveSupplier {
     protected double applyLimiter(double value) {
         boolean isElevatorUp = Subsystems.elevator.isElevatorUp();
         if (isElevatorUp) {
-            return value * SmartDashboard.getNumber("ElevGovSpeed", 0.4);
+            return value * SmartDashboard.getNumber("Controls/ElevGovSpeed", 0.4);
         } else {
             return value;
         }
@@ -46,17 +57,23 @@ public class JoystickSwerveSupplier implements SwerveSupplier {
 
     protected double getBaseX() {
         return applyLimiter(applyDeadband(
-                -driveStick.getY(), 0.08) * (isRedAlliance ? 1 : 1));
+                -driveStick.getY(), 0.08) );
     }
 
     protected double getBaseY() {
         return applyLimiter(applyDeadband(
-                -driveStick.getX(), 0.05) * (isRedAlliance ? 1 : 1));
+                -driveStick.getX(), 0.05));
     }
 
     protected double getBaseRotationalRate() {
-        return applyLimiter(applyDeadband(
-                -steerStick.getX(), 0.05) * (isRedAlliance ? 1 : 1));
+        final double baseRotation;
+        if (targetHeading.isEmpty()) {
+            baseRotation = applyDeadband(-steerStick.getX(), 0.05);
+        } else {
+            double robotDegrees = Subsystems.swerveSubsystem.getState().Pose.getRotation().getDegrees();
+            baseRotation = rotationPID.calculate(robotDegrees, targetHeading.get().in(Degrees));
+        }
+        return applyLimiter(baseRotation);
     }
 
 
@@ -76,5 +93,18 @@ public class JoystickSwerveSupplier implements SwerveSupplier {
     public AngularVelocity supplyRotationalRate() {
         double base = getBaseRotationalRate();
         return RadiansPerSecond.of(base).times(Constants.MaxAngularRate.in(RadiansPerSecond));
+    }
+
+    @Override
+    public void setTargetHeading(Angle angle) {
+        BSLogger.log("JoystickSwerveSupplier", "setTargetHeading: " + angle);
+        rotationPID.reset();
+        this.targetHeading = Optional.of(angle);
+    }
+
+    @Override
+    public void clearTargetHeading() {
+        BSLogger.log("JoystickSwerveSupplier", "clearTargetHeading");
+        this.targetHeading = Optional.empty();
     }
 }

@@ -56,6 +56,7 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
     SmartDashboard.putNumber("Yaw", Subsystems.swerveSubsystem.getPigeonYaw());
     SmartDashboard.putNumber("Rot", Subsystems.swerveSubsystem.getState().Pose.getRotation().getDegrees());
+    m_robotContainer.robotPeriodic();
     Subsystems.poseManager.update();
   }
 
@@ -107,6 +108,7 @@ public class Robot extends TimedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
+    m_robotContainer.teleopInit();
   }
 
   @Override

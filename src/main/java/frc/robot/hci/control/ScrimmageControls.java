@@ -102,8 +102,8 @@ public class ScrimmageControls extends ControlBinding {
 
 //        alignLeft.whileTrue(PathfindFactory.limelightAlignToVisibleAprilTag(true));
 //        alignRight.whileTrue(PathfindFactory.limelightAlignToVisibleAprilTag(false));
-        alignLeft.whileTrue(new AlignDriveInCommand(true)); // SimpleAlignCommand
-        alignRight.whileTrue(new AlignDriveInCommand(false));
+        alignLeft.whileTrue(new AlignDriveInCommand(AlignDriveInCommand.AlignTarget.LEFT)); // SimpleAlignCommand
+        alignRight.whileTrue(new AlignDriveInCommand(AlignDriveInCommand.AlignTarget.RIGHT));
 
 //        robotCentric.whileTrue(new DriveRobotCentricCommand());
 
@@ -132,13 +132,13 @@ public class ScrimmageControls extends ControlBinding {
 
         SmartDashboard.putData("Run DMS", new RunDMSCommand());
         SmartDashboard.putData("Run CoralIntake AMD", new CoralIntakeAMDCommand());
+
+        SmartDashboard.putData("Open Latch", Subsystems.funnelSubsystem.openLatchCommand().ignoringDisable(true));
+        SmartDashboard.putData("Close Latch", Subsystems.funnelSubsystem.closeLatchCommand().ignoringDisable(true));
     }
 
     void bindDebugControls() {
         SmartDashboard.putData("TestTargetCalc", new TestTargetPoseCalc().ignoringDisable(true));
-
-        SmartDashboard.putData("Open Latch", Subsystems.funnelSubsystem.openLatchCommand().ignoringDisable(true));
-        SmartDashboard.putData("Close Latch", Subsystems.funnelSubsystem.closeLatchCommand().ignoringDisable(true));
 
         new Trigger(() -> steerStick.getPOV() == 180)
             .onTrue(Subsystems.coralIntake.ejectCommand())

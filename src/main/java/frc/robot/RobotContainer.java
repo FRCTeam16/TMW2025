@@ -7,17 +7,13 @@ package frc.robot;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.hci.control.ControlBinding;
 import frc.robot.hci.control.ControlBindingFactory;
 import frc.robot.hci.control.ControlBindingFactory.JoystickMode;
-import frc.robot.hci.swerve.JoystickSwerveSupplier;
 import frc.robot.hci.swerve.SwerveSupplier;
-import frc.robot.hci.swerve.XBoxSwerveSupplier;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Controls;
 import frc.robot.subsystems.Lifecycle;
@@ -32,8 +28,6 @@ public class RobotContainer {
     private RobotContainer instance;
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-//            .withDeadband(MaxSpeed.in(MetersPerSecond) * 0.125)
-//            .withRotationalDeadband(MaxAngularRate.in(RadiansPerSecond) * 0.1) // Add a 10% deadband
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
 
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
@@ -52,30 +46,24 @@ public class RobotContainer {
     public final CommandSwerveDrivetrain drivetrain;
     private final SwerveSupplier swerveSupplier;
 
-    private JoystickMode joystickMode = JoystickMode.Bayou;
-    private ControlBinding controlBinding;
+    private final JoystickMode joystickMode = JoystickMode.Bayou;
+    private final ControlBinding controlBinding;
 
     public static RobotContainer getInstance() {
         return new RobotContainer();
     }
 
     private RobotContainer() {
-        Subsystems.getInstance(); // Ensure subsystems are initialized
+        Subsystems.getInstance();   // Ensure subsystems are initialized
+        controlBinding = ControlBindingFactory.createControlBinding(this.joystickMode, driveStick, steerStick, joystick);
+        swerveSupplier = controlBinding.getSwerveSupplier();
         drivetrain = Subsystems.swerveSubsystem;
-        swerveSupplier = (!RobotBase.isSimulation()) ?
-                new JoystickSwerveSupplier(driveStick, steerStick, joystick) :
-                new XBoxSwerveSupplier(joystick);
 
-
-        configureBindings();
-
-
-
+        configureDrivetrain();        // Configure control bindings before setting default command
         SmartDashboard.putString("Joystick Mode", this.joystickMode.toString());
-
     }
 
-    private void configureBindings() {
+    private void configureDrivetrain() {
         // View that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
@@ -90,7 +78,6 @@ public class RobotContainer {
             ).withName("Default Teleop")
         );
 
-        controlBinding = ControlBindingFactory.createControlBinding(this.joystickMode, driveStick, steerStick, joystick);
         drivetrain.registerTelemetry(logger::telemeterize);
     }
 
@@ -105,13 +92,21 @@ public class RobotContainer {
 
     public void robotInit() {
         Subsystems.lifecycleSubsystems.stream().filter(Objects::nonNull).forEach(Lifecycle::robotInit);
+        controlBinding.robotInit();
+    }
+
+    public void robotPeriodic() {
+        controlBinding.periodic();
     }
 
     public void teleopInit() {
         Subsystems.lifecycleSubsystems.stream().filter(Objects::nonNull).forEach(Lifecycle::teleopInit);
+        controlBinding.teleopInit();
     }
 
     public void autoInit() {
         Subsystems.lifecycleSubsystems.stream().filter(Objects::nonNull).forEach(Lifecycle::autoInit);
+        controlBinding.autoInit();
     }
+
 }

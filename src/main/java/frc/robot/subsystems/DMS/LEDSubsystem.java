@@ -136,8 +136,6 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
 
         byte[] buffer = new byte[BUFFER_SIZE];
 
-        BSLogger.log("LEDSubsystem", "Robot state is: " + robotState);
-
         buffer[0] = (byte) 254;
         buffer[1] = (byte) robotState; // comm status
         buffer[2] = (byte) allianceColor;

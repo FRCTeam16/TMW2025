@@ -20,14 +20,13 @@ import java.util.Optional;
 import static edu.wpi.first.units.Units.*;
 
 public class AlignDriveInCommand extends Command {
-    private static final double TARGET_DISTANCE = 0.4;
-
     private final Distance LIMELIGHT_OFFSET = Inches.of(12.279);
 
-    private final boolean isLeft;
-    RotationController rotationController = Subsystems.rotationController;
-    private Distance targetDistance;
+    private final AlignTarget alignTarget;
     private Angle targetRotation;
+    private LinearVelocity approachSpeed = MetersPerSecond.of(1.25);
+
+    RotationController rotationController = Subsystems.rotationController;
     private PIDController alignController = Subsystems.alignTranslationController;
     private TranslationController distanceController = Subsystems.translationController;
 
@@ -35,20 +34,25 @@ public class AlignDriveInCommand extends Command {
     private SwerveRequest.Idle idle = new SwerveRequest.Idle();
     private SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
 
+    public enum AlignTarget {
+        LEFT,
+        RIGHT,
+        CENTER
+    }
 
-    public AlignDriveInCommand(boolean isLeft) {
-        this.isLeft = isLeft;
-        this.targetDistance = Meters.of(isLeft ? TARGET_DISTANCE : TARGET_DISTANCE);
+    public AlignDriveInCommand(AlignTarget alignTarget) {
+        this.alignTarget = alignTarget;
         this.addRequirements(Subsystems.swerveSubsystem);
     }
 
-    public AlignDriveInCommand withTargetDistance(Distance distance) {
-        this.targetDistance = distance;
+    public AlignDriveInCommand withApproachSpeed(LinearVelocity speed) {
+        this.approachSpeed = speed;
         return this;
     }
 
     @Override
     public void initialize() {
+        BSLogger.log("AlignDriveInCommand", "initialize");
         boolean hasTarget = LimelightHelpers.getTV("limelight");
         targetRotation = Subsystems.swerveSubsystem.getState().Pose.getRotation().getMeasure();
         if (hasTarget) {
@@ -73,7 +77,6 @@ public class AlignDriveInCommand extends Command {
 
     @Override
     public void execute() {
-        BSLogger.log("AlignDriveInCommand", "execute");
         boolean hasTarget = LimelightHelpers.getTV("limelight");
 
         if (!hasTarget) {
@@ -85,16 +88,14 @@ public class AlignDriveInCommand extends Command {
         Angle tx = Degrees.of(rawtx);
         double targetAngleRads = calculateYTargetDirect(tx).in(Radians);
 
-        LinearVelocity speed = MetersPerSecond.of(1.5);
-        LinearVelocity xspeed = speed.times(Math.cos(targetAngleRads));
-        LinearVelocity yspeed = speed.times(Math.sin(targetAngleRads));
+        LinearVelocity xspeed = approachSpeed.times(Math.cos(targetAngleRads));
+        LinearVelocity yspeed = approachSpeed.times(Math.sin(targetAngleRads));
 
         // Robot Rotation
         double currentDegrees = Subsystems.swerveSubsystem.getState().Pose.getRotation().getDegrees();
         double rotationError = rotationController.calculate(currentDegrees);
         AngularVelocity rotationSpeed = DegreesPerSecond.of(180).times(rotationError);
 
-        LinearVelocity zero = MetersPerSecond.of(0);
         Subsystems.swerveSubsystem.setControl(
                 robotCentric
                         .withVelocityX(xspeed)
@@ -103,19 +104,31 @@ public class AlignDriveInCommand extends Command {
         );
     }
 
+    /**
+     * Calculates the target angle to directly drive towards a target based on robot position.
+     * D is the hypothenuse of the triangle formed by the robot and the apriltag target.
+     * d is the distance from the april tag to the target.
+     * x is the distance from the robot to the target in the vertical axis.
+     * y is the distance from the robot to the target in the horizontal axis.
+     *
+     * @param tx the angle to the target reported by the limelight
+     * @return the angle to drive towards
+     */
     private Angle calculateYTargetDirect(Angle tx) {
         Optional<Double> distance = Subsystems.visionOdometryUpdater.getTargetDistance();
         if (distance.isPresent()) {
             Angle angle = tx.times(-1);                         // invert incoming angle sign
             Distance D = Meters.of(distance.get());                      // distance to april tag
-            Distance d = Inches.of(6.5);                       // distance to reef pole
+            Distance d = AlignTarget.CENTER == alignTarget ?
+                    Inches.of(0) :                          // distance to center of ap
+                    Inches.of(6.5);                         // distance to reef pole or center
 
-            Distance x = D.times(Math.cos(angle.in(Radians)));             // R in reference system
-            x = x.minus(LIMELIGHT_OFFSET);                                 // limelight offset
-            Distance y = (D.times(Math.sin(angle.in(Radians)))).minus(d);  // r in reference system
+            Distance x = D.times(Math.cos(angle.in(Radians)));             // R in reference system, the vertical vector
+            x = x.minus(LIMELIGHT_OFFSET);                                 // limelight offset, take off the limelight offset within the robot
+            Distance y = (D.times(Math.sin(angle.in(Radians)))).minus(d);  // r in reference system, the horizontal vector component
 
-            // For right target add
-            if (isLeft) {
+            // For right target add twice the small d distance
+            if (AlignTarget.LEFT == alignTarget) {
                 y = y.plus(d.times(2));
             }
 
@@ -128,11 +141,10 @@ public class AlignDriveInCommand extends Command {
 //            BSLogger.log("calculateYTarget", "x =" + x);
 //            BSLogger.log("calculateYTarget", "y =" + y);
 //            BSLogger.log("calculateYTarget", "R =" + result.in(Degrees));
-
             return result;
         }
         // Default if no distance read
-        return Degrees.of((isLeft) ? 22.5 : -23);
+        return Degrees.of((AlignTarget.LEFT == alignTarget) ? 22.5 : -23);
     }
 
     @Override
@@ -143,10 +155,7 @@ public class AlignDriveInCommand extends Command {
     @Override
     public boolean isFinished() {
         Optional<Double> distance = Subsystems.visionOdometryUpdater.getTargetDistance();
-        if (distance.isPresent()) {
-            return distance.get() < 0.02;
-        }
-        return true;
+        return distance.map(aDouble -> aDouble < 0.02).orElse(true);
     }
 }
 

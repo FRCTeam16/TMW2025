@@ -136,7 +136,7 @@ public class ArkansasStrategy extends AutoPathStrategy {
     public Command doScoreSequence(boolean isLeft) {
         return Commands.sequence(
                         new Climber.ClimberMoveToPositionNoWait(Climber.ClimberPosition.DOWN),
-                        new AlignDriveInCommand(isLeft).withTimeout(0.75),
+                        new AlignDriveInCommand(AlignDriveInCommand.AlignTarget.LEFT).withTimeout(0.75),
                         new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4).withTimeout(5),
                         Subsystems.coralIntake.shootCoralCommand().withTimeout(0.5),
                         Commands.parallel(

@@ -1,5 +1,6 @@
 package frc.robot.hci.swerve;
 
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -14,19 +15,20 @@ public class XBoxSwerveSupplier implements SwerveSupplier {
 
     private final CommandXboxController controller;
 
+
     public XBoxSwerveSupplier(CommandXboxController controller) {
         this.controller = controller;
     }
 
     @Override
     public LinearVelocity supplyX() {
-        double base = -controller.getLeftY() * (GameInfo.isRedAlliance() ? 1 : 1);
+        double base = -controller.getLeftY();
         return MetersPerSecond.of(base).times(Constants.MaxSpeed.in(MetersPerSecond));
     }
 
     @Override
     public LinearVelocity supplyY() {
-        double base = -controller.getLeftX() * (GameInfo.isRedAlliance() ? 1 : 1);
+        double base = -controller.getLeftX();
         return MetersPerSecond.of(base).times(Constants.MaxSpeed.in(MetersPerSecond));
     }
 
@@ -37,5 +39,13 @@ public class XBoxSwerveSupplier implements SwerveSupplier {
         } else {
             return RadiansPerSecond.of(-controller.getRawAxis(2)).times(Constants.MaxAngularRate.in(RadiansPerSecond));
         }
+    }
+
+    @Override
+    public void setTargetHeading(Angle angle) {
+    }
+
+    @Override
+    public void clearTargetHeading() {
     }
 }
