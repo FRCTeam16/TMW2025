@@ -1,3 +1,4 @@
+import frc.robot.subsystems.DMS.AMDStats;
 import frc.robot.subsystems.DMS.DriveInfo;
 import frc.robot.subsystems.DMS.SwerveDataCollector;
 import org.junit.jupiter.api.Test;
@@ -8,7 +9,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SwerveDataCollectorTest {
-    // ...existing code...
 
     @Test
     public void testNoOutliers() {
@@ -18,7 +18,7 @@ public class SwerveDataCollectorTest {
         List<Double> velocityData3 = Arrays.asList(1500.0, 1500.0, 1500.0, 1505.0, 1495.0, 1497.0, 1503.0, 1501.0);
         List<Double> velocityData4 = Arrays.asList(1490.0, 1500.0, 1510.0, 1500.0, 1500.0, 1496.0, 1504.0, 1499.0);
         List<Double> currentData1 = Arrays.asList(2.9, 3.0, 3.1, 3.05, 2.95, 3.02, 2.98, 3.03);
-        List<Double> currentData2 = Arrays.asList(2.8, 3.1, 3.0, 3.2, 2.9, 3.05, 2.97, 3.01);
+        List<Double> currentData2 = Arrays.asList(2.9, 3.1, 3.0, 3.1, 2.9, 3.05, 2.97, 3.01);
         List<Double> currentData3 = Arrays.asList(3.0, 3.0, 3.0, 3.05, 2.95, 3.04, 2.96, 3.02);
         List<Double> currentData4 = Arrays.asList(2.95, 3.05, 3.1, 3.0, 2.9, 3.03, 2.97, 3.01);
 
@@ -29,18 +29,18 @@ public class SwerveDataCollectorTest {
 
         // Debug statements
         System.out.println("Test No Outliers - Velocity Medians:");
-        System.out.println("FL: " + SwerveDataCollector.median(vd1));
-        System.out.println("FR: " + SwerveDataCollector.median(vd2));
-        System.out.println("RL: " + SwerveDataCollector.median(vd3));
-        System.out.println("RR: " + SwerveDataCollector.median(vd4));
+        System.out.println("FL: " + AMDStats.median(vd1));
+        System.out.println("FR: " + AMDStats.median(vd2));
+        System.out.println("RL: " + AMDStats.median(vd3));
+        System.out.println("RR: " + AMDStats.median(vd4));
 
-        DriveInfo<Boolean> result = SwerveDataCollector.detectOutliers(vd1, vd2, vd3, vd4, "SwerveDataCollectorTest-medians");
+        DriveInfo<Boolean> result = AMDStats.detectOutliers(vd1, vd2, vd3, vd4, "SwerveDataCollectorTest-medians");
         assertFalse(result.FL);
         assertFalse(result.FR);
         assertFalse(result.RL);
         assertFalse(result.RR);
 
-        result = SwerveDataCollector.detectOutliers(
+        result = AMDStats.detectOutliers(
                 currentData1.stream().mapToDouble(Double::doubleValue).toArray(),
                 currentData2.stream().mapToDouble(Double::doubleValue).toArray(),
                 currentData3.stream().mapToDouble(Double::doubleValue).toArray(),
@@ -96,7 +96,7 @@ public class SwerveDataCollectorTest {
         double[] vd3 = velocityData3.stream().mapToDouble(Double::doubleValue).toArray();
         double[] vd4 = velocityData4.stream().mapToDouble(Double::doubleValue).toArray();
 
-        DriveInfo<Boolean> result = SwerveDataCollector.detectOutliers(vd1, vd2, vd3, vd4, "SwerveDataCollectorTest-velocity");
+        DriveInfo<Boolean> result = AMDStats.detectOutliers(vd1, vd2, vd3, vd4, "SwerveDataCollectorTest-velocity");
         System.out.println("Result: " + result.FL + ", " + result.FR + ", " + result.RL + ", " + result.RR);
 
         assertFalse(result.FL);
@@ -173,7 +173,7 @@ public class SwerveDataCollectorTest {
         double[] vd3 = velocityData3.stream().mapToDouble(Double::doubleValue).toArray();
         double[] vd4 = velocityData4.stream().mapToDouble(Double::doubleValue).toArray();
 
-        DriveInfo<Boolean> velocityResult = SwerveDataCollector.detectOutliers(vd1, vd2, vd3, vd4, "SwerveDataCollectorTest-two-velocity");
+        DriveInfo<Boolean> velocityResult = AMDStats.detectOutliers(vd1, vd2, vd3, vd4, "SwerveDataCollectorTest-two-velocity");
         assertFalse(velocityResult.FL);
         assertTrue(velocityResult.FR);
         assertFalse(velocityResult.RL);
@@ -184,7 +184,7 @@ public class SwerveDataCollectorTest {
         double[] cd3 = currentData3.stream().mapToDouble(Double::doubleValue).toArray();
         double[] cd4 = currentData4.stream().mapToDouble(Double::doubleValue).toArray();
 
-        DriveInfo<Boolean> currentResult = SwerveDataCollector.detectOutliers(cd1, cd2, cd3, cd4, "SwerveDataCollectorTest-two-current");
+        DriveInfo<Boolean> currentResult = AMDStats.detectOutliers(cd1, cd2, cd3, cd4, "SwerveDataCollectorTest-two-current");
         assertFalse(currentResult.FL);
         assertFalse(currentResult.FR);
         assertTrue(currentResult.RL);

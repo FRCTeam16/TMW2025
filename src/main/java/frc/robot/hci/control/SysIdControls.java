@@ -34,6 +34,6 @@ public class SysIdControls extends ControlBinding {
 
 
         // DMS
-        joystick.a().onTrue(new RunDMSCommand());
+//        joystick.a().onTrue(new RunDMSCommand());
     }
 }

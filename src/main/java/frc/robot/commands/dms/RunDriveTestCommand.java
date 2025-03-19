@@ -42,6 +42,8 @@ class RunDriveTestCommand extends AbstractRunDMSMotorTestCommand {
 
     @Override
     double[] getMotorVelocities() {
-        return Arrays.stream(Subsystems.swerveSubsystem.getModules()).mapToDouble(module -> module.getDriveMotor().getVelocity().getValueAsDouble()).toArray();
+        return Arrays.stream(Subsystems.swerveSubsystem.getModules())
+                .mapToDouble(module -> module.getDriveMotor().getVelocity().getValueAsDouble())
+                .toArray();
     }
 }
