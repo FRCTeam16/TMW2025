@@ -7,13 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "TestForwardBack2"
+            "pathName": "EP2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "EP4"
           }
         }
       ]
     }
   },
-  "resetOdom": false,
-  "folder": "Tests",
+  "resetOdom": true,
+  "folder": "Bayou",
   "choreoAuto": false
 }

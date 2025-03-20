@@ -17,6 +17,14 @@ public class Constants {
     public static PathConstraints pathConstraints =
             new PathConstraints(2.5, 2.5, 1.0, 1.0);
 
+    public static class AutoConstants {
+        public static final double kMaxSpeedMetersPerSecond = 4.4;
+        public static final double kMaxAccelerationMetersPerSecondSquared = 8;
+        public static final double kDriveP = 2;
+        public static final double kDriveI = 0.0;
+        public static final double kDriveD = 0.0;
+    }
+
 
     public static class DebugSendables {
         public static boolean AlgaeArm = true;

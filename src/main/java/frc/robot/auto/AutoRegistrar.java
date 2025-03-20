@@ -3,6 +3,7 @@ package frc.robot.auto;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Subsystems;
 import frc.robot.auto.strategies.*;
+import frc.robot.auto.strategies.BayouTroisStrategy.StartingPosition;
 
 import com.pathplanner.lib.auto.NamedCommands;
 import frc.robot.auto.strategies.debug.*;
@@ -20,11 +21,13 @@ public class AutoRegistrar {
         autoManager.registerStrategy("Arkansas Left Red", "Arkansas Left Red", () -> new ArkansasStrategy(true, true));
         autoManager.registerStrategy("Arkansas Right Blue", "Arkansas Right Blue", () -> new ArkansasStrategy(false, false));
         autoManager.registerStrategy("Arkansas Left Blue", "Arkansas Left Blue", () -> new ArkansasStrategy(true, false));
+
+        autoManager.registerStrategy("Bayou Right Red", () -> new BayouTroisStrategy(StartingPosition.RED_RIGHT));
 //        autoManager.registerStrategy("EP", "EP", EPStrategy::new);
 //        autoManager.registerStrategy("TestDP", TestDPStrategy::new);
 //        autoManager.registerStrategy("Spin", "Spin", SpinStrategy::new);
 //        autoManager.registerStrategy("Cresent", "Cresent", CresentStrategy::new);
-//        autoManager.registerStrategy("ThreePiece", "ThreePiece", ThreePieceStrategy::new);
+       autoManager.registerStrategy("ThreePiece", "ThreePiece", ThreePieceStrategy::new);
 //        autoManager.registerStrategy("BlueReefCheck", "BlueReefCheck", () -> new SimplePathStrategy("BlueReefCheck"));
     }
 
@@ -33,6 +36,5 @@ public class AutoRegistrar {
     }
 
     public static void registerAutoPaths(PathRegistry pathRegistry) {
-        // Tab.registerAutoPaths(pathRegistry);
     }
 }
