@@ -9,7 +9,9 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import java.util.Optional;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -31,7 +33,8 @@ public class ProfiledDriveCommand extends Command {
     private final ProfiledPIDController distancePID;
     private final RotationController rotationPID = Subsystems.rotationController;
     private final SwerveRequest.ApplyRobotSpeeds applyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
-    private final SwerveRequest.FieldCentric fieldCentric = new SwerveRequest.FieldCentric();
+    private final SwerveRequest.FieldCentric fieldCentric = 
+        new SwerveRequest.FieldCentric().withForwardPerspective(ForwardPerspectiveValue.BlueAlliance);
 
     private final Pose2d targetPose;
     private State initialState = new State(0, 0);
@@ -101,26 +104,21 @@ public class ProfiledDriveCommand extends Command {
         // Use the ProfiledPIDControllers to calculate outputs
         double driveOutput = distancePID.calculate(distance, finalState);
 
+        // DEBUG
+        // driveOutput = MathUtil.clamp(driveOutput, -1, 1);
+
         AngularVelocity rotationOutput = Constants.MaxAngularRate.times(rotationPID.calculate(currentAngle, targetAngle));
 
 
-        BSLogger.log("ProfiledDriveCommand", "Distance; " + distance);
-        //  +
-        //         " " + driveOutput +
-        //         " " + rotationOutput +
-        //         " " + Radians.of(headingToTarget).in(Degrees));
-
-        // Subsystems.swerveSubsystem.setControl(
-        //         applyRobotSpeeds.withSpeeds(
-        //                 ChassisSpeeds.fromFieldRelativeSpeeds(
-        //                         driveOutput * Math.cos(headingToTarget),
-        //                         driveOutput * Math.sin(headingToTarget),
-        //                         rotationOutput.in(RadiansPerSecond),
-        //                         currentPose.getRotation())));
         
+        double vx = Math.abs(driveOutput) * Math.cos(headingToTarget);
+        double vy = Math.abs(driveOutput) * Math.sin(headingToTarget);
+        BSLogger.log("ProfiledDriveCommand", "Distance; " + distance + " | Heading: " + Radians.of(headingToTarget).in(Degrees));
+        BSLogger.log("ProfiledDriveCommand", "Vx: " + vx + " Vy: " + vy + " Rot: " + rotationOutput.in(RadiansPerSecond));
+
         Subsystems.swerveSubsystem.setControl(
-            fieldCentric.withVelocityX(driveOutput * Math.cos(headingToTarget))
-            .withVelocityY(driveOutput * Math.sin(headingToTarget))
+            fieldCentric.withVelocityX(vx)
+            .withVelocityY(vy)
             .withRotationalRate(rotationOutput));
     }
 

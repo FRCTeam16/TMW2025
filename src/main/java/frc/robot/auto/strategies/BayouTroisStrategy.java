@@ -1,7 +1,15 @@
 package frc.robot.auto.strategies;
 
+import static edu.wpi.first.units.Units.Meters;
+
+import com.pathplanner.lib.util.FlippingUtil;
+
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -17,8 +25,6 @@ import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.pose.UpdateTranslationFromVision;
 
 public class BayouTroisStrategy extends AutoPathStrategy {
-    final Pose2d rr_firstScorePose = new Pose2d(12.275, 5.4, Rotation2d.fromDegrees(-60));
-    Pose2d simulationPose = new Pose2d(10, 5.6, Rotation2d.fromDegrees(135));
 
     // TODO: this is start of path planner Pose2d simulationPose = new Pose2d(12.37, 5.03, Rotation2d.fromDegrees(-60));
 
@@ -29,28 +35,85 @@ public class BayouTroisStrategy extends AutoPathStrategy {
         BLUE_LEFT
     }
 
+    // Baseline coordinates
+    final AprilTagFieldLayout fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
+    final double FW =  fieldLayout.getFieldWidth();
+    final double FL = fieldLayout.getFieldLength();
+
+
+    // Target Pose
+    final Pose2d rr_targetPose = new Pose2d(12.275, 5.4, Rotation2d.fromDegrees(-60));
+    final Pose2d rl_targetPose = new Pose2d(12.275, FW - 5.4, Rotation2d.fromDegrees(60));
+    private Pose2d br_targetPose = FlippingUtil.flipFieldPose(rr_targetPose);
+    private Pose2d bl_targetPose = new Pose2d(FL - 12.275, 5.4, Rotation2d.fromDegrees(-120));
+
+    // Simulation Pose
+    Pose2d rr_simulationPose = new Pose2d(10, 5.6, Rotation2d.fromDegrees(-60));
+    Pose2d rl_simulationPose = new Pose2d(10, FW - 5.6, Rotation2d.fromDegrees(60));
+    Pose2d br_simulationPose = FlippingUtil.flipFieldPose(rr_simulationPose);   
+    Pose2d bl_simulationPose = new Pose2d(FL - 10, 5.6, Rotation2d.fromDegrees(-120));
+
+
+
     public BayouTroisStrategy(StartingPosition startingPosition) {
+        final Pose2d targetPose = switch(startingPosition) {
+            case RED_RIGHT -> rr_targetPose;
+            case RED_LEFT -> rl_targetPose;
+            case BLUE_RIGHT -> br_targetPose;
+            case BLUE_LEFT -> bl_targetPose;
+        };
+
+        final Pose2d simulationPose = switch(startingPosition) {
+            case RED_RIGHT -> rr_simulationPose;
+            case RED_LEFT -> rl_simulationPose;
+            case BLUE_RIGHT -> br_simulationPose;
+            case BLUE_LEFT -> bl_simulationPose;
+        };
+
+        final String secondDrive = switch(startingPosition) {
+            case RED_RIGHT -> "B3SecondDriveRight";
+            case RED_LEFT -> "B3SecondDriveLeft";
+            case BLUE_RIGHT -> "B3SecondDriveRight";
+            case BLUE_LEFT -> "B3SecondDriveLeft";
+        };
+
+        final String thirdDrive = switch(startingPosition) {
+            case RED_RIGHT -> "B3ThirdDriveRight";
+            case RED_LEFT -> "B3ThirdDriveLeft";
+            case BLUE_RIGHT -> "B3ThirdDriveRight";
+            case BLUE_LEFT -> "B3ThirdDriveLeft";
+        };
+
 
         Command initialPoseCommand = RobotBase.isReal()
-                ? new GenericPoseRequestCommand<>(UpdateTranslationFromVision.class)
-                : Commands.runOnce(() -> Subsystems.swerveSubsystem.resetPose(simulationPose));
+        ? new GenericPoseRequestCommand<>(UpdateTranslationFromVision.class)
+        : Commands.runOnce(() -> Subsystems.swerveSubsystem.resetPose(simulationPose));
 
         addCommands(
             initialPoseCommand,
-            new ProfiledDriveCommand(rr_firstScorePose),
-            new AlignDriveInCommand(AlignTarget.RIGHT),
-            new PrintCommand("Auto Finished")
-            // doScoreSequence(false),
-            // runAutoPath("B3SecondPathRight")
-        );
+            new ProfiledDriveCommand(targetPose)
+                .withTolerance(Meters.of(0.5))
+                .withFinalState(new State(0, 1.0)),
+            new AlignDriveInCommand(AlignTarget.RIGHT).withTimeout(1.0),
+            doScoreSequence(false),
 
+            runAutoPath(secondDrive),
+            new AlignDriveInCommand(AlignTarget.RIGHT).withTimeout(1.0),
+            doScoreSequence(false),
+
+            runAutoPath(thirdDrive),
+            new AlignDriveInCommand(AlignTarget.LEFT).withTimeout(1.0),
+            doScoreSequence(true),
+
+
+            new PrintCommand("Done with Bayou Trois")
+        );
     }
 
     public Command doScoreSequence(boolean isLeft) {
         return Commands.sequence(
                         new Climber.ClimberMoveToPositionNoWait(Climber.ClimberPosition.DOWN),
-                        new AlignDriveInCommand(AlignDriveInCommand.AlignTarget.LEFT).withTimeout(0.75),
-                        new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4).withTimeout(5),
+                        new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4).withTimeout(2),
                         Subsystems.coralIntake.shootCoralCommand().withTimeout(0.5),
                         Commands.parallel(
                                 Subsystems.coralIntake.stopCommand(),

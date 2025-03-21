@@ -7,6 +7,7 @@ import frc.robot.auto.strategies.BayouTroisStrategy.StartingPosition;
 
 import com.pathplanner.lib.auto.NamedCommands;
 import frc.robot.auto.strategies.debug.*;
+import frc.robot.subsystems.Intake.IntakeCoralCommand;
 
 
 /**
@@ -23,6 +24,10 @@ public class AutoRegistrar {
         autoManager.registerStrategy("Arkansas Left Blue", "Arkansas Left Blue", () -> new ArkansasStrategy(true, false));
 
         autoManager.registerStrategy("Bayou Right Red", () -> new BayouTroisStrategy(StartingPosition.RED_RIGHT));
+        autoManager.registerStrategy("Bayou Left Red", () -> new BayouTroisStrategy(StartingPosition.RED_LEFT));
+        autoManager.registerStrategy("Bayou Right Blue", () -> new BayouTroisStrategy(StartingPosition.BLUE_RIGHT));
+        autoManager.registerStrategy("Bayou Left Blue", () -> new BayouTroisStrategy(StartingPosition.BLUE_LEFT));
+
 //        autoManager.registerStrategy("EP", "EP", EPStrategy::new);
 //        autoManager.registerStrategy("TestDP", TestDPStrategy::new);
 //        autoManager.registerStrategy("Spin", "Spin", SpinStrategy::new);
@@ -33,6 +38,7 @@ public class AutoRegistrar {
 
     public static void registerNamedCommands() {
          NamedCommands.registerCommand("NamedCommandPrintTest", Commands.print("Named Command Test"));
+         NamedCommands.registerCommand("intakeCoral", new IntakeCoralCommand().withTimeout(3.0));
     }
 
     public static void registerAutoPaths(PathRegistry pathRegistry) {

@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.7635,
-        "y": 2.5819999999999994
+        "x": 3.6338647959183676,
+        "y": 2.596077806122448
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.2285000000000004,
-        "y": 1.1487499999999995
+        "x": 1.098864795918368,
+        "y": 1.1628278061224484
       },
       "isLocked": false,
       "linkedName": "EP4E"
     },
     {
       "anchor": {
-        "x": 1.2089999999999999,
-        "y": 1.1194999999999993
+        "x": 0.8506377551020408,
+        "y": 0.7828762755102037
       },
       "prevControl": {
-        "x": 3.77325,
-        "y": 2.581999999999999
+        "x": 3.4148877551020433,
+        "y": 2.245376275510204
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,7 +33,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
+    "maxVelocity": 4.0,
     "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
@@ -48,7 +48,7 @@
   "folder": "ThreePiece",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 59.47029410006589
+    "rotation": 59.99999999999999
   },
   "useDefaultConstraints": true
 }

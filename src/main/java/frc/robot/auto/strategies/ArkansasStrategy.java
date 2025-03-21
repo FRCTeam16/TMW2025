@@ -101,7 +101,7 @@ public class ArkansasStrategy extends AutoPathStrategy {
                 //
                 initialPoseCommand,
 //                new GenericPoseRequestCommand<>(UpdateTranslationFromVision.class),
-                new Climber.ClimberMoveToPositionNoWait(Climber.ClimberPosition.DOWN),
+                //FIXME new Climber.ClimberMoveToPositionNoWait(Climber.ClimberPosition.DOWN),
 
                 //
                 // Go to first score pose
