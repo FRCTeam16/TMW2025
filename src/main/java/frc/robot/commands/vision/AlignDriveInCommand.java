@@ -1,6 +1,8 @@
 package frc.robot.commands.vision;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
+
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.units.measure.Angle;
@@ -11,9 +13,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Subsystems;
 import frc.robot.subsystems.RotationController;
 import frc.robot.subsystems.TranslationController;
+import frc.robot.subsystems.pose.PoseChangeRequest;
 import frc.robot.subsystems.pose.UpdateTranslationFromVision;
 import frc.robot.subsystems.vision.LimelightHelpers;
 import frc.robot.util.BSLogger;
+import frc.robot.util.TimeExpiringValue;
 
 import java.util.Optional;
 
@@ -33,6 +37,8 @@ public class AlignDriveInCommand extends Command {
     private SwerveRequest.RobotCentric robotCentric = new SwerveRequest.RobotCentric();
     private SwerveRequest.Idle idle = new SwerveRequest.Idle();
     private SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
+
+    private TimeExpiringValue<Pair<Pose2d, Angle>> lastVisionPose = new TimeExpiringValue<>(500);
 
     public enum AlignTarget {
         LEFT,
@@ -60,6 +66,7 @@ public class AlignDriveInCommand extends Command {
             Optional<Pose2d> optTagPose = Subsystems.aprilTagUtil.getTagPose2d((int) aprilTarget);
             optTagPose.ifPresent(pose2d -> {
                 targetRotation = pose2d.getRotation().getMeasure().plus(Degrees.of(180));
+                lastVisionPose.set(Pair.of(pose2d, Degrees.of(LimelightHelpers.getTX("limelight"))));
             });
             Subsystems.poseManager.pushRequest(new UpdateTranslationFromVision());
         }
@@ -79,12 +86,21 @@ public class AlignDriveInCommand extends Command {
     public void execute() {
         boolean hasTarget = LimelightHelpers.getTV("limelight");
 
-        if (!hasTarget) {
-            Subsystems.swerveSubsystem.setControl(idle);
-            return;
+        final double rawtx;
+        if (hasTarget) {
+             rawtx = LimelightHelpers.getTX("limelight");
+        } else {
+            Optional<Pair<Pose2d, Angle>> optVisionTarget = lastVisionPose.get();
+            if (optVisionTarget.isEmpty()) {
+                Subsystems.swerveSubsystem.setControl(idle);
+                return;
+            } else {
+                // Use last non-expired vision
+                Pair<Pose2d, Angle> lastSeen = optVisionTarget.get();
+                rawtx = lastSeen.getSecond().in(Degrees);
+            }
         }
 
-        double rawtx = LimelightHelpers.getTX("limelight");
         Angle tx = Degrees.of(rawtx);
         double targetAngleRads = calculateYTargetDirect(tx).in(Radians);
 
@@ -150,6 +166,16 @@ public class AlignDriveInCommand extends Command {
     @Override
     public void end(boolean interrupted) {
         Subsystems.swerveSubsystem.setControl(brake);
+
+        boolean hasTarget = LimelightHelpers.getTV("limelight");
+        if (hasTarget) {
+            Subsystems.poseManager.pushRequest(new UpdateTranslationFromVision());
+        } else {
+            Pair<Pose2d, Angle> lastPose = lastVisionPose.getLastIgnoringExpiration();
+            if (lastPose != null) {
+                Subsystems.poseManager.pushRequest(new PoseChangeRequest(lastPose.getFirst()));
+            }
+        }
     }
 
     @Override

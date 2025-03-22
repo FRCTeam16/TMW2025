@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.8506377551020408,
-        "y": 0.7828762755102037
+        "x": 0.83125,
+        "y": 0.7625
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.968625460020072,
-        "y": 1.2778885705921712
+        "x": 2.9492377049180307,
+        "y": 1.2575122950819675
       },
       "isLocked": false,
       "linkedName": "EP2E"
     },
     {
       "anchor": {
-        "x": 5.45025,
-        "y": 2.699
+        "x": 5.3375,
+        "y": 2.8625
       },
       "prevControl": {
-        "x": 3.721782786885246,
-        "y": 1.8207008196721315
+        "x": 3.6090327868852468,
+        "y": 1.9842008196721315
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,8 +33,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 4.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 4.4,
+    "maxAcceleration": 5.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 118.81079374297309
+    "rotation": 119.99999999999999
   },
   "reversed": false,
   "folder": "ThreePiece",

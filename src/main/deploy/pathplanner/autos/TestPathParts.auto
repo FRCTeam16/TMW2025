@@ -7,19 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "EP5"
+            "pathName": "EP2"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "EP6"
+            "pathName": "EP4"
           }
         }
       ]
     }
   },
-  "resetOdom": false,
+  "resetOdom": true,
   "folder": "Bayou",
   "choreoAuto": false
 }

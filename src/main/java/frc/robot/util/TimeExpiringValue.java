@@ -2,6 +2,8 @@ package frc.robot.util;
 
 import java.util.Optional;
 
+import edu.wpi.first.math.geometry.Pose2d;
+
 /**
  * A simple generic time-expiring value.
  */
@@ -33,5 +35,9 @@ public class TimeExpiringValue<V> {
 
     public long getTimestamp() {
         return timestamp;
+    }
+
+    public V getLastIgnoringExpiration() {
+        return value;
     }
 }

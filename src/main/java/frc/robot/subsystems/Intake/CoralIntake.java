@@ -256,6 +256,7 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
         @Override
         public boolean isFinished() {
             if (startedWithSensor) {
+                BSLogger.log("ShootCoralCommand", "Stopping because of sensor");
                 return !coralDetectedAtBottomSensor();
             }
             return false;

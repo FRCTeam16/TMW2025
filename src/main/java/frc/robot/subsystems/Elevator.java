@@ -30,7 +30,8 @@ public class Elevator extends SubsystemBase implements Lifecycle {
 
     private final NeutralOut neutralOut = new NeutralOut();
     private final DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
-    private final MotionMagicVoltage motionMagicV = new MotionMagicVoltage(0).withFeedForward(Units.Volts.of(GRAVITY_VOLTS));
+    private final MotionMagicVoltage motionMagicV = new MotionMagicVoltage(0)
+            .withFeedForward(Units.Volts.of(GRAVITY_VOLTS));
 
     private double openLoopMotorSpeed = -0.2;
     private double currentSetpoint = 0;
@@ -42,7 +43,6 @@ public class Elevator extends SubsystemBase implements Lifecycle {
 
     private Alert coralObstructionAlert = new Alert("Coral is obstructing elevator path", Alert.AlertType.kError);
 
-
     public Elevator() {
         right.setControl(new Follower(left.getDeviceID(), true));
 
@@ -51,8 +51,8 @@ public class Elevator extends SubsystemBase implements Lifecycle {
                 .withKG(GRAVITY_VOLTS);
 
         MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs()
-                .withMotionMagicCruiseVelocity(80)  // 80
-                .withMotionMagicAcceleration(160)     // 140
+                .withMotionMagicCruiseVelocity(80) // 80
+                .withMotionMagicAcceleration(160) // 140
                 .withMotionMagicJerk(0)
                 .withMotionMagicExpo_kA(0.0)
                 .withMotionMagicExpo_kV(0.01);
@@ -112,10 +112,10 @@ public class Elevator extends SubsystemBase implements Lifecycle {
 
     private void moveToEncoderPosition(double encoderPosition) {
         BSLogger.log("Elevator", "moveToEncoderPosition: " + encoderPosition);
-//        if (!MathUtil.isNear(0, encoderPosition, 0.05)) {
-//            encoderPosition += encoderOffset;
-//            BSLogger.log("Elevator", "Moving to adjusted position: " + encoderPosition);
-//        }
+        // if (!MathUtil.isNear(0, encoderPosition, 0.05)) {
+        // encoderPosition += encoderOffset;
+        // BSLogger.log("Elevator", "Moving to adjusted position: " + encoderPosition);
+        // }
         this.currentSetpoint = encoderPosition;
         left.setControl(motionMagicV.withPosition(encoderPosition));
     }
@@ -182,11 +182,14 @@ public class Elevator extends SubsystemBase implements Lifecycle {
         builder.addDoubleProperty("Current Position", this::getCurrentPosition, null);
         builder.addBooleanProperty("Is In Position", this::isInPosition, null);
         builder.addDoubleProperty("Current Setpoint", () -> currentSetpoint, this::moveToEncoderPosition);
-        builder.addStringProperty("Requested", () -> requestedSetpoint != null ? requestedSetpoint.name() : "none", null);
+        builder.addStringProperty("Requested", () -> requestedSetpoint != null ? requestedSetpoint.name() : "none",
+                null);
         builder.addBooleanProperty("Coral Obstruction", this::isElevatorObstructedByCoral, null);
-//        builder.addDoubleProperty("Encoder Offset", () -> encoderOffset, (v) -> encoderOffset = v);
+        // builder.addDoubleProperty("Encoder Offset", () -> encoderOffset, (v) ->
+        // encoderOffset = v);
 
-        builder.addDoubleProperty("Open Loop Motor Speed", () -> openLoopMotorSpeed, (speed) -> openLoopMotorSpeed = speed);
+        builder.addDoubleProperty("Open Loop Motor Speed", () -> openLoopMotorSpeed,
+                (speed) -> openLoopMotorSpeed = speed);
         builder.addDoubleProperty("Open Loop Max", () -> openLoopMax, (max) -> openLoopMax = max);
         builder.addDoubleProperty("Left Motor Volts", () -> left.getMotorVoltage().getValueAsDouble(), null);
         builder.addDoubleProperty("Left Motor DutyCycle", () -> left.getDutyCycle().getValueAsDouble(), null);
@@ -221,10 +224,10 @@ public class Elevator extends SubsystemBase implements Lifecycle {
         }
     }
 
-
     public static class ElevatorMoveToPositionCommand extends Command {
         private final ElevatorSetpoint setpoint;
         private boolean abort = false;
+        private boolean noWaitForFinish = false;
 
         public ElevatorMoveToPositionCommand(ElevatorSetpoint setpoint) {
             this.setpoint = setpoint;
@@ -243,7 +246,17 @@ public class Elevator extends SubsystemBase implements Lifecycle {
 
         @Override
         public boolean isFinished() {
-            return abort || Subsystems.elevator.isInPosition();
+            if (abort || noWaitForFinish || Subsystems.elevator.isInPosition()) {
+                BSLogger.log("ElevatorMoveToPositionCommand", "abort: " + abort + 
+                " | noWaitForFinish: " + noWaitForFinish + " | inPosition: " + Subsystems.elevator.isInPosition());
+                return true;
+            }
+            return false;
+        }
+
+        public ElevatorMoveToPositionCommand withNoWait() {
+            this.noWaitForFinish = true;
+            return this;
         }
     }
 
@@ -260,8 +273,10 @@ public class Elevator extends SubsystemBase implements Lifecycle {
 
         @Override
         public void execute() {
-            // If we are near the bottom and not moving, apply a neutral output to the motors
-            if (!lazyHold && Subsystems.elevator.isInPosition() && ElevatorSetpoint.Zero == Subsystems.elevator.requestedSetpoint) {
+            // If we are near the bottom and not moving, apply a neutral output to the
+            // motors
+            if (!lazyHold && Subsystems.elevator.isInPosition()
+                    && ElevatorSetpoint.Zero == Subsystems.elevator.requestedSetpoint) {
                 Subsystems.elevator.setLazyHold(true);
                 Subsystems.elevator.left.setControl(neutralOut);
             }

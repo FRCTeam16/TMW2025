@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.45025,
-        "y": 2.699
+        "x": 5.3375,
+        "y": 2.8625
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.9248724489795928,
-        "y": 1.8051339285714278
+        "x": 5.4125,
+        "y": 1.83125
       },
       "isLocked": false,
       "linkedName": "EP1E"
     },
     {
       "anchor": {
-        "x": 0.8506377551020408,
-        "y": 0.7828762755102037
+        "x": 0.83125,
+        "y": 0.7625
       },
       "prevControl": {
-        "x": 1.6058631649381057,
-        "y": 0.8907656197724999
+        "x": 1.2553007404571412,
+        "y": 1.0168480569656417
       },
       "nextControl": null,
       "isLocked": false,
@@ -31,17 +31,10 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "intakeCoral",
-      "waypointRelativePos": 0.7114093959731552,
-      "endWaypointRelativePos": null,
-      "command": null
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 4.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 4.4,
+    "maxAcceleration": 5.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -55,7 +48,7 @@
   "folder": "ThreePiece",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 118.81079374297309
+    "rotation": 119.99999999999999
   },
   "useDefaultConstraints": true
 }

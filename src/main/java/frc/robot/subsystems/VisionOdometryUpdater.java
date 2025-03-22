@@ -72,7 +72,7 @@ public class VisionOdometryUpdater {
                 SmartDashboard.putData("VisionPoseEstimator-" + visionPoseEstimator.getName(), visionPoseEstimator));
 
         // Defaults
-        Subsystems.swerveSubsystem.setVisionMeasurementStdDevs(VecBuilder.fill(0.7, 0.7, 999999)); // Example tuning values
+        Subsystems.swerveSubsystem.setVisionMeasurementStdDevs(VecBuilder.fill(0.5, 0.5, 999999)); // Example tuning values
     }
 
     /**
