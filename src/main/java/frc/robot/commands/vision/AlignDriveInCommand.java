@@ -9,6 +9,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Subsystems;
 import frc.robot.subsystems.RotationController;
@@ -49,6 +50,7 @@ public class AlignDriveInCommand extends Command {
     public AlignDriveInCommand(AlignTarget alignTarget) {
         this.alignTarget = alignTarget;
         this.addRequirements(Subsystems.swerveSubsystem);
+        SmartDashboard.putNumber("AlignDrive/Approach", 1.25);
     }
 
     public AlignDriveInCommand withApproachSpeed(LinearVelocity speed) {
@@ -104,6 +106,7 @@ public class AlignDriveInCommand extends Command {
         Angle tx = Degrees.of(rawtx);
         double targetAngleRads = calculateYTargetDirect(tx).in(Radians);
 
+        approachSpeed = MetersPerSecond.of(SmartDashboard.getNumber("AlignDrive/Approach", 1.25));
         LinearVelocity xspeed = approachSpeed.times(Math.cos(targetAngleRads));
         LinearVelocity yspeed = approachSpeed.times(Math.sin(targetAngleRads));
 
