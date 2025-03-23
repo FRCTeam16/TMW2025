@@ -30,9 +30,9 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle {
             algaeIntakeMotor.getStatorCurrent().asSupplier());
 
 
-    private double forwardSpeed = 0.65;
+    private double forwardSpeed = 0.6;
     private double backwardSpeed = -0.3;
-    private double holdSpeed = 0.15;
+    private double holdSpeed = 0.04;
     private boolean algaeDetected = false;
 
     public AlgaeIntake() {
