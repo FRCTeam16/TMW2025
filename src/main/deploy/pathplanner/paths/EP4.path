@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.83125,
-        "y": 0.7625
+        "x": 1.3186475409836067,
+        "y": 0.7583504098360652
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.4625,
-        "y": 1.26875
+        "x": 2.0018195002397974,
+        "y": 1.3991865817159548
       },
       "isLocked": false,
       "linkedName": "EP2E"
     },
     {
       "anchor": {
-        "x": 2.8125,
-        "y": 2.60625
+        "x": 3.2246926229508195,
+        "y": 2.5804815573770488
       },
       "prevControl": {
-        "x": 2.3900047339996116,
-        "y": 2.363238858680305
+        "x": 2.860808609218563,
+        "y": 2.246265561900546
       },
       "nextControl": null,
       "isLocked": false,
@@ -55,7 +55,7 @@
   "folder": "ThreePiece",
   "idealStartingState": {
     "velocity": 0.0,
-    "rotation": 53.13
+    "rotation": 54.582944723532634
   },
   "useDefaultConstraints": true
 }

@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.83125,
-        "y": 0.7625
+        "x": 1.3186475409836067,
+        "y": 0.7583504098360652
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.9492377049180307,
-        "y": 1.2575122950819675
+        "x": 3.4366352459016367,
+        "y": 1.253362704918033
       },
       "isLocked": false,
       "linkedName": "EP2E"
@@ -48,7 +48,7 @@
   "folder": "ThreePiece",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 53.13010235415596
+    "rotation": 54.582944723532634
   },
   "useDefaultConstraints": true
 }
