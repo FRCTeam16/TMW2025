@@ -6,9 +6,7 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
-import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.*;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.util.sendable.SendableBuilder;
@@ -35,7 +33,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
 
     private final DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
     private final PositionVoltage positionVoltage = new PositionVoltage(0).withSlot(0);
-    private final MotionMagicVoltage motionMagic = new MotionMagicVoltage(0);
+    private final MotionMagicVoltage motionMagic = new MotionMagicVoltage(0).withSlot(1);
 
     private double targetPosition = 0;
     private double openLoopMax = 0.3;
@@ -43,29 +41,39 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
 
     public AlgaeArm() {
         CANcoderConfiguration encoderConfiguration = new CANcoderConfiguration()
-            .withMagnetSensor(new MagnetSensorConfigs()
-            .withMagnetOffset(-0.114));
+            .withMagnetSensor(
+                    new MagnetSensorConfigs()
+                        .withSensorDirection(SensorDirectionValue.Clockwise_Positive)
+                        .withMagnetOffset(0.007812));
         algaeArmEncoder.getConfigurator().apply(encoderConfiguration);
 
         Slot0Configs slot0 = new Slot0Configs()
-                .withKP(25)
-                .withKI(2)
-                .withKD(1)
-                .withKG(GRAVITY_COMPENSATION);
+                .withKP(45)
+                .withKI(0)
+                .withKD(2)
+                .withGravityType(GravityTypeValue.Arm_Cosine)
+                .withKG(0.5);
+
+        Slot1Configs slot1 = new Slot1Configs()
+                .withKP(50)
+                .withKI(0)
+                .withKD(3)
+                .withGravityType(GravityTypeValue.Arm_Cosine)
+                .withKG(0.5);
 
         SoftwareLimitSwitchConfigs softwareLimitSwitchConfigs = new SoftwareLimitSwitchConfigs()
         .withForwardSoftLimitEnable(true)
-        .withForwardSoftLimitThreshold(0.24)
+        .withForwardSoftLimitThreshold(0.230)
         .withReverseSoftLimitEnable(true)
-        .withReverseSoftLimitThreshold(-0.005);
+        .withReverseSoftLimitThreshold(0.012);
 
         MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs()
-                .withMotionMagicCruiseVelocity(2)
-                .withMotionMagicAcceleration(3);
+                .withMotionMagicCruiseVelocity(0.6)
+                .withMotionMagicAcceleration(1.8);
 
         MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs()
                 .withNeutralMode(NeutralModeValue.Brake)
-                .withInverted(InvertedValue.Clockwise_Positive);
+                .withInverted(InvertedValue.CounterClockwise_Positive);
 
         FeedbackConfigs feedbackConfigs = new FeedbackConfigs()
                .withFeedbackRemoteSensorID(Robot.robotConfig.getCanID("algaeArmEncoder"))
@@ -73,6 +81,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
 
         TalonFXConfiguration armConfiguration = new TalonFXConfiguration()
                 .withSlot0(slot0)
+                .withSlot1(slot1)
                 .withMotionMagic(motionMagicConfigs)
                 .withMotorOutput(motorOutputConfigs)
                 .withSoftwareLimitSwitch(softwareLimitSwitchConfigs)
@@ -186,10 +195,10 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
 
 
     public enum AlgaeArmPosition {
-        Up(0.001),
-        Ground(0.233),
-        Processor(0.185),
-        Shooting(0.05),
+        Up(0.233),
+        Ground(0.014),
+        Processor(0.34),
+        Shooting(0.220),
         PickFromReef(0.11);
 
         private final double position;

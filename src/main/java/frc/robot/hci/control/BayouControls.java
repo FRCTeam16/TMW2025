@@ -163,6 +163,10 @@ public class BayouControls extends ControlBinding {
 
         SmartDashboard.putData("Open Latch", Subsystems.funnelSubsystem.openLatchCommand().ignoringDisable(true));
         SmartDashboard.putData("Close Latch", Subsystems.funnelSubsystem.closeLatchCommand().ignoringDisable(true));
+
+
+        SmartDashboard.putData("Elevator RH", new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.AlgaeReefHigh));
+        SmartDashboard.putData("Elevator RL", new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.AlgaeReefLow));
     }
 
     @Override
