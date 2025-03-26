@@ -9,7 +9,7 @@ import frc.robot.subsystems.Intake.FunnelSubsystem;
 import frc.robot.subsystems.pose.PoseManager;
 import frc.robot.subsystems.scoring.ScoreSubsystem;
 import frc.robot.subsystems.*;
-import frc.robot.subsystems.DMS.LEDSubsystem;
+import frc.robot.subsystems.amd.LEDSubsystem;
 import frc.robot.subsystems.Intake.AlgaeArm;
 import frc.robot.subsystems.Intake.AlgaeIntake;
 import frc.robot.subsystems.Intake.CoralIntake;

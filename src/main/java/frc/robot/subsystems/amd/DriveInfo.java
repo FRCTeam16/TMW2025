@@ -1,4 +1,4 @@
-package frc.robot.subsystems.DMS;
+package frc.robot.subsystems.amd;
 
 /** Add your docs here. */
 public class DriveInfo <T> {

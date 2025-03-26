@@ -4,7 +4,6 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Subsystems;
-import frc.robot.commands.dms.RunDMSCommand;
 import frc.robot.subsystems.SysIdHelper.Routine;
 
 public class SysIdControls extends ControlBinding {

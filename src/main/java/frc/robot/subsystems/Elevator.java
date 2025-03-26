@@ -18,11 +18,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.Subsystems;
+import frc.robot.commands.amd.ElevatorAMDCommand;
 import frc.robot.util.BSLogger;
 
 import java.util.function.Supplier;
 
-public class Elevator extends SubsystemBase implements Lifecycle {
+public class Elevator extends SubsystemBase implements Lifecycle, AMD<ElevatorAMDCommand.ElevatorDataCollector> {
     public static final double GRAVITY_VOLTS = -0.5;
     public static final double ELEVATOR_POSITION_THRESHOLD = 0.3;
     private final TalonFX left = new TalonFX(Robot.robotConfig.getCanID("elevatorLeftMotor"));
@@ -127,6 +128,10 @@ public class Elevator extends SubsystemBase implements Lifecycle {
         return left.getPosition().getValueAsDouble();
     }
 
+    public ElevatorSetpoint getRequestedSetpoint() {
+        return requestedSetpoint;
+    }
+
     public boolean isInPosition() {
         if (ElevatorSetpoint.Zero == requestedSetpoint && lazyHold) {
             return true;
@@ -204,6 +209,11 @@ public class Elevator extends SubsystemBase implements Lifecycle {
      */
     public boolean isElevatorUp() {
         return getCurrentPosition() < elevatorUpThreshold;
+    }
+
+    @Override
+    public void collectAMDData(ElevatorAMDCommand.ElevatorDataCollector dataCollector) {
+        dataCollector.collectData(isInPosition(), left.getStatorCurrent(), right.getStatorCurrent());
     }
 
     public enum ElevatorSetpoint {

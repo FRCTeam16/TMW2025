@@ -1,4 +1,4 @@
-package frc.robot.subsystems.DMS;
+package frc.robot.subsystems.amd;
 
 import frc.robot.util.BSLogger;
 

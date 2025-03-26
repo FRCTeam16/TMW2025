@@ -1,10 +1,10 @@
-package frc.robot.commands.dms;
+package frc.robot.commands.amd;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.Constants;
 import frc.robot.Subsystems;
-import frc.robot.subsystems.DMS.SwerveDataCollector;
+import frc.robot.subsystems.amd.SwerveDataCollector;
 import frc.robot.util.BSLogger;
 
 import java.util.Arrays;

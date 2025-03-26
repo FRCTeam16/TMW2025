@@ -1,4 +1,4 @@
-package frc.robot.commands.dms;
+package frc.robot.commands.amd;
 
 import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -8,7 +8,7 @@ import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.Subsystems;
-import frc.robot.subsystems.DMS.SwerveDataCollector;
+import frc.robot.subsystems.amd.SwerveDataCollector;
 
 import java.util.Arrays;
 

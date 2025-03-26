@@ -1,4 +1,4 @@
-package frc.robot.commands.dms;
+package frc.robot.commands.amd;
 
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.units.measure.Time;
@@ -6,9 +6,8 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Subsystems;
-import frc.robot.subsystems.DMS.AbstractDataCollector;
-import frc.robot.subsystems.DMS.LEDSubsystem;
-import frc.robot.subsystems.DMS.SwerveDataCollector;
+import frc.robot.subsystems.amd.AMDSerialData;
+import frc.robot.subsystems.amd.AbstractDataCollector;
 import frc.robot.util.BSLogger;
 
 import java.util.ArrayList;
@@ -33,7 +32,7 @@ public class CoralIntakeAMDCommand extends Command {
     @Override
     public void initialize() {
         BSLogger.log("CoralIntakeAMDCommand", "initialize");
-        Subsystems.ledSubsystem.startAMDPhase(LEDSubsystem.AMDPhase.CoralShooter);
+        Subsystems.ledSubsystem.getAMDSerialData().startAMDPhase(AMDSerialData.AMDPhase.CoralShooter);
         timer.restart();
     }
 
@@ -45,15 +44,15 @@ public class CoralIntakeAMDCommand extends Command {
             BSLogger.log("CoralIntakeAMDCommand", "spin up");
             return;
         }
-        Subsystems.coralIntake.collectAMD(dataCollector);
+        Subsystems.coralIntake.collectAMDData(dataCollector);
     }
 
     @Override
     public void end(boolean interrupted) {
         int score = dataCollector.getScore();
         SmartDashboard.putNumber("AMD/CoralIntakeAMDScore", score);
-        Subsystems.ledSubsystem.submitCoralAMDScore(score);
-        Subsystems.ledSubsystem.startAMDPhase(LEDSubsystem.AMDPhase.Comm);
+        Subsystems.ledSubsystem.getAMDSerialData().submitCoralScore(score);
+        Subsystems.ledSubsystem.getAMDSerialData().startAMDPhase(AMDSerialData.AMDPhase.Comm);
         Subsystems.coralIntake.stop();
     }
 
@@ -63,6 +62,9 @@ public class CoralIntakeAMDCommand extends Command {
     }
 
 
+    /**
+     * Collects data from the Coral Intake for analysis.
+     */
     public static class CoralIntakeDataCollector extends AbstractDataCollector<Integer> {
         List<Double> topCurrents = new ArrayList<>();
         List<Double> bottomCurrents = new ArrayList<>();

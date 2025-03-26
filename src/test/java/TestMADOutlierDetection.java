@@ -1,6 +1,6 @@
-import frc.robot.subsystems.DMS.AMDStats;
-import frc.robot.subsystems.DMS.DriveInfo;
-import frc.robot.subsystems.DMS.SwerveDataCollector;
+import frc.robot.subsystems.amd.AMDStats;
+import frc.robot.subsystems.amd.DriveInfo;
+import frc.robot.subsystems.amd.SwerveDataCollector;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;

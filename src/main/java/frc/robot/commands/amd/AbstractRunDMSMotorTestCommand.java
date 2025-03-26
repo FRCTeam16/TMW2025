@@ -1,10 +1,10 @@
-package frc.robot.commands.dms;
+package frc.robot.commands.amd;
 
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Subsystems;
-import frc.robot.subsystems.DMS.SwerveDataCollector;
+import frc.robot.subsystems.amd.SwerveDataCollector;
 import frc.robot.util.BSLogger;
 
 import static edu.wpi.first.units.Units.Seconds;

@@ -14,19 +14,19 @@ import com.ctre.phoenix6.signals.S1FloatStateValue;
 import com.ctre.phoenix6.signals.S2CloseStateValue;
 import com.ctre.phoenix6.signals.S2FloatStateValue;
 import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.Subsystems;
-import frc.robot.commands.dms.CoralIntakeAMDCommand;
+import frc.robot.commands.amd.CoralIntakeAMDCommand;
+import frc.robot.subsystems.AMD;
 import frc.robot.subsystems.Lifecycle;
 import frc.robot.util.BSLogger;
 
 import static frc.robot.subsystems.Intake.IntakeCoralCommand.STOP_CORAL_INTAKE_TASK;
 
-public class CoralIntake extends SubsystemBase implements Lifecycle {
+public class CoralIntake extends SubsystemBase implements Lifecycle, AMD<CoralIntakeAMDCommand.CoralIntakeDataCollector> {
     public static final double COMMAND_TIMEOUT_SECONDS = 5.0;
     private final TalonFX topMotor = new TalonFX(Robot.robotConfig.getCanID("coralIntakeLeftMotor"));
     private final TalonFX bottomMotor = new TalonFX(Robot.robotConfig.getCanID("coralIntakeRightMotor"));
@@ -233,7 +233,8 @@ public class CoralIntake extends SubsystemBase implements Lifecycle {
         bottomMotor.setControl(dutyCycleOutBottom.withOutput(-0.5));
     }
 
-    public void collectAMD(CoralIntakeAMDCommand.CoralIntakeDataCollector dataCollector) {
+    @Override
+    public void collectAMDData(CoralIntakeAMDCommand.CoralIntakeDataCollector dataCollector) {
         dataCollector.addCurrents(topMotor.getStatorCurrent().getValueAsDouble(),
                 bottomMotor.getStatorCurrent().getValueAsDouble());
     }
