@@ -30,16 +30,19 @@ public class Climber extends SubsystemBase implements Lifecycle {
         MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs()
                 .withInverted(InvertedValue.Clockwise_Positive)
                 .withNeutralMode(NeutralModeValue.Brake);
+
         Slot0Configs slot0Configs = new Slot0Configs()
                 .withKP(5.0);
+
         SoftwareLimitSwitchConfigs softwareLimitSwitchConfigs = new SoftwareLimitSwitchConfigs()
                 .withForwardSoftLimitEnable(true)
-                .withForwardSoftLimitThreshold(128)
+                .withForwardSoftLimitThreshold(200)
                 .withReverseSoftLimitEnable(true)
-                .withReverseSoftLimitThreshold(-70);
+                .withReverseSoftLimitThreshold(0);
+
         MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs()
-                .withMotionMagicAcceleration(60)
-                .withMotionMagicCruiseVelocity(60);
+                .withMotionMagicAcceleration(400)
+                .withMotionMagicCruiseVelocity(100);
 
         climberConfiguration
                 .withMotionMagic(motionMagicConfigs)
@@ -48,7 +51,8 @@ public class Climber extends SubsystemBase implements Lifecycle {
                 .withSoftwareLimitSwitch(softwareLimitSwitchConfigs);
 
         climberMotor.getConfigurator().apply(climberConfiguration);
-        this.setDefaultCommand(new DefaultHoldPositionCommand());
+        climberMotor.setPosition(0.0);
+        this.setDefaultCommand(this.defaultHoldPositionCommand());
     }
 
     @Override
@@ -58,7 +62,7 @@ public class Climber extends SubsystemBase implements Lifecycle {
 
     @Override
     public void teleopInit() {
-        this.setDefaultCommand(new DefaultHoldPositionCommand());
+        this.setDefaultCommand(this.defaultHoldPositionCommand());
     }
 
     private double getPosition() {
@@ -88,7 +92,6 @@ public class Climber extends SubsystemBase implements Lifecycle {
         this.currentSetpoint = position;
         climberMotor.setControl(
                 motionMagicVoltage.withPosition(position));
-//                positionVoltage.withPosition(position).withVelocity(setpointVelocity));
     }
 
     public Command openLoopUpDefault() {
@@ -111,12 +114,15 @@ public class Climber extends SubsystemBase implements Lifecycle {
         return this.runOnce(() -> this.climberMotor.setPosition(0));
     }
 
+    public Command defaultHoldPositionCommand() {
+        return this.run(() -> Subsystems.climber.moveToPosition(Subsystems.climber.getPosition()));
+    }
 
     public enum ClimberPosition {
-        UP(0),
-        CLIMB(-65), // -53.3                         -48 was w
-        DOWN(125),   // 100   125 is w/9-4-4           130 was w/5-5-5 ratio
-        PICKUP(70); // 53.3    70 is w/9-4-4 ratio     75 was w/5-5-5 ratio
+        DOWN(0),
+        PICKUP(75),
+        UP(150),
+        CLIMB(180);
 
         private final double position;
 
@@ -128,19 +134,6 @@ public class Climber extends SubsystemBase implements Lifecycle {
             return position;
         }
     }
-
-    public class DefaultHoldPositionCommand extends Command {
-
-        public DefaultHoldPositionCommand() {
-            addRequirements(Climber.this);
-        }
-
-        @Override
-        public void initialize() {
-            Subsystems.climber.moveToPosition(Subsystems.climber.getPosition());
-        }
-    }
-
 
     public static class ClimberMoveToPositionCommand extends Command {
         private final ClimberPosition position;
@@ -158,7 +151,7 @@ public class Climber extends SubsystemBase implements Lifecycle {
         public void initialize() {
             if (ClimberPosition.PICKUP == position) {
                 BSLogger.log("Climber", "Closing Latch");
-                Subsystems.funnelSubsystem.closeLatch();;
+                Subsystems.funnelSubsystem.closeLatch();
             } else if (ClimberPosition.CLIMB == position && Subsystems.funnelSubsystem.isLatchOpen()) {
                 BSLogger.log("Climber", "Requested to climb but we think latch is open");
                 return;
