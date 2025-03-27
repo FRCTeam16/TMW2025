@@ -149,6 +149,7 @@ public class BayouControls extends ControlBinding {
 
         SmartDashboard.putData("Set LLs to Apriltag", new PipelineSwitcher(Pipeline.April));
         SmartDashboard.putData("Set LLs to Viewfinder", new PipelineSwitcher(Pipeline.View));
+        SmartDashboard.putData("Clear LL ID Filter", Commands.runOnce(() -> Subsystems.visionSubsystem.resetIDFilter()));
 
         // reset the field-centric heading on left bumper press
         SmartDashboard.putData("Seed Field Centric", Commands.runOnce(() -> Subsystems.poseManager.pushRequest(new SeedFieldCentricRequest()))

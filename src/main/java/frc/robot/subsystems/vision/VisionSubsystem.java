@@ -76,4 +76,8 @@ public class VisionSubsystem extends SubsystemBase implements Lifecycle {
     public void selectPipeline(Pipeline pipeline) {
         getLimelights().forEach(limelight -> limelight.setPipeline(pipeline));
     }
+
+    public void resetIDFilter() {
+        getLimelights().forEach(limelight -> LimelightHelpers.SetFiducialIDFiltersOverride(limelight.getName(), new int[] {}));
+    }
 }

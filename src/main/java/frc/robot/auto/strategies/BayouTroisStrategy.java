@@ -24,6 +24,7 @@ import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Elevator.ElevatorSetpoint;
 import frc.robot.subsystems.pose.UpdateTranslationFromVision;
+import frc.robot.subsystems.vision.LimelightHelpers;
 
 public class BayouTroisStrategy extends AutoPathStrategy {
 
@@ -69,6 +70,21 @@ public class BayouTroisStrategy extends AutoPathStrategy {
             case BLUE_LEFT -> bl_simulationPose;
         };
 
+        final String firstDrive = switch (startingPosition) {
+            case RED_RIGHT -> "B3FirstDriveRight";
+            case RED_LEFT -> "B3FirstDriveLeft";
+            case BLUE_RIGHT -> "B3FirstDriveRight";
+            case BLUE_LEFT -> "B3FirstDriveLeft";
+        };
+
+        final int[] ALL_IDS = new int[] {};
+        final int[] firstDriveFilters = switch (startingPosition) {
+            case RED_RIGHT -> new int[] { 9 };
+            case RED_LEFT -> new int[] { 11 };
+            case BLUE_RIGHT -> ALL_IDS;
+            case BLUE_LEFT -> ALL_IDS;
+        };
+
         final String secondDrive = switch (startingPosition) {
             case RED_RIGHT -> "B3SecondDriveRight";
             case RED_LEFT -> "B3SecondDriveLeft";
@@ -88,14 +104,18 @@ public class BayouTroisStrategy extends AutoPathStrategy {
                 : Commands.runOnce(() -> Subsystems.swerveSubsystem.resetPose(simulationPose));
 
         addCommands(
+                Commands.runOnce(() -> LimelightHelpers.SetFiducialIDFiltersOverride("limelight", firstDriveFilters)),
+                new WaitCommand(0.1),
                 initialPoseCommand,
                 //                 new Climber.ClimberMoveToPositionNoWait(Climber.ClimberPosition.DOWN),
 
-                new ProfiledDriveCommand(targetPose)
-                        .withTolerance(Meters.of(0.5))
-                        .withFinalState(new State(0, 1.0)),
+//                new ProfiledDriveCommand(targetPose)
+//                        .withTolerance(Meters.of(0.5))
+//                        .withFinalState(new State(0, 1.0)),
+                runAutoPath(firstDrive),
                 new AlignDriveInCommand(AlignTarget.RIGHT).withTimeout(1.0),
                 doScoreSequence(),
+                Commands.runOnce(() -> Subsystems.visionSubsystem.resetIDFilter()),
 
                 runAutoPath(secondDrive),
                 new AlignDriveInCommand(AlignTarget.RIGHT).withTimeout(1.0),
@@ -104,9 +124,9 @@ public class BayouTroisStrategy extends AutoPathStrategy {
                 runAutoPath(thirdDrive),
                 new AlignDriveInCommand(AlignTarget.LEFT).withTimeout(1.0),
                 doScoreSequence(),
-                new PrintCommand("Done with Bayou Trois"),
 
                 // Let commands finish if we have time leftover, FMS will kill this for us
+                new PrintCommand("Done with Bayou Trois"),
                 new WaitCommand(3)
         );
     }
