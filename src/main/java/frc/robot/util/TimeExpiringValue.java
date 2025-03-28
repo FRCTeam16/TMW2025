@@ -22,7 +22,7 @@ public class TimeExpiringValue<V> {
     }
 
     public Optional<V> get() {
-        if (isExpired()) {
+        if (!isExpired()) {
             return Optional.ofNullable(value);
         } else {
             return Optional.empty();

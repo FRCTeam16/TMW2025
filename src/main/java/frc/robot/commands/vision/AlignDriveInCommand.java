@@ -60,17 +60,11 @@ public class AlignDriveInCommand extends Command {
 
     @Override
     public void initialize() {
-        BSLogger.log("AlignDriveInCommand", "initialize");
         boolean hasTarget = LimelightHelpers.getTV("limelight");
         targetRotation = Subsystems.swerveSubsystem.getState().Pose.getRotation().getMeasure();
+        BSLogger.log("AlignDriveInCommand", "initialize: " + hasTarget);
         if (hasTarget) {
-            double aprilTarget = LimelightHelpers.getFiducialID("limelight");
-            Optional<Pose2d> optTagPose = Subsystems.aprilTagUtil.getTagPose2d((int) aprilTarget);
-            optTagPose.ifPresent(pose2d -> {
-                targetRotation = pose2d.getRotation().getMeasure().plus(Degrees.of(180));
-                lastVisionPose.set(Pair.of(pose2d, Degrees.of(LimelightHelpers.getTX("limelight"))));
-            });
-            Subsystems.poseManager.pushRequest(new UpdateTranslationFromVision());
+            updateVisionInfo();
         }
 
         rotationController.reset();
@@ -84,20 +78,35 @@ public class AlignDriveInCommand extends Command {
         alignController.setTolerance(0.25);
     }
 
+    private void updateVisionInfo() {
+        double aprilTarget = LimelightHelpers.getFiducialID("limelight");
+        Optional<Pose2d> optTagPose = Subsystems.aprilTagUtil.getTagPose2d((int) aprilTarget);
+        optTagPose.ifPresent(pose2d -> {
+            BSLogger.log("AlignDriveInCommand", "updating tag pose");
+            targetRotation = pose2d.getRotation().getMeasure().plus(Degrees.of(180));
+            lastVisionPose.set(Pair.of(pose2d, Degrees.of(LimelightHelpers.getTX("limelight"))));
+        });
+        BSLogger.log("AlignDriveInCommand", "initialize: tagPose: " + optTagPose + " | rot: " + targetRotation);
+        Subsystems.poseManager.pushRequest(new UpdateTranslationFromVision());
+    }
+
     @Override
     public void execute() {
-        boolean hasTarget = LimelightHelpers.getTV("limelight");
-
         final double rawtx;
+
+        boolean hasTarget = LimelightHelpers.getTV("limelight");
         if (hasTarget) {
-             rawtx = LimelightHelpers.getTX("limelight");
+            updateVisionInfo();
+            rawtx = LimelightHelpers.getTX("limelight");
         } else {
             Optional<Pair<Pose2d, Angle>> optVisionTarget = lastVisionPose.get();
             if (optVisionTarget.isEmpty()) {
+                BSLogger.log("AlignDriveInCommand", "execute has no valid vision, idling");
                 Subsystems.swerveSubsystem.setControl(idle);
                 return;
             } else {
                 // Use last non-expired vision
+                BSLogger.log("AlignDriveInCommand", "execute using cached vision target: " + optVisionTarget);
                 Pair<Pose2d, Angle> lastSeen = optVisionTarget.get();
                 rawtx = lastSeen.getSecond().in(Degrees);
             }
@@ -183,8 +192,22 @@ public class AlignDriveInCommand extends Command {
 
     @Override
     public boolean isFinished() {
+        BSLogger.log("AlignDriveInCommand", "last ts: " + lastVisionPose.getTimestamp() + " | " + (System.currentTimeMillis() - lastVisionPose.getTimestamp()));
+
+        if (lastVisionPose.get().isEmpty()) {
+            BSLogger.log("AlignDriveInCommand", "Finishing command because no vision target");
+            return true;
+        }
         Optional<Double> distance = Subsystems.visionOdometryUpdater.getTargetDistance();
-        return distance.map(aDouble -> aDouble < 0.02).orElse(true);
+        if (distance.isPresent()) {
+            boolean metDistance = distance.map(aDouble -> aDouble < 0.415).orElse(false);
+            if (metDistance) {
+                BSLogger.log("AlignDriveInCommand", "Finishing because we are within distance threshold");
+                return true;
+            };
+        }
+
+        return false;
     }
 }
 
