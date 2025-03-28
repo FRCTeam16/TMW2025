@@ -14,6 +14,10 @@ import frc.robot.subsystems.amd.AbstractDataCollector;
 import java.util.List;
 
 
+/**
+ * TODO: run to l2/l3, pause, then home with timeout
+ * send
+ */
 public class ElevatorAMDCommand extends Command {
     private ElevatorDataCollector dataCollector = new ElevatorDataCollector();
     private Timer timer = new Timer();

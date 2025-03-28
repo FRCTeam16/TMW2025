@@ -7,13 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "TestForwardBack2"
+            "pathName": "EP2"
           }
         }
       ]
     }
   },
-  "resetOdom": false,
+  "resetOdom": true,
   "folder": "Tests",
   "choreoAuto": false
 }
