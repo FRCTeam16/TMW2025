@@ -1,5 +1,6 @@
 package frc.robot.subsystems.Intake;
 
+import au.grapplerobotics.LaserCan;
 import com.ctre.phoenix6.configs.CANdiConfiguration;
 import com.ctre.phoenix6.configs.DigitalInputsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -34,6 +35,7 @@ public class CoralIntake extends SubsystemBase implements Lifecycle, AMD<CoralIn
     private final DutyCycleOut dutyCycleOutBottom = new DutyCycleOut(1);
 
     private final CANdi candi = new CANdi(Robot.robotConfig.getCanID("coralIntakeCandi"));
+    private final LaserCan laserCan = new LaserCan(1);
 
     private final Debouncer topSensorFilter = new Debouncer(0.005);
     private final Debouncer bottomSensorFilter = new Debouncer(0.005);
@@ -70,7 +72,6 @@ public class CoralIntake extends SubsystemBase implements Lifecycle, AMD<CoralIn
                         .withS2FloatState(S2FloatStateValue.PullLow));
         this.candi.getConfigurator().apply(candiConfig);
         this.setDefaultCommand(this.stopCommand());
-
     }
 
     @Override
@@ -164,11 +165,14 @@ public class CoralIntake extends SubsystemBase implements Lifecycle, AMD<CoralIn
         builder.addDoubleProperty("intakeLowSpeed", () -> intakeLowSpeed, (v) -> intakeLowSpeed = v);
         builder.addDoubleProperty("ejectSpeed", () -> ejectSpeed, (v) -> ejectSpeed = v);
 
+        builder.addDoubleProperty("laserCanDistMM", () -> laserCan.getMeasurement().distance_mm, null);
         builder.addBooleanProperty("coralDetectedAtTop", this::coralDetectedAtTopSensor, null); // s2
         builder.addBooleanProperty("coralDetectedAtBottom", this::coralDetectedAtBottomSensor, null); // s1
+        builder.addBooleanProperty("coralDetectedAtLaserCAN", this::coralDetectedByLaserCAN, null);
         builder.addBooleanProperty("rawTopSensor", () -> candi.getS1Closed().getValue(), null);
         builder.addBooleanProperty("rawBotSensor", () -> candi.getS2Closed().getValue(), null);
         builder.addStringProperty("requestedState", () -> requestedState, null);
+
 
         builder.addDoubleProperty("motorOutput", () -> topMotor.getDutyCycle().getValueAsDouble(), null);
     }
@@ -237,6 +241,10 @@ public class CoralIntake extends SubsystemBase implements Lifecycle, AMD<CoralIn
     public void collectAMDData(CoralIntakeAMDCommand.CoralIntakeDataCollector dataCollector) {
         dataCollector.addCurrents(topMotor.getStatorCurrent().getValueAsDouble(),
                 bottomMotor.getStatorCurrent().getValueAsDouble());
+    }
+
+    public boolean coralDetectedByLaserCAN() {
+        return this.laserCan.getMeasurement().distance_mm < 260;
     }
 
     private class ShootCoralCommand extends Command {
