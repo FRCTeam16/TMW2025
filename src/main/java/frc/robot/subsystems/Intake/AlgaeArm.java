@@ -55,7 +55,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
                 .withKG(0.5);
 
         Slot1Configs slot1 = new Slot1Configs()
-                .withKP(50)
+                .withKP(60)
                 .withKI(0)
                 .withKD(3)
                 .withGravityType(GravityTypeValue.Arm_Cosine)
@@ -63,7 +63,8 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
 
         SoftwareLimitSwitchConfigs softwareLimitSwitchConfigs = new SoftwareLimitSwitchConfigs()
         .withForwardSoftLimitEnable(true)
-        .withForwardSoftLimitThreshold(0.230)
+        .withForwardSoftLimitThreshold(0.240
+        )
         .withReverseSoftLimitEnable(true)
         .withReverseSoftLimitThreshold(0.012);
 
@@ -195,7 +196,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
 
 
     public enum AlgaeArmPosition {
-        Up(0.233),
+        Up(0.235),
         Ground(0.014),
         Processor(0.34),
         Shooting(0.220),
