@@ -164,9 +164,9 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
         builder.addDoubleProperty("motorPosition", this::getMotorPosition, this::setArmPosition);
         builder.addDoubleProperty("targetPosition", () -> this.targetPosition, this::setArmPosition);
         builder.addBooleanProperty("isInPosition", this::isInPosition, null);
-        builder.addDoubleProperty("estimatedAngle", () -> this.getEstimatedAngle().in(Degrees), null);
 
         if (Constants.DebugSendables.AlgaeArm) {
+            builder.addDoubleProperty("estimatedAngle", () -> this.getEstimatedAngle().in(Degrees), null);
             builder.addDoubleProperty("openLoopMax", () -> openLoopMax, (v) -> openLoopMax = v);
         }
     }

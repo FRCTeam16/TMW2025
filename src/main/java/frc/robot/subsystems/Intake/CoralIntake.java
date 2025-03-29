@@ -19,6 +19,7 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.Subsystems;
 import frc.robot.commands.amd.CoralIntakeAMDCommand;
@@ -161,21 +162,24 @@ public class CoralIntake extends SubsystemBase implements Lifecycle, AMD<CoralIn
     public void initSendable(SendableBuilder builder) {
         super.initSendable(builder);
         builder.setSmartDashboardType("CoralIntake");
-        builder.addDoubleProperty("intakeHighSpeedLeft", () -> intakeHighSpeedLeft, (v) -> intakeHighSpeedLeft = v);
-        builder.addDoubleProperty("intakeHighSpeedRight", () -> intakeHighSpeedRight, (v) -> intakeHighSpeedRight = v);
-        builder.addDoubleProperty("intakeLowSpeed", () -> intakeLowSpeed, (v) -> intakeLowSpeed = v);
         builder.addDoubleProperty("ejectSpeed", () -> ejectSpeed, (v) -> ejectSpeed = v);
-
-        builder.addDoubleProperty("laserCanDistMM", this::getLaserCanMeasurementInMM, null);
         builder.addBooleanProperty("coralDetectedAtTop", this::coralDetectedAtTopSensor, null); // s2
         builder.addBooleanProperty("coralDetectedAtBottom", this::coralDetectedAtBottomSensor, null); // s1
         builder.addBooleanProperty("coralDetectedAtLaserCAN", this::coralDetectedByLaserCAN, null);
-        builder.addBooleanProperty("rawTopSensor", () -> candi.getS1Closed().getValue(), null);
-        builder.addBooleanProperty("rawBotSensor", () -> candi.getS2Closed().getValue(), null);
         builder.addStringProperty("requestedState", () -> requestedState, null);
 
+        if (Constants.DebugSendables.CoralIntake) {
+            builder.addDoubleProperty("intakeHighSpeedLeft", () -> intakeHighSpeedLeft, (v) -> intakeHighSpeedLeft = v);
+            builder.addDoubleProperty("intakeHighSpeedRight", () -> intakeHighSpeedRight, (v) -> intakeHighSpeedRight = v);
+            builder.addDoubleProperty("intakeLowSpeed", () -> intakeLowSpeed, (v) -> intakeLowSpeed = v);
 
-        builder.addDoubleProperty("motorOutput", () -> topMotor.getDutyCycle().getValueAsDouble(), null);
+            builder.addBooleanProperty("rawTopSensor", () -> candi.getS1Closed().getValue(), null);
+            builder.addBooleanProperty("rawBotSensor", () -> candi.getS2Closed().getValue(), null);
+            builder.addDoubleProperty("laserCanDistMM", this::getLaserCanMeasurementInMM, null);
+
+            builder.addDoubleProperty("motorOutput", () -> topMotor.getDutyCycle().getValueAsDouble(), null);
+        }
+
     }
 
     void intakeFast() {

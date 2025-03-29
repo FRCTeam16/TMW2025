@@ -10,13 +10,13 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.Subsystems;
 import frc.robot.subsystems.Lifecycle;
 import frc.robot.util.MotorStatorCurrentFilter;
-
 
 import static edu.wpi.first.units.Units.Amps;
 
@@ -34,6 +34,7 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle {
     private double backwardSpeed = -0.3;
     private double holdSpeed = 0.04;
     private boolean algaeDetected = false;
+    private String requestedState = "None";
 
     public AlgaeIntake() {
         MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs()
@@ -78,11 +79,13 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle {
     public void initSendable(SendableBuilder builder) {
         super.initSendable(builder);
         builder.setSmartDashboardType("AlgaeIntake");
-        builder.addDoubleProperty("filteredCurrent", () -> detector.getCurrent().in(Amps), null);
-        builder.addBooleanProperty("filteredThreshold", detector::isOverThreshold, null);
+        builder.addStringProperty("requestedState", () -> requestedState, null);
         builder.addBooleanProperty("algaeDetected", () -> algaeDetected, null);
 
         if (Constants.DebugSendables.AlgaeIntake) {
+            builder.addDoubleProperty("filteredCurrent", () -> detector.getCurrent().in(Amps), null);
+            builder.addBooleanProperty("filteredThreshold", detector::isOverThreshold, null);
+
             builder.addDoubleProperty("forwardSpeed", () -> forwardSpeed, this::setForwardSpeed);
             builder.addDoubleProperty("backwardSpeed", () -> backwardSpeed, this::setBackwardSpeed);
             builder.addDoubleProperty("holdSpeed", () -> holdSpeed, this::setHoldSpeed);
@@ -91,6 +94,7 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle {
 
     public Command intakeCommand() {
         return this.run(() -> algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(forwardSpeed)))
+                .alongWith(Commands.runOnce(() -> requestedState = "Intake"))
                 .withName("Algae Intake");
     }
 
@@ -98,19 +102,22 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle {
         return this.startRun(
             () -> this.algaeDetected = false,
             () -> algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(backwardSpeed))
-            ).withName("Algae Eject");
+            ).alongWith(Commands.runOnce(() -> requestedState = "Eject"))
+            .withName("Algae Eject");
 
     }
 
     public Command holdAlgaeCommand() {
         return this.run(() -> algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(holdSpeed)))
+                .alongWith(Commands.runOnce(() -> requestedState = "Hold"))
                 .withName("Algae Hold");
 
-//        return new PulseHoldAlgaeCommand();
     }
 
     public Command stopCommand() {
-        return this.run(() -> algaeIntakeMotor.setControl(brake)).withName("Algae Stop");
+        return this.run(() -> algaeIntakeMotor.setControl(brake))
+                .alongWith(Commands.runOnce(() -> requestedState = "Stop"))
+                .withName("Algae Stop");
     }
 
     class DefaultHoldCommand extends Command {
@@ -121,6 +128,7 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle {
 
         @Override
         public void initialize() {
+            requestedState = "Hold";
             algaeIntakeMotor.setControl(brake);
         }
     }

@@ -1,7 +1,6 @@
 package frc.robot.commands.vision;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
-
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -25,21 +24,25 @@ import java.util.Optional;
 import static edu.wpi.first.units.Units.*;
 
 public class AlignDriveInCommand extends Command {
+    private final Distance DEFAULT_TARGET_DISTANCE = Meters.of(0.415);
     private final Distance LIMELIGHT_OFFSET = Inches.of(12.279);
 
     private final AlignTarget alignTarget;
     private Angle targetRotation;
     private LinearVelocity approachSpeed = MetersPerSecond.of(1.25);
+    private Distance targetDistance = DEFAULT_TARGET_DISTANCE;
+    private boolean useTargetDistanceForApproachSpeed = true;
 
     RotationController rotationController = Subsystems.rotationController;
-    private PIDController alignController = Subsystems.alignTranslationController;
-    private TranslationController distanceController = Subsystems.translationController;
+    private final PIDController alignController = Subsystems.alignTranslationController;
+    private final TranslationController distanceController = Subsystems.translationController;
 
-    private SwerveRequest.RobotCentric robotCentric = new SwerveRequest.RobotCentric();
-    private SwerveRequest.Idle idle = new SwerveRequest.Idle();
-    private SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
+    private final SwerveRequest.RobotCentric robotCentric = new SwerveRequest.RobotCentric();
+    private final SwerveRequest.Idle idle = new SwerveRequest.Idle();
+    private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
 
-    private TimeExpiringValue<Pair<Pose2d, Angle>> lastVisionPose = new TimeExpiringValue<>(500);
+    private final String limelightName;
+    private final TimeExpiringValue<Pair<Pose2d, Angle>> lastVisionPose = new TimeExpiringValue<>(500);
 
     public enum AlignTarget {
         LEFT,
@@ -50,7 +53,9 @@ public class AlignDriveInCommand extends Command {
     public AlignDriveInCommand(AlignTarget alignTarget) {
         this.alignTarget = alignTarget;
         this.addRequirements(Subsystems.swerveSubsystem);
+        this.limelightName = "limelight";
         SmartDashboard.putNumber("AlignDrive/Approach", 1.25);
+        SmartDashboard.putNumber("AlignDrive/Distance", -1);
     }
 
     public AlignDriveInCommand withApproachSpeed(LinearVelocity speed) {
@@ -58,11 +63,16 @@ public class AlignDriveInCommand extends Command {
         return this;
     }
 
+    public AlignDriveInCommand withTargetDistance(Distance distance) {
+        this.targetDistance = distance;
+        return this;
+    }
+
     @Override
     public void initialize() {
-        boolean hasTarget = LimelightHelpers.getTV("limelight");
+        boolean hasTarget = LimelightHelpers.getTV(limelightName);
         targetRotation = Subsystems.swerveSubsystem.getState().Pose.getRotation().getMeasure();
-        BSLogger.log("AlignDriveInCommand", "initialize: " + hasTarget);
+        BSLogger.log("AlignDriveInCommand", "initialize: hasTarget?" + hasTarget);
         if (hasTarget) {
             updateVisionInfo();
         }
@@ -73,20 +83,23 @@ public class AlignDriveInCommand extends Command {
 
         distanceController.reset();
         distanceController.setTolerance(0.02);
+        distanceController.setSetpoint(targetDistance.in(Meters));
 
         alignController.reset();
         alignController.setTolerance(0.25);
     }
 
     private void updateVisionInfo() {
-        double aprilTarget = LimelightHelpers.getFiducialID("limelight");
+        double aprilTarget = LimelightHelpers.getFiducialID(limelightName);
         Optional<Pose2d> optTagPose = Subsystems.aprilTagUtil.getTagPose2d((int) aprilTarget);
         optTagPose.ifPresent(pose2d -> {
-            BSLogger.log("AlignDriveInCommand", "updating tag pose");
+            BSLogger.log("AlignDriveInCommand", "updating target rotation based on april tag: " + aprilTarget);
             targetRotation = pose2d.getRotation().getMeasure().plus(Degrees.of(180));
-            lastVisionPose.set(Pair.of(pose2d, Degrees.of(LimelightHelpers.getTX("limelight"))));
+            lastVisionPose.set(Pair.of(pose2d, Degrees.of(LimelightHelpers.getTX(limelightName))));
         });
         BSLogger.log("AlignDriveInCommand", "initialize: tagPose: " + optTagPose + " | rot: " + targetRotation);
+
+        // Reset our pose based on vision
         Subsystems.poseManager.pushRequest(new UpdateTranslationFromVision());
     }
 
@@ -94,11 +107,12 @@ public class AlignDriveInCommand extends Command {
     public void execute() {
         final double rawtx;
 
-        boolean hasTarget = LimelightHelpers.getTV("limelight");
+        boolean hasTarget = LimelightHelpers.getTV(limelightName);
         if (hasTarget) {
             updateVisionInfo();
-            rawtx = LimelightHelpers.getTX("limelight");
+            rawtx = LimelightHelpers.getTX(limelightName);
         } else {
+            // No target detected, see if we can use previous vision info
             Optional<Pair<Pose2d, Angle>> optVisionTarget = lastVisionPose.get();
             if (optVisionTarget.isEmpty()) {
                 BSLogger.log("AlignDriveInCommand", "execute has no valid vision, idling");
@@ -113,11 +127,23 @@ public class AlignDriveInCommand extends Command {
         }
 
         Angle tx = Degrees.of(rawtx);
-        double targetAngleRads = calculateYTargetDirect(tx).in(Radians);
+        double headingRadians = calculateYTargetDirect(tx).in(Radians);
 
+        //
+        // Calculate speeds
+        //
         approachSpeed = MetersPerSecond.of(SmartDashboard.getNumber("AlignDrive/Approach", 1.25));
-        LinearVelocity xspeed = approachSpeed.times(Math.cos(targetAngleRads));
-        LinearVelocity yspeed = approachSpeed.times(Math.sin(targetAngleRads));
+
+        // Approach speed is the speed we want to drive towards the target
+        LinearVelocity xspeed = approachSpeed.times(Math.cos(headingRadians));
+        if (useTargetDistanceForApproachSpeed) {
+            Optional<Double> seenDistance = Subsystems.visionOdometryUpdater.getTargetDistance();
+            xspeed = seenDistance.map(seenDistanceM -> calculateXSpeedFromDistance(Meters.of(seenDistanceM)))
+                    .orElseGet(() -> approachSpeed.times(Math.cos(headingRadians)));
+        }
+
+        // Y speed is the speed we want to drive horizontally towards the target point
+        LinearVelocity yspeed = approachSpeed.times(Math.sin(headingRadians));
 
         // Robot Rotation
         double currentDegrees = Subsystems.swerveSubsystem.getState().Pose.getRotation().getDegrees();
@@ -175,12 +201,16 @@ public class AlignDriveInCommand extends Command {
         return Degrees.of((AlignTarget.LEFT == alignTarget) ? 22.5 : -23);
     }
 
+    private LinearVelocity calculateXSpeedFromDistance(Distance distance) {
+        double error = distanceController.calculate(distance.in(Meters), targetDistance.in(Meters));
+        return approachSpeed.times(error);
+    }
+
     @Override
     public void end(boolean interrupted) {
         Subsystems.swerveSubsystem.setControl(brake);
 
-        boolean hasTarget = LimelightHelpers.getTV("limelight");
-        if (hasTarget) {
+        if (LimelightHelpers.getTV(limelightName)) {
             Subsystems.poseManager.pushRequest(new UpdateTranslationFromVision());
         } else {
             Pair<Pose2d, Angle> lastPose = lastVisionPose.getLastIgnoringExpiration();
@@ -192,15 +222,15 @@ public class AlignDriveInCommand extends Command {
 
     @Override
     public boolean isFinished() {
-        BSLogger.log("AlignDriveInCommand", "last ts: " + lastVisionPose.getTimestamp() + " | " + (System.currentTimeMillis() - lastVisionPose.getTimestamp()));
+        boolean finishedRotation = rotationController.atSetpoint();
 
         if (lastVisionPose.get().isEmpty()) {
-            BSLogger.log("AlignDriveInCommand", "Finishing command because no vision target");
+            BSLogger.log("AlignDriveInCommand", "Finishing command because no vision target cached");
             return true;
         }
         Optional<Double> distance = Subsystems.visionOdometryUpdater.getTargetDistance();
         if (distance.isPresent()) {
-            boolean metDistance = distance.map(aDouble -> aDouble < 0.415).orElse(false);
+            boolean metDistance = distance.map(aDouble -> aDouble < targetDistance.in(Meters)).orElse(false);
             if (metDistance) {
                 BSLogger.log("AlignDriveInCommand", "Finishing because we are within distance threshold");
                 return true;
