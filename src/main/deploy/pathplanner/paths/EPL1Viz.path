@@ -3,42 +3,35 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.3186475409836067,
-        "y": 0.7583504098360652
+        "x": 6.0875,
+        "y": 5.794
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.123997479401116,
-        "y": 1.5556492323253175
+        "x": 5.718749111729596,
+        "y": 5.650252278627493
       },
       "isLocked": false,
-      "linkedName": "EP2E"
+      "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.2246926229508195,
-        "y": 2.5804815573770488
+        "x": 5.34375,
+        "y": 5.5
       },
       "prevControl": {
-        "x": 2.676080405021397,
-        "y": 2.040334331424635
+        "x": 5.668750602914579,
+        "y": 5.724999129120892
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "EP4E"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "intakeCoral",
-      "waypointRelativePos": 0.0,
-      "endWaypointRelativePos": null,
-      "command": null
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 4.4,
     "maxAcceleration": 3.75,
@@ -49,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0.75,
-    "rotation": 59.99999999999999
+    "rotation": -119.99999999999999
   },
   "reversed": false,
   "folder": "ThreePiece",
   "idealStartingState": {
-    "velocity": 0.0,
-    "rotation": 54.582944723532634
+    "velocity": 2.0,
+    "rotation": -123.68999999999998
   },
   "useDefaultConstraints": true
 }

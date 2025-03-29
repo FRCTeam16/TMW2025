@@ -8,44 +8,27 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.317520491803278,
-        "y": 2.159
+        "x": 5.99625,
+        "y": 2.5527499999999996
       },
       "isLocked": false,
       "linkedName": "EPR1S"
     },
     {
       "anchor": {
-        "x": 3.0225,
-        "y": 2.159
+        "x": 5.3375,
+        "y": 2.862
       },
       "prevControl": {
-        "x": 4.041454918032786,
-        "y": 2.1709877049180317
+        "x": 6.331998039264892,
+        "y": 2.627991667032376
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "SP1E"
+      "linkedName": "EPR1E"
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.21763779527559046,
-      "rotationDegrees": 0.0
-    },
-    {
-      "waypointRelativePos": 0.40283464566928795,
-      "rotationDegrees": -179.0
-    },
-    {
-      "waypointRelativePos": 0.5779527559055111,
-      "rotationDegrees": 1.0
-    },
-    {
-      "waypointRelativePos": 0.7631496062992096,
-      "rotationDegrees": -178.0
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -59,10 +42,10 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 119.99999999999999
   },
   "reversed": false,
-  "folder": "Tests",
+  "folder": "ThreePiece",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0

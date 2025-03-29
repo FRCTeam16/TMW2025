@@ -3,35 +3,42 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.2246926229508195,
-        "y": 2.5804815573770488
+        "x": 1.3186475409836067,
+        "y": 7.242
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.9981262135756683,
-        "y": 2.4666073082044977
+        "x": 2.0018146270732275,
+        "y": 6.6011586330553955
       },
       "isLocked": false,
-      "linkedName": "EP4E"
+      "linkedName": "EPL2E"
     },
     {
       "anchor": {
-        "x": 1.3066598360655735,
-        "y": 0.9981045081967216
+        "x": 3.2246926229508195,
+        "y": 5.42
       },
       "prevControl": {
-        "x": 1.9434180490988808,
-        "y": 1.4764681283552517
+        "x": 2.860805722728357,
+        "y": 5.7542128527282195
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "EPL4E"
     }
   ],
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "intakeCoral",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 4.4,
     "maxAcceleration": 3.75,
@@ -41,14 +48,14 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0,
-    "rotation": 54.582944723532634
+    "velocity": 0.75,
+    "rotation": -59.99999999999999
   },
   "reversed": false,
   "folder": "ThreePiece",
   "idealStartingState": {
-    "velocity": 0,
-    "rotation": 59.99999999999999
+    "velocity": 0.0,
+    "rotation": -54.583
   },
   "useDefaultConstraints": true
 }

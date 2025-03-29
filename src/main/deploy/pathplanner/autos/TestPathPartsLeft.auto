@@ -7,13 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "EPR1Viz"
+            "pathName": "EPL2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "EPL4"
           }
         }
       ]
     }
   },
-  "resetOdom": false,
+  "resetOdom": true,
   "folder": "Bayou",
   "choreoAuto": false
 }

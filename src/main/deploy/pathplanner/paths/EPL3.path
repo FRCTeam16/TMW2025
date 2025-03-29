@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 1.3186475409836067,
+        "y": 7.242
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 3.4366346732903863,
+        "y": 6.746985254917426
+      },
+      "isLocked": false,
+      "linkedName": "EPL2E"
+    },
+    {
+      "anchor": {
+        "x": 5.3375,
+        "y": 5.138
+      },
+      "prevControl": {
+        "x": 3.6090353031943376,
+        "y": 6.016304132333326
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "EPL3E"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 4.4,
+    "maxAcceleration": 3.75,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -119.99999999999999
+  },
+  "reversed": false,
+  "folder": "ThreePiece",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -54.583
+  },
+  "useDefaultConstraints": true
+}

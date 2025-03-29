@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.3186475409836067,
-        "y": 0.7583504098360652
+        "x": 7.540266393442623,
+        "y": 5.841
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.4366352459016367,
-        "y": 1.253362704918033
+        "x": 5.996246897452233,
+        "y": 5.447262166256347
       },
       "isLocked": false,
-      "linkedName": "EP2E"
+      "linkedName": "EPL1S"
     },
     {
       "anchor": {
         "x": 5.3375,
-        "y": 2.8625
+        "y": 5.138
       },
       "prevControl": {
-        "x": 3.6090327868852468,
-        "y": 1.9842008196721315
+        "x": 6.331998039264892,
+        "y": 5.372008332967624
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "EP1E"
+      "linkedName": "EPL1E"
     }
   ],
   "rotationTargets": [],
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 119.99999999999999
+    "rotation": -119.99999999999999
   },
   "reversed": false,
   "folder": "ThreePiece",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 54.582944723532634
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }
