@@ -151,9 +151,9 @@ public class Climber extends SubsystemBase implements Lifecycle {
         public void initialize() {
             if (ClimberPosition.PICKUP == position) {
                 BSLogger.log("Climber", "Closing Latch");
-                Subsystems.funnelSubsystem.closeLatch();
-            } else if (ClimberPosition.CLIMB == position && Subsystems.funnelSubsystem.isLatchOpen()) {
-                BSLogger.log("Climber", "Requested to climb but we think latch is open");
+                Subsystems.funnelSubsystem.openLatch();
+            } else if (ClimberPosition.CLIMB == position && !Subsystems.funnelSubsystem.isLatchOpen()) {
+                BSLogger.log("Climber", "Requested to climb but we think latch hasn't run");
                 return;
             }
             BSLogger.log("Climber", "Moving to position: " + position.name());
