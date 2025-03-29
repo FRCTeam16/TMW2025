@@ -166,7 +166,7 @@ public class CoralIntake extends SubsystemBase implements Lifecycle, AMD<CoralIn
         builder.addDoubleProperty("intakeLowSpeed", () -> intakeLowSpeed, (v) -> intakeLowSpeed = v);
         builder.addDoubleProperty("ejectSpeed", () -> ejectSpeed, (v) -> ejectSpeed = v);
 
-        builder.addDoubleProperty("laserCanDistMM", () -> laserCan.getMeasurement().distance_mm, null);
+        builder.addDoubleProperty("laserCanDistMM", this::getLaserCanMeasurementInMM, null);
         builder.addBooleanProperty("coralDetectedAtTop", this::coralDetectedAtTopSensor, null); // s2
         builder.addBooleanProperty("coralDetectedAtBottom", this::coralDetectedAtBottomSensor, null); // s1
         builder.addBooleanProperty("coralDetectedAtLaserCAN", this::coralDetectedByLaserCAN, null);
@@ -244,12 +244,16 @@ public class CoralIntake extends SubsystemBase implements Lifecycle, AMD<CoralIn
                 bottomMotor.getStatorCurrent().getValueAsDouble());
     }
 
-    public boolean coralDetectedByLaserCAN() {
+    public double getLaserCanMeasurementInMM() {
         LaserCanInterface.Measurement measurement = laserCan.getMeasurement();
         if (measurement != null) {
-            return measurement.distance_mm < 260;
+            return measurement.distance_mm;
         }
-        return false;
+        return 9999;
+    }
+
+    public boolean coralDetectedByLaserCAN() {
+        return getLaserCanMeasurementInMM() < 260;
     }
 
     private class ShootCoralCommand extends Command {
