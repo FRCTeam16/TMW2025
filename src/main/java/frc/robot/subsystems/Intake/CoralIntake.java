@@ -1,6 +1,7 @@
 package frc.robot.subsystems.Intake;
 
 import au.grapplerobotics.LaserCan;
+import au.grapplerobotics.interfaces.LaserCanInterface;
 import com.ctre.phoenix6.configs.CANdiConfiguration;
 import com.ctre.phoenix6.configs.DigitalInputsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -244,7 +245,11 @@ public class CoralIntake extends SubsystemBase implements Lifecycle, AMD<CoralIn
     }
 
     public boolean coralDetectedByLaserCAN() {
-        return this.laserCan.getMeasurement().distance_mm < 260;
+        LaserCanInterface.Measurement measurement = laserCan.getMeasurement();
+        if (measurement != null) {
+            return measurement.distance_mm < 260;
+        }
+        return false;
     }
 
     private class ShootCoralCommand extends Command {
