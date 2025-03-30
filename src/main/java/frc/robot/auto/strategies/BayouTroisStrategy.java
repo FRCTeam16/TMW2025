@@ -81,7 +81,7 @@ public class BayouTroisStrategy extends AutoPathStrategy {
         final int[] firstDriveFilters = switch (startingPosition) {
             case RED_RIGHT -> new int[] { 9 };
             case RED_LEFT -> new int[] { 11 };
-            case BLUE_RIGHT -> ALL_IDS;
+            case BLUE_RIGHT -> new int[] { 22 };
             case BLUE_LEFT -> ALL_IDS;
         };
 
