@@ -4,6 +4,7 @@ import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -21,6 +22,7 @@ public class Climber extends SubsystemBase implements Lifecycle {
     private final DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
     private final PositionVoltage positionVoltage = new PositionVoltage(0).withSlot(0).withEnableFOC(true);
     private final MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0).withSlot(0).withEnableFOC(true);
+    private final StaticBrake staticBrake = new StaticBrake();
 
     private double openLoopMotorOutput = 0.5;
     private double currentSetpoint = 0;
@@ -36,7 +38,7 @@ public class Climber extends SubsystemBase implements Lifecycle {
 
         SoftwareLimitSwitchConfigs softwareLimitSwitchConfigs = new SoftwareLimitSwitchConfigs()
                 .withForwardSoftLimitEnable(true)
-                .withForwardSoftLimitThreshold(200)
+                .withForwardSoftLimitThreshold(215)
                 .withReverseSoftLimitEnable(true)
                 .withReverseSoftLimitThreshold(0);
 
@@ -52,7 +54,7 @@ public class Climber extends SubsystemBase implements Lifecycle {
 
         climberMotor.getConfigurator().apply(climberConfiguration);
         climberMotor.setPosition(0.0);
-        this.setDefaultCommand(this.defaultHoldPositionCommand());
+//        this.setDefaultCommand(this.defaultHoldPositionCommand());
     }
 
     @Override
@@ -62,7 +64,8 @@ public class Climber extends SubsystemBase implements Lifecycle {
 
     @Override
     public void teleopInit() {
-        this.setDefaultCommand(this.defaultHoldPositionCommand());
+//        this.setDefaultCommand(this.defaultHoldPositionCommand());
+        this.defaultHoldPositionCommand().schedule();
     }
 
     private double getPosition() {
@@ -96,6 +99,10 @@ public class Climber extends SubsystemBase implements Lifecycle {
                 motionMagicVoltage.withPosition(position));
     }
 
+    private void brakeMode() {
+        climberMotor.setControl(staticBrake);
+    }
+
     public Command openLoopUpDefault() {
         return this.run(() -> runOpenLoop(openLoopMotorOutput)).withName("Climber Default Open Loop Up");
     }
@@ -124,7 +131,7 @@ public class Climber extends SubsystemBase implements Lifecycle {
         DOWN(0),
         PICKUP(75),
         UP(150),
-        CLIMB(180);
+        CLIMB(210);
 
         private final double position;
 
@@ -145,7 +152,6 @@ public class Climber extends SubsystemBase implements Lifecycle {
             if (ClimberPosition.PICKUP == position) {
                 addRequirements(Subsystems.funnelSubsystem);
             }
-
             this.position = position;
         }
 
@@ -165,6 +171,13 @@ public class Climber extends SubsystemBase implements Lifecycle {
         @Override
         public boolean isFinished() {
             return Subsystems.climber.isInPosition();
+        }
+
+        @Override
+        public void end(boolean interrupted) {
+            if (ClimberPosition.CLIMB == position) {
+                Subsystems.climber.brakeMode();
+            }
         }
     }
 
