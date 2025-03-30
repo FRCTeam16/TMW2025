@@ -10,19 +10,20 @@ import frc.robot.subsystems.Intake.AlgaeArm;
 public class PickAlgaeCommand extends SequentialCommandGroup {
     public PickAlgaeCommand(Elevator.ElevatorSetpoint elevatorSetpoint) {
         addCommands(
-            new Elevator.ElevatorMoveToPositionCommand(elevatorSetpoint).withTimeout(2.0),
-            Commands.parallel(
-                Subsystems.algaeIntake.intakeCommand(),
-                new StartEndCommand(
-                        () -> {
-                            Subsystems.algaeArm.setArmPosition(AlgaeArm.AlgaeArmPosition.PickFromReef);
-                        },
-                        () -> {
-                            Subsystems.algaeArm.setArmPosition(AlgaeArm.AlgaeArmPosition.Up);
-                        },
-                        Subsystems.algaeArm
+                Commands.runOnce(() -> Subsystems.algaeArm.setArmPosition(AlgaeArm.AlgaeArmPosition.Up)),
+                new Elevator.ElevatorMoveToPositionCommand(elevatorSetpoint).withTimeout(2.0),
+                Commands.parallel(
+                        Subsystems.algaeIntake.intakeCommand(),
+                        new StartEndCommand(
+                                () -> {
+                                    Subsystems.algaeArm.setArmPosition(AlgaeArm.AlgaeArmPosition.PickFromReef);
+                                },
+                                () -> {
+                                    Subsystems.algaeArm.setArmPosition(AlgaeArm.AlgaeArmPosition.Up);
+                                },
+                                Subsystems.algaeArm
+                        )
                 )
-            )
         );
     }
 }

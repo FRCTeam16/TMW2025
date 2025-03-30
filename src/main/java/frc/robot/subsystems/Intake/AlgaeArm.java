@@ -162,6 +162,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
     public void initSendable(SendableBuilder builder) {
         builder.setSmartDashboardType("AlgaeArm");
         builder.addDoubleProperty("motorPosition", this::getMotorPosition, this::setArmPosition);
+        builder.addDoubleProperty("motorCurrent", () -> algaeArmMotor.getStatorCurrent().getValueAsDouble(), null);
         builder.addDoubleProperty("targetPosition", () -> this.targetPosition, this::setArmPosition);
         builder.addBooleanProperty("isInPosition", this::isInPosition, null);
 
@@ -196,7 +197,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
 
 
     public enum AlgaeArmPosition {
-        Up(0.235),
+        Up(0.239),   // 0.235
         Ground(0.087),
         Processor(0.087),
         Shooting(0.15),

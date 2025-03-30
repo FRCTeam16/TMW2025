@@ -8,6 +8,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.util.datalog.BooleanLogEntry;
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
@@ -78,6 +79,7 @@ public class AlignDriveInCommand extends Command {
 
     @Override
     public void initialize() {
+        alignTelemetry.activeLog.update(true);
         boolean hasTarget = LimelightHelpers.getTV(limelightName);
         targetRotation = Subsystems.swerveSubsystem.getState().Pose.getRotation().getMeasure();
         BSLogger.log("AlignDriveInCommand", "initialize: hasTarget?" + hasTarget);
@@ -228,6 +230,7 @@ public class AlignDriveInCommand extends Command {
                 Subsystems.poseManager.pushRequest(new PoseChangeRequest(lastPose.getFirst()));
             }
         }
+        alignTelemetry.activeLog.update(false);
     }
 
     @Override
@@ -252,6 +255,7 @@ public class AlignDriveInCommand extends Command {
     }
 
     class AlignTelemetry {
+        final BooleanLogEntry activeLog;
         final DoubleLogEntry distanceLog;
         final DoubleLogEntry rotationLog;
         final DoubleLogEntry alignLog;
@@ -265,6 +269,7 @@ public class AlignDriveInCommand extends Command {
 
         AlignTelemetry() {
             DataLog log = DataLogManager.getLog();
+            activeLog = new BooleanLogEntry(log, "AlignDrive/Active");
             headingLog = new DoubleLogEntry(log, "AlignDrive/Heading");
             distanceLog = new DoubleLogEntry(log, "AlignDrive/DistanceError");
             rotationLog = new DoubleLogEntry(log, "AlignDrive/RotationError");
