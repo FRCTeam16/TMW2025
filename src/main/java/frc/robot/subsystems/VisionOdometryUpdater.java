@@ -81,9 +81,7 @@ public class VisionOdometryUpdater {
      * This method should be called periodically to ensure the robot's pose estimate is up-to-date.
      */
     public void updateOdometry() {
-//        Rotation2d robotRotation2d = drivetrain.getState().Pose.getRotation();
         Rotation2d robotRotation2d = drivetrain.getPigeon2().getRotation2d();
-
 
         // Update main pose odometry estimation
         mainPoseEstimator.update(
@@ -100,6 +98,7 @@ public class VisionOdometryUpdater {
                 //    Vector<N3> vector = VecBuilder.fill(visionStdDev, visionStdDev, 99);
                 //    mainPoseEstimator.addVisionMeasurement(pose.pose, pose.timestampSeconds, vector);
                     mainPoseEstimator.addVisionMeasurement(pose.pose, pose.timestampSeconds);
+                    drivetrain.addVisionMeasurement(pose.pose, pose.timestampSeconds);
                 });
 
         // Publish pose to network tables
