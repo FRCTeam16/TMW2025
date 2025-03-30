@@ -92,8 +92,16 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle {
         }
     }
 
+    public void intakeAlgae() {
+        algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(forwardSpeed));
+    }
+
+    public void holdAlgae() {
+        algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(holdSpeed));
+    }
+
     public Command intakeCommand() {
-        return this.run(() -> algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(forwardSpeed)))
+        return this.run(this::intakeAlgae)
                 .alongWith(Commands.runOnce(() -> requestedState = "Intake"))
                 .withName("Algae Intake");
     }
@@ -108,7 +116,7 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle {
     }
 
     public Command holdAlgaeCommand() {
-        return this.run(() -> algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(holdSpeed)))
+        return this.run(this::holdAlgae)
                 .alongWith(Commands.runOnce(() -> requestedState = "Hold"))
                 .withName("Algae Hold");
 

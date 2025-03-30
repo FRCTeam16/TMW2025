@@ -34,7 +34,7 @@ public class LimelightPoseEstimator implements Sendable {
         this.limelightName = limelightName;
         this.useMegaTag2 = useMegaTag2;
         this.publisher = NetworkTableInstance.getDefault()
-                .getStructTopic("LimelightPoseEstimator/" + limelightName + "/pose", Pose2d.struct).publish();
+                .getStructTopic("Pose/" + limelightName + "Pose", Pose2d.struct).publish();
     }
 
     /**

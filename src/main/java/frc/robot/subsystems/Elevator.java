@@ -132,13 +132,19 @@ public class Elevator extends SubsystemBase implements Lifecycle, AMD<ElevatorAM
     }
 
     public boolean isInPosition() {
-        if (ElevatorSetpoint.Zero == requestedSetpoint && lazyHold) {
-            return true;
+        final double currentPos = getCurrentPosition();
+        final double error = Math.abs(currentPos - currentSetpoint);
+
+        if (ElevatorSetpoint.Zero == requestedSetpoint) {
+             if (lazyHold) {
+                 return true;
+             }
+             if (error < 5) {
+                 return true;
+             }
         }
-        double currentPos = getCurrentPosition();
-        double error = Math.abs(currentPos - currentSetpoint);
-        return error < ELEVATOR_POSITION_THRESHOLD &&
-                left.getVelocity().getValueAsDouble() < 0.1;
+
+        return error < ELEVATOR_POSITION_THRESHOLD && left.getVelocity().getValueAsDouble() < 0.1;
     }
 
     void setLazyHold(boolean lazyHold) {
@@ -215,6 +221,10 @@ public class Elevator extends SubsystemBase implements Lifecycle, AMD<ElevatorAM
         dataCollector.collectData(isInPosition(), left.getStatorCurrent(), right.getStatorCurrent());
     }
 
+    private boolean isRequestedZero() {
+        return ElevatorSetpoint.Zero == Subsystems.elevator.requestedSetpoint;
+    }
+
     public enum ElevatorSetpoint {
         Zero(0),
         TROUGH(-16.5),
@@ -223,8 +233,8 @@ public class Elevator extends SubsystemBase implements Lifecycle, AMD<ElevatorAM
         L4(-56.5),
         AlgaeBarge(-38.5),
         AlgaeProcessor(0.0),
-        AlgaeReefHigh(-20),
-        AlgaeReefLow(-7.0);
+        AlgaeReefHigh(-20.75),
+        AlgaeReefLow(-7.75);
 
         public final double val;
 
@@ -276,16 +286,17 @@ public class Elevator extends SubsystemBase implements Lifecycle, AMD<ElevatorAM
 
         @Override
         public void initialize() {
-            double currentPosition = Subsystems.elevator.getCurrentPosition();
-            Subsystems.elevator.moveToEncoderPosition(currentPosition);
+            if (!isInPosition()) {
+                double currentPosition = Subsystems.elevator.getCurrentPosition();
+                Subsystems.elevator.moveToEncoderPosition(currentPosition);
+                BSLogger.log("DefaultHoldPositionCommand", "Explicitly setting position to hold: " + currentPosition);
+            }
         }
 
         @Override
         public void execute() {
-            // If we are near the bottom and not moving, apply a neutral output to the
-            // motors
-            if (!lazyHold && Subsystems.elevator.isInPosition()
-                    && ElevatorSetpoint.Zero == Subsystems.elevator.requestedSetpoint) {
+            // If we are near the bottom and not moving, apply a neutral output
+            if (!lazyHold && Subsystems.elevator.isInPosition() && isRequestedZero()) {
                 Subsystems.elevator.setLazyHold(true);
                 Subsystems.elevator.left.setControl(neutralOut);
             }
@@ -293,6 +304,9 @@ public class Elevator extends SubsystemBase implements Lifecycle, AMD<ElevatorAM
 
         @Override
         public void end(boolean interrupted) {
+            if (lazyHold && isRequestedZero()) {
+//                Subsystems.elevator.left.setPosition(0);
+            }
             Subsystems.elevator.setLazyHold(false);
         }
     }

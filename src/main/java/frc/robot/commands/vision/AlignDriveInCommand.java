@@ -8,6 +8,9 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.util.datalog.DataLog;
+import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Subsystems;
@@ -24,14 +27,14 @@ import java.util.Optional;
 import static edu.wpi.first.units.Units.*;
 
 public class AlignDriveInCommand extends Command {
-    private final Distance DEFAULT_TARGET_DISTANCE = Meters.of(0.415);
+    private final Distance DEFAULT_TARGET_DISTANCE = Meters.of(0.375);
     private final Distance LIMELIGHT_OFFSET = Inches.of(12.279);
 
     private final AlignTarget alignTarget;
     private Angle targetRotation;
     private LinearVelocity approachSpeed = MetersPerSecond.of(1.25);
     private Distance targetDistance = DEFAULT_TARGET_DISTANCE;
-    private boolean useTargetDistanceForApproachSpeed = true;
+    private boolean useTargetDistanceForApproachSpeed = false;
 
     RotationController rotationController = Subsystems.rotationController;
     private final PIDController alignController = Subsystems.alignTranslationController;
@@ -50,12 +53,17 @@ public class AlignDriveInCommand extends Command {
         CENTER
     }
 
+    static AlignTelemetry alignTelemetry;
+
     public AlignDriveInCommand(AlignTarget alignTarget) {
         this.alignTarget = alignTarget;
         this.addRequirements(Subsystems.swerveSubsystem);
         this.limelightName = "limelight";
         SmartDashboard.putNumber("AlignDrive/Approach", 1.25);
-        SmartDashboard.putNumber("AlignDrive/Distance", -1);
+
+        if (alignTelemetry == null) {
+            alignTelemetry = new AlignTelemetry();
+        }
     }
 
     public AlignDriveInCommand withApproachSpeed(LinearVelocity speed) {
@@ -93,14 +101,12 @@ public class AlignDriveInCommand extends Command {
         double aprilTarget = LimelightHelpers.getFiducialID(limelightName);
         Optional<Pose2d> optTagPose = Subsystems.aprilTagUtil.getTagPose2d((int) aprilTarget);
         optTagPose.ifPresent(pose2d -> {
-            BSLogger.log("AlignDriveInCommand", "updating target rotation based on april tag: " + aprilTarget);
             targetRotation = pose2d.getRotation().getMeasure().plus(Degrees.of(180));
             lastVisionPose.set(Pair.of(pose2d, Degrees.of(LimelightHelpers.getTX(limelightName))));
+            // Reset our pose based on vision
+            Subsystems.poseManager.pushRequest(new UpdateTranslationFromVision());
+            BSLogger.log("AlignDriveInCommand", "updating pose based on april tag [" + aprilTarget + "] " + pose2d);
         });
-        BSLogger.log("AlignDriveInCommand", "initialize: tagPose: " + optTagPose + " | rot: " + targetRotation);
-
-        // Reset our pose based on vision
-        Subsystems.poseManager.pushRequest(new UpdateTranslationFromVision());
     }
 
     @Override
@@ -127,6 +133,7 @@ public class AlignDriveInCommand extends Command {
         }
 
         Angle tx = Degrees.of(rawtx);
+        alignTelemetry.visionOffsetLog.update(rawtx);
         double headingRadians = calculateYTargetDirect(tx).in(Radians);
 
         //
@@ -150,12 +157,15 @@ public class AlignDriveInCommand extends Command {
         double rotationError = rotationController.calculate(currentDegrees);
         AngularVelocity rotationSpeed = DegreesPerSecond.of(180).times(rotationError);
 
+
         Subsystems.swerveSubsystem.setControl(
                 robotCentric
                         .withVelocityX(xspeed)
                         .withVelocityY(yspeed)
                         .withRotationalRate(rotationSpeed)
         );
+
+        alignTelemetry.periodic(Radians.of(headingRadians), xspeed, yspeed, rotationSpeed);
     }
 
     /**
@@ -203,7 +213,7 @@ public class AlignDriveInCommand extends Command {
 
     private LinearVelocity calculateXSpeedFromDistance(Distance distance) {
         double error = distanceController.calculate(distance.in(Meters), targetDistance.in(Meters));
-        return approachSpeed.times(error);
+        return approachSpeed.times(-error);
     }
 
     @Override
@@ -235,9 +245,48 @@ public class AlignDriveInCommand extends Command {
                 BSLogger.log("AlignDriveInCommand", "Finishing because we are within distance threshold");
                 return true;
             };
+            alignTelemetry.visionDistanceLog.update(distance.get());
         }
 
         return false;
+    }
+
+    class AlignTelemetry {
+        final DoubleLogEntry distanceLog;
+        final DoubleLogEntry rotationLog;
+        final DoubleLogEntry alignLog;
+        final DoubleLogEntry visionOffsetLog;
+        final DoubleLogEntry visionDistanceLog;
+
+        final DoubleLogEntry xspeedLog;
+        final DoubleLogEntry yspeedLog;
+        final DoubleLogEntry rotSpeedLog;
+        final DoubleLogEntry headingLog;
+
+        AlignTelemetry() {
+            DataLog log = DataLogManager.getLog();
+            headingLog = new DoubleLogEntry(log, "AlignDrive/Heading");
+            distanceLog = new DoubleLogEntry(log, "AlignDrive/DistanceError");
+            rotationLog = new DoubleLogEntry(log, "AlignDrive/RotationError");
+            alignLog = new DoubleLogEntry(log, "AlignDrive/AlignError");
+            visionOffsetLog = new DoubleLogEntry(log, "AlignDrive/VisionOffset");
+            visionDistanceLog = new DoubleLogEntry(log, "AlignDrive/VisionDistance");
+
+            xspeedLog = new DoubleLogEntry(log, "AlignDrive/XSpeed");
+            yspeedLog = new DoubleLogEntry(log, "AlignDrive/YSpeed");
+            rotSpeedLog = new DoubleLogEntry(log, "AlignDrive/RotSpeed");
+        }
+
+        void periodic(Angle angle, LinearVelocity xspeed, LinearVelocity yspeed, AngularVelocity rotationSpeed) {
+            headingLog.update(angle.in(Degrees));
+            xspeedLog.update(xspeed.in(MetersPerSecond));
+            yspeedLog.update(yspeed.in(MetersPerSecond));
+            rotSpeedLog.update(rotationSpeed.in(DegreesPerSecond));
+
+            distanceLog.update(distanceController.getError());
+            rotationLog.update(rotationController.getError());
+            alignLog.update(alignController.getError());
+        }
     }
 }
 

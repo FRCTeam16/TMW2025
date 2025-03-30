@@ -68,7 +68,7 @@ public class JoystickSwerveSupplier implements SwerveSupplier {
     protected double getBaseRotationalRate() {
         final double baseRotation;
         if (targetHeading.isEmpty()) {
-            baseRotation = applyDeadband(-steerStick.getX(), 0.05);
+            baseRotation = applyDeadband(-steerStick.getX(), 0.1);
         } else {
             double robotDegrees = Subsystems.swerveSubsystem.getState().Pose.getRotation().getDegrees();
             baseRotation = rotationPID.calculate(robotDegrees, targetHeading.get().in(Degrees));

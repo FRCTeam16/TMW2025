@@ -113,7 +113,7 @@ public class BayouTroisStrategy extends AutoPathStrategy {
 //                        .withTolerance(Meters.of(0.5))
 //                        .withFinalState(new State(0, 1.0)),
                 runAutoPath(firstDrive),
-                new AlignDriveInCommand(AlignTarget.RIGHT).withTimeout(1.0),
+                new AlignDriveInCommand(AlignTarget.LEFT).withTimeout(1.0),
                 doScoreSequence(),
                 Commands.runOnce(() -> Subsystems.visionSubsystem.resetIDFilter()),
 

@@ -72,10 +72,8 @@ public class BayouControls extends ControlBinding {
 
     final Trigger enableManualStickControlToggle = joystick.back();
 
-    private final Trigger manualAlgaeToggleButton = joystick.leftStick();
     private final Supplier<Double> manualAlgaeArmControl = algaeArmDampener(); // deadband(joystick::getLeftY, 0.05);
 
-    private final Trigger manualElevatorToggleButton = joystick.rightStick();
     private final Supplier<Double> manualElevatorControl = Robot.isReal() ?
             deadband(joystick::getRightY, 0.05) :
             deadband(joystick::getRightTriggerAxis, 0.05);  // simulation mode is flipped
@@ -114,14 +112,14 @@ public class BayouControls extends ControlBinding {
                 .onFalse(new AlgaeArm.SetArmPositionCommand(AlgaeArmPosition.Up));
         algaeArmUp.onTrue(new AlgaeArm.SetArmPositionCommand(AlgaeArmPosition.Up));
 
-        algaeHighElevator.whileTrue(new PickAlgaeCommand(Elevator.ElevatorSetpoint.AlgaeReefHigh));
-        algaeLowElevator.whileTrue(new PickAlgaeCommand(Elevator.ElevatorSetpoint.AlgaeReefLow));
+        algaeHighElevator.whileTrue(new PickAlgaeCommand(Elevator.ElevatorSetpoint.AlgaeReefHigh)).onFalse(Subsystems.algaeIntake.holdAlgaeCommand());
+        algaeLowElevator.whileTrue(new PickAlgaeCommand(Elevator.ElevatorSetpoint.AlgaeReefLow)).onFalse(Subsystems.algaeIntake.holdAlgaeCommand());
 
         climberPickup.onTrue(new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.PICKUP));
         climberClimb.onTrue(new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.CLIMB));
 
-        manualStickControl.and(manualAlgaeToggleButton).toggleOnTrue(Subsystems.algaeArm.openLoopCommand(manualAlgaeArmControl));
-        manualStickControl.and(manualElevatorToggleButton).toggleOnTrue(Subsystems.elevator.openLoopCommand(manualElevatorControl));
+        manualStickControl.toggleOnTrue(Subsystems.algaeArm.openLoopCommand(manualAlgaeArmControl));
+        manualStickControl.toggleOnTrue(Subsystems.elevator.openLoopCommand(manualElevatorControl));
 
         alignLeft.whileTrue(new AlignDriveInCommand(AlignDriveInCommand.AlignTarget.LEFT));
         alignRight.whileTrue(new AlignDriveInCommand(AlignDriveInCommand.AlignTarget.RIGHT));
