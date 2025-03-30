@@ -1,5 +1,7 @@
 package frc.robot.subsystems.amd;
 
+import frc.robot.Subsystems;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,5 +77,15 @@ public class SwerveDataCollector extends AbstractDataCollector<DriveInfo<Integer
 //        } else {
 //            return 4;
 //        }
+    }
+
+    public void report(boolean isDrive) {
+        DriveInfo<Integer> driveScores = this.getScore();
+        DriveInfo<Integer> steerScores = this.getScore();
+        if (isDrive) {
+            Subsystems.ledSubsystem.getAMDSerialData().submitDriveDMSScores(driveScores);
+        } else {
+            Subsystems.ledSubsystem.getAMDSerialData().submitSteerDMSScores(steerScores);
+        }
     }
 }

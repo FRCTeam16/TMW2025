@@ -26,11 +26,9 @@ public class RunDMSCommand extends SequentialCommandGroup {
                 new RunSteerTestCommand(steerDataCollector),
                 new WaitCommand(1.0),
                 Commands.runOnce(() -> {
-                    DriveInfo<Integer> driveScores = this.driveDataCollector.getScore();
-                    DriveInfo<Integer> steerScores = this.steerDataCollector.getScore();
-                    Subsystems.ledSubsystem.getAMDSerialData().submitDriveDMSScores(driveScores);
-                    Subsystems.ledSubsystem.getAMDSerialData().submitSteerDMSScores(steerScores);
-                    Subsystems.ledSubsystem.getAMDSerialData().startAMDPhase(AMDSerialData.AMDPhase.Comm);
+                    driveDataCollector.report(true);
+                    steerDataCollector.report(false);
+                    Subsystems.ledSubsystem.getAMDSerialData().startAMDPhase(AMDSerialData.AMDPhase.AMDEnd);
                 })
         );
     }

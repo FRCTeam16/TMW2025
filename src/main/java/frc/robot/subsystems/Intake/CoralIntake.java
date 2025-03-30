@@ -178,6 +178,8 @@ public class CoralIntake extends SubsystemBase implements Lifecycle, AMD<CoralIn
             builder.addDoubleProperty("laserCanDistMM", this::getLaserCanMeasurementInMM, null);
 
             builder.addDoubleProperty("motorOutput", () -> topMotor.getDutyCycle().getValueAsDouble(), null);
+            builder.addDoubleProperty("leftCurrent", () -> topMotor.getStatorCurrent().getValueAsDouble(), null);
+            builder.addDoubleProperty("rightCurrent", () -> bottomMotor.getStatorCurrent().getValueAsDouble(), null);
         }
 
     }

@@ -46,4 +46,9 @@ class RunDriveTestCommand extends AbstractRunDMSMotorTestCommand {
                 .mapToDouble(module -> module.getDriveMotor().getVelocity().getValueAsDouble())
                 .toArray();
     }
+
+    @Override
+    void report() {
+        this.swerveDataCollector.report(true);
+    }
 }

@@ -29,7 +29,8 @@ public class AMDSerialData {
     private AMDSerialData.AMDPhase currentPhase = AMDSerialData.AMDPhase.Comm;
     private DriveInfo<Integer> driveScores = new DriveInfo<>(0);
     private DriveInfo<Integer> steerScores = new DriveInfo<>(0);
-    private int coralScore = 0;
+    private int leftCoralScore = 0;
+    private int rightCoralScore = 0;
     private int elevatorLeftScore;
     private int elevatorRightScore;
 
@@ -85,14 +86,22 @@ public class AMDSerialData {
         this.steerScores = new DriveInfo<>(0);
     }
 
-    public byte getCoralScore() {
-        return (byte) coralScore;
+    public byte getLeftCoralScore() {
+        return (byte) leftCoralScore;
+    }
+    public byte getRightCoralScore() {
+        return (byte) rightCoralScore;
     }
 
-    public void submitCoralScore(int coralScore) {
-        BSLogger.log("AMDSerialData", "Coral Score: " + coralScore);
-        SmartDashboard.putNumber("AMD/coral/intake", coralScore);
-        this.coralScore = coralScore;
+    public void submitLeftCoralScore(int coralScore) {
+        BSLogger.log("AMDSerialData", "Left Coral Score: " + coralScore);
+        SmartDashboard.putNumber("AMD/coral/left_intake", coralScore);
+        this.leftCoralScore = coralScore;
+    }
+    public void submitRightCoralScore(int coralScore) {
+        BSLogger.log("AMDSerialData", "Right Coral Score: " + coralScore);
+        SmartDashboard.putNumber("AMD/coral/right_intake", coralScore);
+        this.rightCoralScore = coralScore;
     }
 
     public byte getElevatorLeftScore() {

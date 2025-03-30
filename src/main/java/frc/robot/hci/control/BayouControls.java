@@ -9,6 +9,7 @@ import frc.robot.Robot;
 import frc.robot.Subsystems;
 import frc.robot.commands.PickAlgaeCommand;
 import frc.robot.commands.amd.CoralIntakeAMDCommand;
+import frc.robot.commands.amd.ElevatorAMDCommand;
 import frc.robot.commands.amd.RunDMSCommand;
 import frc.robot.commands.pose.GenericPoseRequestCommand;
 import frc.robot.commands.vision.AlignDriveInCommand;
@@ -18,6 +19,7 @@ import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake.AlgaeArm;
 import frc.robot.subsystems.Intake.AlgaeArm.AlgaeArmPosition;
+import frc.robot.subsystems.amd.AMDSerialData;
 import frc.robot.subsystems.pose.ResetToAlliancePoseRequest;
 import frc.robot.subsystems.pose.SeedFieldCentricRequest;
 import frc.robot.subsystems.vision.Pipeline;
@@ -157,8 +159,12 @@ public class BayouControls extends ControlBinding {
         SmartDashboard.putData("Move Climber Up", new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.UP));
         SmartDashboard.putData("Move Climber Down", new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.DOWN));
 
+        // AMD
         SmartDashboard.putData("Run DMS", new RunDMSCommand());
+        SmartDashboard.putData("Stop AMD", Commands.runOnce(() -> Subsystems.ledSubsystem.getAMDSerialData().startAMDPhase(AMDSerialData.AMDPhase.Comm)).ignoringDisable(true));
         SmartDashboard.putData("Run CoralIntake AMD", new CoralIntakeAMDCommand());
+        SmartDashboard.putData("Run Elevator AMD", new ElevatorAMDCommand());
+        // End AMD
 
         SmartDashboard.putData("Open Latch", Subsystems.funnelSubsystem.openLatchCommand().ignoringDisable(true));
         SmartDashboard.putData("Close Latch", Subsystems.funnelSubsystem.closeLatchCommand().ignoringDisable(true));

@@ -1,5 +1,6 @@
 package frc.robot.commands.amd;
 
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.Timer;
@@ -45,14 +46,13 @@ public class CoralIntakeAMDCommand extends Command {
             return;
         }
         Subsystems.coralIntake.collectAMDData(dataCollector);
+        dataCollector.report();
     }
 
     @Override
     public void end(boolean interrupted) {
-        int score = dataCollector.getScore();
-        SmartDashboard.putNumber("AMD/CoralIntakeAMDScore", score);
-        Subsystems.ledSubsystem.getAMDSerialData().submitCoralScore(score);
-        Subsystems.ledSubsystem.getAMDSerialData().startAMDPhase(AMDSerialData.AMDPhase.Comm);
+        Subsystems.ledSubsystem.getAMDSerialData().startAMDPhase(AMDSerialData.AMDPhase.AMDEnd);
+        dataCollector.report();
         Subsystems.coralIntake.stop();
     }
 
@@ -65,7 +65,7 @@ public class CoralIntakeAMDCommand extends Command {
     /**
      * Collects data from the Coral Intake for analysis.
      */
-    public static class CoralIntakeDataCollector extends AbstractDataCollector<Integer> {
+    public static class CoralIntakeDataCollector extends AbstractDataCollector<Pair<Integer, Integer>> {
         List<Double> topCurrents = new ArrayList<>();
         List<Double> bottomCurrents = new ArrayList<>();
 
@@ -74,11 +74,31 @@ public class CoralIntakeAMDCommand extends Command {
 
 
         @Override
-        public Integer getScore() {
-            boolean topOutlier = Math.abs(topFilter.lastValue()) > 20;
-            boolean bottomOutlier = Math.abs(bottomFilter.lastValue()) > 20;
-            int score = (topOutlier ? 1 : 0) + (bottomOutlier ? 2 : 0);
-            return score;
+        public Pair<Integer, Integer> getScore() {
+            // 1 green < 15
+            // 2 yellow < 25
+            // 3 red > 25
+            // 4 red
+
+            double topAvg = Math.abs(topFilter.lastValue());
+            int topScore;
+            if (topAvg > 25) {
+                topScore = 3;
+            } else if (topAvg > 15) {
+                topScore = 2;
+            } else {
+                topScore = 1;
+            }
+            int bottomScore;
+            if (topAvg > 25) {
+                bottomScore = 3;
+            } else if (topAvg > 15) {
+                bottomScore = 2;
+            } else {
+                bottomScore = 1;
+            }
+
+            return Pair.of(topScore, bottomScore);
         }
 
         public void addCurrents(double topAmps, double bottomAmps) {
@@ -87,6 +107,14 @@ public class CoralIntakeAMDCommand extends Command {
 
             topFilter.calculate(topAmps);
             bottomFilter.calculate(bottomAmps);
+        }
+
+        public void report() {
+            Pair<Integer, Integer> score = this.getScore();
+            SmartDashboard.putNumber("AMD/CoralIntakeAMDScore", score.getFirst());
+
+            Subsystems.ledSubsystem.getAMDSerialData().submitLeftCoralScore(score.getFirst());
+            Subsystems.ledSubsystem.getAMDSerialData().submitRightCoralScore(score.getSecond());
         }
     }
 }

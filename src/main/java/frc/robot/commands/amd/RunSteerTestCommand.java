@@ -45,4 +45,9 @@ class RunSteerTestCommand extends AbstractRunDMSMotorTestCommand {
     double[] getMotorVelocities() {
         return Arrays.stream(Subsystems.swerveSubsystem.getModules()).mapToDouble(module -> module.getSteerMotor().getVelocity().getValueAsDouble()).toArray();
     }
+
+    @Override
+    void report() {
+        this.swerveDataCollector.report(false);
+    }
 }

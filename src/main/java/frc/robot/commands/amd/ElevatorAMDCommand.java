@@ -11,6 +11,7 @@ import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.amd.AMDSerialData;
 import frc.robot.subsystems.amd.AMDStats;
 import frc.robot.subsystems.amd.AbstractDataCollector;
+import frc.robot.util.BSLogger;
 
 import java.util.List;
 
@@ -41,10 +42,12 @@ public class ElevatorAMDCommand extends Command {
     @Override
     public void execute() {
         if (phaseNum == 1) {
+            BSLogger.log("ElevatorAMDCommand","phase1");
             if (moveElevatorCommand == null) {
-                moveElevatorCommand = new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L3);
+                moveElevatorCommand = new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L2);
                 moveElevatorCommand.schedule();
-            } else if (moveElevatorCommand.isFinished()) {
+            } else if (!moveElevatorCommand.isScheduled() || moveElevatorCommand.isFinished()) {
+                BSLogger.log("ElevatorAMDCommand", "phase1 finished");
                 moveElevatorCommand.cancel();
                 moveElevatorCommand = null;
                 phaseNum++;
@@ -53,7 +56,7 @@ public class ElevatorAMDCommand extends Command {
             if (moveElevatorCommand == null) {
                 moveElevatorCommand = new WaitCommand(4.0);
                 moveElevatorCommand.schedule();
-            } else if (moveElevatorCommand.isFinished()) {
+            } else if (!moveElevatorCommand.isScheduled() || moveElevatorCommand.isFinished()) {
                 moveElevatorCommand.cancel();
                 moveElevatorCommand = null;
                 timer.start();
@@ -61,9 +64,9 @@ public class ElevatorAMDCommand extends Command {
             }
         } else if (phaseNum == 3) {
             if (moveElevatorCommand == null) {
-                moveElevatorCommand = new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L2);
+                moveElevatorCommand = new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.Zero);
                 moveElevatorCommand.schedule();
-            } else if (moveElevatorCommand.isFinished()) {
+            } else if (!moveElevatorCommand.isScheduled() || moveElevatorCommand.isFinished()) {
                 moveElevatorCommand.cancel();
                 moveElevatorCommand = null;
                 phaseNum++;
@@ -89,7 +92,7 @@ public class ElevatorAMDCommand extends Command {
 
         Pair<Integer, Integer> score = dataCollector.getScore();
         Subsystems.ledSubsystem.getAMDSerialData().submitElevatorScore(score.getFirst(), score.getSecond());
-        Subsystems.ledSubsystem.getAMDSerialData().startAMDPhase(AMDSerialData.AMDPhase.Comm);
+        Subsystems.ledSubsystem.getAMDSerialData().startAMDPhase(AMDSerialData.AMDPhase.AMDEnd);
     }
 
     public static class ElevatorDataCollector extends AbstractDataCollector<Pair<Integer, Integer>> {

@@ -14,7 +14,7 @@ public abstract class AbstractRunDMSMotorTestCommand extends Command {
     private final Time runTime = Seconds.of(3.0);
     private final Time spinUpTime = Seconds.of(0.5);
     private final Timer timer = new Timer();
-    private final SwerveDataCollector swerveDataCollector;
+    protected final SwerveDataCollector swerveDataCollector;
 
 
     public AbstractRunDMSMotorTestCommand(SwerveDataCollector swerveDataCollector) {
@@ -55,7 +55,10 @@ public abstract class AbstractRunDMSMotorTestCommand extends Command {
         double[] velocity = getMotorVelocities();
         this.swerveDataCollector.addCurrent(current);
         this.swerveDataCollector.addVelocity(velocity);
+        this.report();
     }
+
+    abstract void report();
 
     // Called once the command ends or is interrupted.
     @Override
