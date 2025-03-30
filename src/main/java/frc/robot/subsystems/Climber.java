@@ -10,6 +10,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.Subsystems;
 import frc.robot.util.BSLogger;
@@ -23,7 +24,6 @@ public class Climber extends SubsystemBase implements Lifecycle {
 
     private double openLoopMotorOutput = 0.5;
     private double currentSetpoint = 0;
-    private double setpointVelocity = 10;
 
     public Climber() {
         TalonFXConfiguration climberConfiguration = new TalonFXConfiguration();
@@ -73,11 +73,13 @@ public class Climber extends SubsystemBase implements Lifecycle {
     public void initSendable(SendableBuilder builder) {
         super.initSendable(builder);
         builder.setSmartDashboardType("Climber");
-        builder.addDoubleProperty("openLoopMotorOutput", () -> openLoopMotorOutput, (v) -> openLoopMotorOutput = v);
         builder.addDoubleProperty("currentSetpoint", () -> currentSetpoint, (v) -> currentSetpoint = v);
         builder.addDoubleProperty("position", this::getPosition, null);
         builder.addBooleanProperty("inPosition", this::isInPosition, null);
-        builder.addDoubleProperty("setpointVelocity", () -> setpointVelocity, (v) -> setpointVelocity = v);
+
+        if (Constants.DebugSendables.Climber) {
+            builder.addDoubleProperty("openLoopMotorOutput", () -> openLoopMotorOutput, (v) -> openLoopMotorOutput = v);
+        }
     }
 
     public boolean isInPosition() {

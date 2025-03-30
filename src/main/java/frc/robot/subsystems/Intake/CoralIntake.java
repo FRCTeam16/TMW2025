@@ -277,9 +277,9 @@ public class CoralIntake extends SubsystemBase implements Lifecycle, AMD<CoralIn
 
         @Override
         public boolean isFinished() {
-            if (startedWithSensor) {
+            if (startedWithSensor && !coralDetectedAtBottomSensor()) {
                 BSLogger.log("ShootCoralCommand", "Stopping because of sensor");
-                return !coralDetectedAtBottomSensor();
+                return true;
             }
             return false;
         }

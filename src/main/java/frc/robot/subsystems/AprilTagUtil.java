@@ -5,6 +5,7 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import frc.robot.Constants;
 import frc.robot.Subsystems;
 import frc.robot.subsystems.scoring.TargetPose;
 
@@ -38,8 +39,10 @@ public class AprilTagUtil implements Sendable {
     @Override
     public void initSendable(SendableBuilder sendableBuilder) {
         sendableBuilder.setSmartDashboardType("AprilTagUtil");
-        sendableBuilder.addDoubleProperty("scoringDistance", this::getScoringDistance, this::setScoringDistance);
-        sendableBuilder.addDoubleProperty("offsetDistance", this::getOffsetDistance, this::setOffsetDistance);
+        if (Constants.DebugSendables.AprilTagUtil) {
+            sendableBuilder.addDoubleProperty("scoringDistance", this::getScoringDistance, this::setScoringDistance);
+            sendableBuilder.addDoubleProperty("offsetDistance", this::getOffsetDistance, this::setOffsetDistance);
+        }
     }
 
     public AprilTagFieldLayout getFieldLayout() {

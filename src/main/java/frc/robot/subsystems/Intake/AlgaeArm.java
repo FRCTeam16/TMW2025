@@ -25,26 +25,24 @@ import static edu.wpi.first.units.Units.Radians;
 public class AlgaeArm extends SubsystemBase implements Lifecycle {
 
     public static final double ALLOWED_POSITION_ERROR = 0.1;
-
-    private final TalonFX algaeArmMotor = new TalonFX(Robot.robotConfig.getCanID("algaeArmMotor"));
-   private final CANcoder algaeArmEncoder = new CANcoder(Robot.robotConfig.getCanID("algaeArmEncoder"));
-
     private static final double GRAVITY_COMPENSATION = 0; //-0.49;
-
+    private final TalonFX algaeArmMotor = new TalonFX(Robot.robotConfig.getCanID("algaeArmMotor"));
+    private final CANcoder algaeArmEncoder = new CANcoder(Robot.robotConfig.getCanID("algaeArmEncoder"));
     private final DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
     private final PositionVoltage positionVoltage = new PositionVoltage(0).withSlot(0);
     private final MotionMagicVoltage motionMagic = new MotionMagicVoltage(0).withSlot(1);
 
+    private String requestedPosition = "None";
     private double targetPosition = 0;
     private double openLoopMax = 0.3;
 
 
     public AlgaeArm() {
         CANcoderConfiguration encoderConfiguration = new CANcoderConfiguration()
-            .withMagnetSensor(
-                    new MagnetSensorConfigs()
-                        .withSensorDirection(SensorDirectionValue.Clockwise_Positive)
-                        .withMagnetOffset(0.007812));
+                .withMagnetSensor(
+                        new MagnetSensorConfigs()
+                                .withSensorDirection(SensorDirectionValue.Clockwise_Positive)
+                                .withMagnetOffset(0.007812));
         algaeArmEncoder.getConfigurator().apply(encoderConfiguration);
 
         Slot0Configs slot0 = new Slot0Configs()
@@ -62,11 +60,11 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
                 .withKG(0.5);
 
         SoftwareLimitSwitchConfigs softwareLimitSwitchConfigs = new SoftwareLimitSwitchConfigs()
-        .withForwardSoftLimitEnable(true)
-        .withForwardSoftLimitThreshold(0.240
-        )
-        .withReverseSoftLimitEnable(true)
-        .withReverseSoftLimitThreshold(0.086);
+                .withForwardSoftLimitEnable(true)
+                .withForwardSoftLimitThreshold(0.240
+                )
+                .withReverseSoftLimitEnable(true)
+                .withReverseSoftLimitThreshold(0.086);
 
         MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs()
                 .withMotionMagicCruiseVelocity(0.6)
@@ -77,8 +75,8 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
                 .withInverted(InvertedValue.CounterClockwise_Positive);
 
         FeedbackConfigs feedbackConfigs = new FeedbackConfigs()
-               .withFeedbackRemoteSensorID(Robot.robotConfig.getCanID("algaeArmEncoder"))
-               .withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANcoder);
+                .withFeedbackRemoteSensorID(Robot.robotConfig.getCanID("algaeArmEncoder"))
+                .withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANcoder);
 
         TalonFXConfiguration armConfiguration = new TalonFXConfiguration()
                 .withSlot0(slot0)
@@ -89,7 +87,6 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
                 .withFeedback(feedbackConfigs);
         algaeArmMotor.getConfigurator().apply(armConfiguration);
 
-        // this.algaeArmMotor.setPosition(0);
         this.setDefaultCommand(new DefaultHoldAlgaeArmCommand(this));
     }
 
@@ -104,6 +101,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
     }
 
     public void setArmPosition(AlgaeArmPosition armPosition) {
+        requestedPosition = armPosition.name();
         this.setArmPosition(armPosition.position);
     }
 
@@ -138,12 +136,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
     }
 
     public void holdPosition() {
-        // double currentPosition = getMotorPosition();
         setArmPosition(targetPosition);
-    }
-
-    private void setPosition(AlgaeArmPosition position) {
-        setArmPosition(position.getPosition());
     }
 
     public boolean isInPosition() {
@@ -165,6 +158,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
         builder.addDoubleProperty("motorCurrent", () -> algaeArmMotor.getStatorCurrent().getValueAsDouble(), null);
         builder.addDoubleProperty("targetPosition", () -> this.targetPosition, this::setArmPosition);
         builder.addBooleanProperty("isInPosition", this::isInPosition, null);
+        builder.addStringProperty("requestedPosition", () -> requestedPosition, null);
 
         if (Constants.DebugSendables.AlgaeArm) {
             builder.addDoubleProperty("estimatedAngle", () -> this.getEstimatedAngle().in(Degrees), null);
@@ -176,25 +170,10 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
         return this.run(() -> runOpenLoop(speed.get())).withName("AlgaeArm Manual Control");
     }
 
-//    public Command holdPositionCommand() {
-//        return this.run(this::holdPosition).withName("Hold AlgaeArm Position");
-//    }
 
     public Command setArmPositionCommand(AlgaeArmPosition position) {
         return new SetArmPositionCommand(position);
     }
-
-    public static class DefaultHoldAlgaeArmCommand extends Command {
-        public DefaultHoldAlgaeArmCommand(AlgaeArm algaeArm) {
-            addRequirements(algaeArm);
-        }
-
-        @Override
-        public void initialize() {
-            Subsystems.algaeArm.holdPosition();
-        }
-    }
-
 
     public enum AlgaeArmPosition {
         Up(0.239),   // 0.235
@@ -211,6 +190,17 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
 
         public double getPosition() {
             return position;
+        }
+    }
+
+    public static class DefaultHoldAlgaeArmCommand extends Command {
+        public DefaultHoldAlgaeArmCommand(AlgaeArm algaeArm) {
+            addRequirements(algaeArm);
+        }
+
+        @Override
+        public void initialize() {
+            Subsystems.algaeArm.holdPosition();
         }
     }
 

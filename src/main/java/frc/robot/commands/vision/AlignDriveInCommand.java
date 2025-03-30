@@ -79,7 +79,7 @@ public class AlignDriveInCommand extends Command {
 
     @Override
     public void initialize() {
-        alignTelemetry.activeLog.update(true);
+        alignTelemetry.activeLog.append(true);
         boolean hasTarget = LimelightHelpers.getTV(limelightName);
         targetRotation = Subsystems.swerveSubsystem.getState().Pose.getRotation().getMeasure();
         BSLogger.log("AlignDriveInCommand", "initialize: hasTarget?" + hasTarget);
@@ -135,7 +135,7 @@ public class AlignDriveInCommand extends Command {
         }
 
         Angle tx = Degrees.of(rawtx);
-        alignTelemetry.visionOffsetLog.update(rawtx);
+        alignTelemetry.visionOffsetLog.append(rawtx);
         double headingRadians = calculateYTargetDirect(tx).in(Radians);
 
         //
@@ -283,14 +283,14 @@ public class AlignDriveInCommand extends Command {
         }
 
         void periodic(Angle angle, LinearVelocity xspeed, LinearVelocity yspeed, AngularVelocity rotationSpeed) {
-            headingLog.update(angle.in(Degrees));
-            xspeedLog.update(xspeed.in(MetersPerSecond));
-            yspeedLog.update(yspeed.in(MetersPerSecond));
-            rotSpeedLog.update(rotationSpeed.in(DegreesPerSecond));
+            headingLog.append(angle.in(Degrees));
+            xspeedLog.append(xspeed.in(MetersPerSecond));
+            yspeedLog.append(yspeed.in(MetersPerSecond));
+            rotSpeedLog.append(rotationSpeed.in(DegreesPerSecond));
 
-            distanceLog.update(distanceController.getError());
-            rotationLog.update(rotationController.getError());
-            alignLog.update(alignController.getError());
+            distanceLog.append(distanceController.getError());
+            rotationLog.append(rotationController.getError());
+            alignLog.append(alignController.getError());
         }
     }
 }
