@@ -15,12 +15,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.Subsystems;
+import frc.robot.commands.amd.AlgaeIntakeAMDCommand;
+import frc.robot.subsystems.AMD;
 import frc.robot.subsystems.Lifecycle;
 import frc.robot.util.MotorStatorCurrentFilter;
 
 import static edu.wpi.first.units.Units.Amps;
 
-public class AlgaeIntake extends SubsystemBase implements Lifecycle {
+public class AlgaeIntake extends SubsystemBase implements Lifecycle, AMD<AlgaeIntakeAMDCommand.AlgaeIntakeDataCollector> {
     private final TalonFX algaeIntakeMotor = new TalonFX(Robot.robotConfig.getCanID("algaeIntakeMotor"));
     private final NeutralOut brake = new NeutralOut();
     private final DutyCycleOut intakeDutyCycleOut = new DutyCycleOut(1);
@@ -100,6 +102,14 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle {
         algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(holdSpeed));
     }
 
+    public void runAMD() {
+        this.intakeCommand();
+    }
+
+    public void stopAlgae() {
+        algaeIntakeMotor.setControl(brake);
+    }
+
     public Command intakeCommand() {
         return this.run(this::intakeAlgae)
                 .alongWith(Commands.runOnce(() -> requestedState = "Intake"))
@@ -123,9 +133,14 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle {
     }
 
     public Command stopCommand() {
-        return this.run(() -> algaeIntakeMotor.setControl(brake))
+        return this.run(this::stopAlgae)
                 .alongWith(Commands.runOnce(() -> requestedState = "Stop"))
                 .withName("Algae Stop");
+    }
+
+    @Override
+    public void collectAMDData(AlgaeIntakeAMDCommand.AlgaeIntakeDataCollector dataCollector) {
+        dataCollector.addCurrents(algaeIntakeMotor.getStatorCurrent().getValueAsDouble());
     }
 
     class DefaultHoldCommand extends Command {

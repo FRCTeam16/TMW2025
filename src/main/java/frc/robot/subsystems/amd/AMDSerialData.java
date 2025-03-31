@@ -1,14 +1,16 @@
 package frc.robot.subsystems.amd;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Subsystems;
+import frc.robot.subsystems.vision.Limelight;
 import frc.robot.util.BSLogger;
+
+import java.util.Optional;
 
 /**
  * This class is used to store the data that is sent during the AMD process.
  */
 public class AMDSerialData {
-
-
 
     public enum AMDPhase {
         Comm(0),
@@ -33,6 +35,8 @@ public class AMDSerialData {
     private int rightCoralScore = 0;
     private int elevatorLeftScore;
     private int elevatorRightScore;
+    private int algaeArmScore = 0;
+    private int algaeIntakeScore = 0;
 
     public void startAMDPhase(AMDPhase amdPhase) {
         this.currentPhase = amdPhase;
@@ -118,5 +122,44 @@ public class AMDSerialData {
         SmartDashboard.putNumber("AMD/elevator/right", rightScore);
         this.elevatorLeftScore = leftScore;
         this.elevatorRightScore = rightScore;
+    }
+
+    public byte getAlgaeArmScore() {
+        return (byte) algaeArmScore;
+    }
+
+    public void submitAlgaeArmScore(int score) {
+        BSLogger.log("AMDSerialData", "Algae Arm Score: " + score);
+        SmartDashboard.putNumber("AMD/algae_arm", score);
+        this.algaeArmScore = score;
+    }
+
+    public byte getAprilTagAngle() {
+        Optional<Double> targetAngle = Subsystems.visionSubsystem.getDefaultLimelight()
+                .map(Limelight::getTargetInfo)
+                .map(info -> {
+                    if (info.hasTarget()) {
+                        return info.xOffset();
+                    } else {
+                        return -99.0;
+                    }
+                });
+        return targetAngle.orElse(-99.0).byteValue();
+    }
+
+    public byte getAlgaeIntakeScore() {
+        return (byte) algaeIntakeScore;
+    }
+
+    public void submitAlgaeIntakeScore(int score) {
+        BSLogger.log("AMDSerialData", "Algae Intake Score: " + score);
+        SmartDashboard.putNumber("AMD/algae_intake", score);
+        this.algaeIntakeScore = score;
+    }
+
+    public boolean getAprilTagDistanceInThreshold() {
+        return Subsystems.visionOdometryUpdater.getTargetDistance()
+                .map(d -> d < 0.4)
+                .orElse(false);
     }
 }

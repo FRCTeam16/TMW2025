@@ -87,12 +87,12 @@ public class LEDSubsystem extends SubsystemBase implements Lifecycle {
         buffer[15] = (byte) amdSerialData.getElevatorRightScore(); // AMD elevatorRight
         buffer[16] = (byte) amdSerialData.getLeftCoralScore(); // AMD coral shooter
         buffer[17] = (byte) amdSerialData.getRightCoralScore(); // AMD coralRight
-        buffer[18] = (byte) 0; // AMD algaeIntake
-        buffer[19] = (byte) 0; // AMD algaePivotMotor
-        buffer[20] = (byte) 0; // April Tag Angle
+        buffer[18] = (byte) amdSerialData.getAlgaeIntakeScore(); // AMD algae intake
+        buffer[19] = (byte) amdSerialData.getAlgaeArmScore(); // AMD algaePivotMotor
+        buffer[20] = (byte) amdSerialData.getAprilTagAngle(); // April Tag Angle
         buffer[21] = (byte) 0; // extra
         buffer[22] = (byte) 0; // barge distance
-        buffer[23] = (byte) 0; // april tag distance threshold (boolean)
+        buffer[23] = (byte) (amdSerialData.getAprilTagDistanceInThreshold() ? 1 : 0); // April Tag Distance
         buffer[24] = (byte) 0; // extra
         buffer[25] = (byte) 255;
 

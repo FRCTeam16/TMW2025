@@ -269,17 +269,17 @@ public class AlignDriveInCommand extends Command {
 
         AlignTelemetry() {
             DataLog log = DataLogManager.getLog();
-            activeLog = new BooleanLogEntry(log, "AlignDrive/Active");
-            headingLog = new DoubleLogEntry(log, "AlignDrive/Heading");
-            distanceLog = new DoubleLogEntry(log, "AlignDrive/DistanceError");
-            rotationLog = new DoubleLogEntry(log, "AlignDrive/RotationError");
-            alignLog = new DoubleLogEntry(log, "AlignDrive/AlignError");
-            visionOffsetLog = new DoubleLogEntry(log, "AlignDrive/VisionOffset");
-            visionDistanceLog = new DoubleLogEntry(log, "AlignDrive/VisionDistance");
+            activeLog = new BooleanLogEntry(log, "Telemetry/AlignDrive/Active");
+            headingLog = new DoubleLogEntry(log, "Telemetry/AlignDrive/Heading");
+            distanceLog = new DoubleLogEntry(log, "Telemetry/AlignDrive/DistanceError");
+            rotationLog = new DoubleLogEntry(log, "Telemetry/AlignDrive/RotationError");
+            alignLog = new DoubleLogEntry(log, "Telemetry/AlignDrive/AlignError");
+            visionOffsetLog = new DoubleLogEntry(log, "Telemetry/AlignDrive/VisionOffset");
+            visionDistanceLog = new DoubleLogEntry(log, "Telemetry/AlignDrive/VisionDistance");
 
-            xspeedLog = new DoubleLogEntry(log, "AlignDrive/XSpeed");
-            yspeedLog = new DoubleLogEntry(log, "AlignDrive/YSpeed");
-            rotSpeedLog = new DoubleLogEntry(log, "AlignDrive/RotSpeed");
+            xspeedLog = new DoubleLogEntry(log, "Telemetry/AlignDrive/XSpeed");
+            yspeedLog = new DoubleLogEntry(log, "Telemetry/AlignDrive/YSpeed");
+            rotSpeedLog = new DoubleLogEntry(log, "Telemetry/AlignDrive/RotSpeed");
         }
 
         void periodic(Angle angle, LinearVelocity xspeed, LinearVelocity yspeed, AngularVelocity rotationSpeed) {

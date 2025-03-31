@@ -32,6 +32,7 @@ public class Constants {
         public static boolean AprilTagUtil = false;
         public static boolean Climber = false;
         public static boolean CoralIntake = true;
+        public static boolean Elevator = true;
         public static boolean Funnel = true;
     }
 }

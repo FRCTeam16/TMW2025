@@ -107,7 +107,6 @@ public class BayouTroisStrategy extends AutoPathStrategy {
                 Commands.runOnce(() -> LimelightHelpers.SetFiducialIDFiltersOverride("limelight", firstDriveFilters)),
                 new WaitCommand(0.1),
                 initialPoseCommand,
-                //                 new Climber.ClimberMoveToPositionNoWait(Climber.ClimberPosition.DOWN),
 
 //                new ProfiledDriveCommand(targetPose)
 //                        .withTolerance(Meters.of(0.5))

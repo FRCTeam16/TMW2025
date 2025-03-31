@@ -3,96 +3,82 @@ package frc.robot.commands.amd;
 import com.ctre.phoenix6.StatusSignal;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Subsystems;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.amd.AMDSerialData;
 import frc.robot.subsystems.amd.AMDStats;
 import frc.robot.subsystems.amd.AbstractDataCollector;
-import frc.robot.util.BSLogger;
 
 import java.util.List;
 
-
-/**
- * TODO: run to l2/l3, pause, then home with timeout
- * send
- */
 public class ElevatorAMDCommand extends Command {
-    private ElevatorDataCollector dataCollector = new ElevatorDataCollector();
-    private Timer timer = new Timer();
-    private Command moveElevatorCommand;
-    int phaseNum = 0;
+    private final ElevatorDataCollector dataCollector = new ElevatorDataCollector();
+    private Command amdCommand;
 
     public ElevatorAMDCommand() {
-        addRequirements(Subsystems.elevator);
+        // No requirements needed - internal commands will handle them
     }
 
     @Override
     public void initialize() {
-        Subsystems.ledSubsystem.getAMDSerialData().startAMDPhase(AMDSerialData.AMDPhase.Elevator);
-        timer.stop();
-        timer.reset();
-        moveElevatorCommand = null;
-        phaseNum = 1;
-    }
-
-    @Override
-    public void execute() {
-        if (phaseNum == 1) {
-            BSLogger.log("ElevatorAMDCommand","phase1");
-            if (moveElevatorCommand == null) {
-                moveElevatorCommand = new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L2);
-                moveElevatorCommand.schedule();
-            } else if (!moveElevatorCommand.isScheduled() || moveElevatorCommand.isFinished()) {
-                BSLogger.log("ElevatorAMDCommand", "phase1 finished");
-                moveElevatorCommand.cancel();
-                moveElevatorCommand = null;
-                phaseNum++;
-            }
-        } else if (phaseNum == 2) {
-            if (moveElevatorCommand == null) {
-                moveElevatorCommand = new WaitCommand(4.0);
-                moveElevatorCommand.schedule();
-            } else if (!moveElevatorCommand.isScheduled() || moveElevatorCommand.isFinished()) {
-                moveElevatorCommand.cancel();
-                moveElevatorCommand = null;
-                timer.start();
-                phaseNum++;
-            }
-        } else if (phaseNum == 3) {
-            if (moveElevatorCommand == null) {
-                moveElevatorCommand = new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.Zero);
-                moveElevatorCommand.schedule();
-            } else if (!moveElevatorCommand.isScheduled() || moveElevatorCommand.isFinished()) {
-                moveElevatorCommand.cancel();
-                moveElevatorCommand = null;
-                phaseNum++;
-            }
-        }
-        Subsystems.elevator.collectAMDData(dataCollector);
+        amdCommand = createAMDCommand();
+        amdCommand.schedule();
     }
 
     @Override
     public boolean isFinished() {
-        if (timer.hasElapsed(5.0)) {
-            dataCollector.setTimedOut(true);
-            return true;
-        }
-        return phaseNum == 4;
+        return !amdCommand.isScheduled();
     }
 
     @Override
     public void end(boolean interrupted) {
-        if (moveElevatorCommand != null) {
-            moveElevatorCommand.cancel();
+        if (interrupted) {
+            amdCommand.cancel();
         }
+    }
 
-        Pair<Integer, Integer> score = dataCollector.getScore();
-        Subsystems.ledSubsystem.getAMDSerialData().submitElevatorScore(score.getFirst(), score.getSecond());
-        Subsystems.ledSubsystem.getAMDSerialData().startAMDPhase(AMDSerialData.AMDPhase.AMDEnd);
+    private Command createAMDCommand() {
+        return Commands.sequence(
+                        // Phase 1
+                        Commands.parallel(
+                                        new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L2),
+                                        collectDataCommand().repeatedly()
+                                )
+                                .until(() -> Subsystems.elevator.isInPosition())
+                                .withTimeout(2)
+                                .handleInterrupt(() -> dataCollector.setTimedOut(true)),
+
+                        // Phase 2
+                        Commands.parallel(
+                                        collectDataCommand().repeatedly()
+                                )
+                                .withTimeout(2.0),
+
+                        // Phase 3
+                        Commands.parallel(
+                                        new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.Zero),
+                                        collectDataCommand().repeatedly()
+                                )
+                                .until(() -> Subsystems.elevator.isInPosition())
+                                .withTimeout(2.0)
+                                .handleInterrupt(() -> dataCollector.setTimedOut(true))
+                )
+                .beforeStarting(() ->
+                        Subsystems.ledSubsystem.getAMDSerialData().startAMDPhase(AMDSerialData.AMDPhase.Elevator)
+                )
+                .finallyDo(() -> {
+                    dataCollector.report();
+                    Subsystems.ledSubsystem.getAMDSerialData().startAMDPhase(AMDSerialData.AMDPhase.AMDEnd);
+                });
+    }
+
+    private Command collectDataCommand() {
+        return Commands.runOnce(() -> {
+            Subsystems.elevator.collectAMDData(dataCollector);
+            dataCollector.report();
+        });
     }
 
     public static class ElevatorDataCollector extends AbstractDataCollector<Pair<Integer, Integer>> {
@@ -108,7 +94,9 @@ public class ElevatorAMDCommand extends Command {
 
         @Override
         public Pair<Integer, Integer> getScore() {
-            // FIXME: Is this where we want to have this happen
+            if (timedOut) {
+                return new Pair<>(1,2);
+            }
             List<Double> leftScore = AMDStats.detectOutliersZScore(leftCurrents, 70);
             List<Double> rightScore = AMDStats.detectOutliersZScore(rightCurrents, 70);
             int leftCount = leftScore.isEmpty() ? 0 : 1;
@@ -118,6 +106,11 @@ public class ElevatorAMDCommand extends Command {
 
         public void setTimedOut(boolean b) {
             this.timedOut = true;
+        }
+
+        public void report() {
+            Pair<Integer, Integer> score = getScore();
+            Subsystems.ledSubsystem.getAMDSerialData().submitElevatorScore(score.getFirst(), score.getSecond());
         }
     }
 }

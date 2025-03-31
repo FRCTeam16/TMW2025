@@ -8,9 +8,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Robot;
 import frc.robot.Subsystems;
 import frc.robot.commands.PickAlgaeCommand;
-import frc.robot.commands.amd.CoralIntakeAMDCommand;
-import frc.robot.commands.amd.ElevatorAMDCommand;
-import frc.robot.commands.amd.RunDMSCommand;
+import frc.robot.commands.amd.*;
 import frc.robot.commands.pose.GenericPoseRequestCommand;
 import frc.robot.commands.vision.AlignDriveInCommand;
 import frc.robot.commands.vision.PipelineSwitcher;
@@ -164,6 +162,8 @@ public class BayouControls extends ControlBinding {
         SmartDashboard.putData("Stop AMD", Commands.runOnce(() -> Subsystems.ledSubsystem.getAMDSerialData().startAMDPhase(AMDSerialData.AMDPhase.Comm)).ignoringDisable(true));
         SmartDashboard.putData("Run CoralIntake AMD", new CoralIntakeAMDCommand());
         SmartDashboard.putData("Run Elevator AMD", new ElevatorAMDCommand());
+        SmartDashboard.putData("Run AlgaeArm AMD", new AlgaeArmAMDCommand());
+        SmartDashboard.putData("Run AlgaeIntake AMD", new AlgaeIntakeAMDCommand());
         // End AMD
 
         SmartDashboard.putData("Open Latch", Subsystems.funnelSubsystem.openLatchCommand().ignoringDisable(true));

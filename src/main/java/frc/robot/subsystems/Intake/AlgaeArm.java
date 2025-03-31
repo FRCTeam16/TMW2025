@@ -15,14 +15,17 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.Subsystems;
+import frc.robot.commands.amd.AlgaeArmAMDCommand;
+import frc.robot.subsystems.AMD;
 import frc.robot.subsystems.Lifecycle;
+import frc.robot.util.BSLogger;
 
 import java.util.function.Supplier;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
 
-public class AlgaeArm extends SubsystemBase implements Lifecycle {
+public class AlgaeArm extends SubsystemBase implements Lifecycle, AMD<AlgaeArmAMDCommand.AlgaeArmDataCollector> {
 
     public static final double ALLOWED_POSITION_ERROR = 0.1;
     private static final double GRAVITY_COMPENSATION = 0; //-0.49;
@@ -140,10 +143,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
     }
 
     public boolean isInPosition() {
-        // TODO: Test using algaeArmMotor.getClosedLoopError() if using magic motion
-//        if (ControlModeValue.DutyCycleOut == algaeArmMotor.getControlMode().getValue()) {
-//            return algaeArmMotor.getClosedLoopError().getValueAsDouble() < ALLOWED_POSITION_ERROR;
-//        }
+        // Future: Test using algaeArmMotor.getClosedLoopError() if using magic motion
         return Math.abs(getMotorPosition() - targetPosition) < ALLOWED_POSITION_ERROR;
     }
 
@@ -173,6 +173,11 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle {
 
     public Command setArmPositionCommand(AlgaeArmPosition position) {
         return new SetArmPositionCommand(position);
+    }
+
+    @Override
+    public void collectAMDData(AlgaeArmAMDCommand.AlgaeArmDataCollector dataCollector) {
+        dataCollector.collectData(algaeArmMotor.getStatorCurrent().getValueAsDouble());
     }
 
     public enum AlgaeArmPosition {

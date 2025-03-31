@@ -12,10 +12,16 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.ControlModeValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.util.datalog.BooleanLogEntry;
+import edu.wpi.first.util.datalog.DataLog;
+import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.util.datalog.StringLogEntry;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.Subsystems;
 import frc.robot.commands.amd.ElevatorAMDCommand;
@@ -43,6 +49,8 @@ public class Elevator extends SubsystemBase implements Lifecycle, AMD<ElevatorAM
     private double elevatorUpThreshold = -26.0;
 
     private Alert coralObstructionAlert = new Alert("Coral is obstructing elevator path", Alert.AlertType.kError);
+
+    private final ElevatorTelemetry telemetry = new ElevatorTelemetry();
 
     public Elevator() {
         right.setControl(new Follower(left.getDeviceID(), true));
@@ -89,7 +97,11 @@ public class Elevator extends SubsystemBase implements Lifecycle, AMD<ElevatorAM
 
     @Override
     public void periodic() {
-        coralObstructionAlert.set(isElevatorObstructedByCoral());
+        boolean isElevatorObstructed = isElevatorObstructedByCoral();
+        if (isElevatorObstructed ^ coralObstructionAlert.get()) {
+            coralObstructionAlert.set(isElevatorObstructed);
+            telemetry.obstructionDetected.append(isElevatorObstructed);
+        }
     }
 
     boolean isElevatorObstructedByCoral() {
@@ -99,6 +111,7 @@ public class Elevator extends SubsystemBase implements Lifecycle, AMD<ElevatorAM
     private void setOpenLoop(double speed) {
         double clampedSpeed = MathUtil.clamp(speed, -openLoopMax, openLoopMax);
         left.setControl(dutyCycleOut.withOutput(clampedSpeed));
+        telemetry.openLoopMotorSpeed.append(clampedSpeed);
     }
 
     private void moveToPosition(ElevatorSetpoint setpoint) {
@@ -108,16 +121,14 @@ public class Elevator extends SubsystemBase implements Lifecycle, AMD<ElevatorAM
         BSLogger.log("Elevator", "moveToPosition: " + setpoint.name());
         requestedSetpoint = setpoint;
         moveToEncoderPosition(setpoint.val);
+        telemetry.requestedSetpoint.append(setpoint.name());
     }
 
     private void moveToEncoderPosition(double encoderPosition) {
         BSLogger.log("Elevator", "moveToEncoderPosition: " + encoderPosition);
-        // if (!MathUtil.isNear(0, encoderPosition, 0.05)) {
-        // encoderPosition += encoderOffset;
-        // BSLogger.log("Elevator", "Moving to adjusted position: " + encoderPosition);
-        // }
         this.currentSetpoint = encoderPosition;
         left.setControl(motionMagicV.withPosition(encoderPosition));
+        telemetry.currentSetpoint.append(encoderPosition);
     }
 
     /**
@@ -144,7 +155,9 @@ public class Elevator extends SubsystemBase implements Lifecycle, AMD<ElevatorAM
              }
         }
 
-        return error < ELEVATOR_POSITION_THRESHOLD && left.getVelocity().getValueAsDouble() < 0.1;
+        boolean inPosition = error < ELEVATOR_POSITION_THRESHOLD && left.getVelocity().getValueAsDouble() < 0.1;
+        telemetry.isInPosition.append(inPosition);
+        return inPosition;
     }
 
     void setLazyHold(boolean lazyHold) {
@@ -195,18 +208,20 @@ public class Elevator extends SubsystemBase implements Lifecycle, AMD<ElevatorAM
         builder.addStringProperty("Requested", () -> requestedSetpoint != null ? requestedSetpoint.name() : "none",
                 null);
         builder.addBooleanProperty("Coral Obstruction", this::isElevatorObstructedByCoral, null);
-        // builder.addDoubleProperty("Encoder Offset", () -> encoderOffset, (v) ->
-        // encoderOffset = v);
 
-        builder.addDoubleProperty("Open Loop Motor Speed", () -> openLoopMotorSpeed,
-                (speed) -> openLoopMotorSpeed = speed);
-        builder.addDoubleProperty("Open Loop Max", () -> openLoopMax, (max) -> openLoopMax = max);
-        builder.addDoubleProperty("Left Motor Volts", () -> left.getMotorVoltage().getValueAsDouble(), null);
-        builder.addDoubleProperty("Left Motor DutyCycle", () -> left.getDutyCycle().getValueAsDouble(), null);
-        builder.addDoubleProperty("Left Motor Current", () -> left.getStatorCurrent().getValueAsDouble(), null);
-        builder.addDoubleProperty("Right Motor Current", () -> right.getStatorCurrent().getValueAsDouble(), null);
-        builder.addBooleanProperty("Lazy Mode", () -> lazyHold, this::setLazyHold);
-        builder.addDoubleProperty("elevatorUpThreshold", () -> elevatorUpThreshold, (t) -> elevatorUpThreshold = t);
+
+        if (Constants.DebugSendables.Elevator) {
+            builder.addDoubleProperty("elevatorUpThreshold", () -> elevatorUpThreshold, (t) -> elevatorUpThreshold = t);
+            builder.addBooleanProperty("Lazy Mode", () -> lazyHold, this::setLazyHold);
+
+            builder.addDoubleProperty("Open Loop Motor Speed", () -> openLoopMotorSpeed,
+                    (speed) -> openLoopMotorSpeed = speed);
+            builder.addDoubleProperty("Open Loop Max", () -> openLoopMax, (max) -> openLoopMax = max);
+            builder.addDoubleProperty("Left Motor Volts", () -> left.getMotorVoltage().getValueAsDouble(), null);
+            builder.addDoubleProperty("Left Motor DutyCycle", () -> left.getDutyCycle().getValueAsDouble(), null);
+            builder.addDoubleProperty("Left Motor Current", () -> left.getStatorCurrent().getValueAsDouble(), null);
+            builder.addDoubleProperty("Right Motor Current", () -> right.getStatorCurrent().getValueAsDouble(), null);
+        }
     }
 
     /**
@@ -308,6 +323,30 @@ public class Elevator extends SubsystemBase implements Lifecycle, AMD<ElevatorAM
 //                Subsystems.elevator.left.setPosition(0);
             }
             Subsystems.elevator.setLazyHold(false);
+        }
+    }
+
+    class ElevatorTelemetry {
+
+        DoubleLogEntry leftMotorCurrent;
+        DoubleLogEntry rightMotorCurrent;
+        DoubleLogEntry currentPosition;
+        DoubleLogEntry currentSetpoint;
+        BooleanLogEntry isInPosition;
+        StringLogEntry requestedSetpoint;
+        BooleanLogEntry obstructionDetected;
+        DoubleLogEntry openLoopMotorSpeed;
+
+        ElevatorTelemetry() {
+            DataLog log = DataLogManager.getLog();
+            leftMotorCurrent = new DoubleLogEntry(log, "Telemetry/Elevator/LeftMotorCurrent");
+            rightMotorCurrent = new DoubleLogEntry(log, "Telemetry/Elevator/RightMotorCurrent");
+            currentPosition = new DoubleLogEntry(log, "Telemetry/Elevator/CurrentPosition");
+            currentSetpoint = new DoubleLogEntry(log, "Telemetry/Elevator/CurrentSetpoint");
+            isInPosition = new BooleanLogEntry(log, "Telemetry/Elevator/IsInPosition");
+            requestedSetpoint = new StringLogEntry(log, "Telemetry/Elevator/RequestedSetpoint");
+            obstructionDetected = new BooleanLogEntry(log, "Telemetry/Elevator/ObstructionDetected");
+            openLoopMotorSpeed = new DoubleLogEntry(log, "Telemetry/Elevator/OpenLoopMotorSpeed");
         }
     }
 }
