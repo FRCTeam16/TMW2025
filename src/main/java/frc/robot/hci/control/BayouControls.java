@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Robot;
 import frc.robot.Subsystems;
 import frc.robot.commands.PickAlgaeCommand;
+import frc.robot.commands.RotateToAngleCommand;
 import frc.robot.commands.amd.*;
 import frc.robot.commands.pose.GenericPoseRequestCommand;
 import frc.robot.commands.vision.AlignDriveInCommand;
@@ -169,9 +170,7 @@ public class BayouControls extends ControlBinding {
         SmartDashboard.putData("Open Latch", Subsystems.funnelSubsystem.openLatchCommand().ignoringDisable(true));
         SmartDashboard.putData("Close Latch", Subsystems.funnelSubsystem.closeLatchCommand().ignoringDisable(true));
 
-
-        SmartDashboard.putData("Elevator RH", new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.AlgaeReefHigh));
-        SmartDashboard.putData("Elevator RL", new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.AlgaeReefLow));
+        SmartDashboard.putData("Debug Rotate", new RotateToAngleCommand(Degrees.of(120)));
     }
 
     @Override

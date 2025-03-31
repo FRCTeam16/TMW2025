@@ -1,7 +1,5 @@
 package frc.robot.auto.strategies;
 
-import static edu.wpi.first.units.Units.Meters;
-
 import com.pathplanner.lib.util.FlippingUtil;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -16,6 +14,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Subsystems;
+import frc.robot.commands.DriveRobotCentricCommand;
+import frc.robot.commands.RotateToAngleCommand;
 import frc.robot.commands.path.ProfiledDriveCommand;
 import frc.robot.commands.pose.GenericPoseRequestCommand;
 import frc.robot.commands.vision.AlignDriveInCommand;
@@ -25,6 +25,8 @@ import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Elevator.ElevatorSetpoint;
 import frc.robot.subsystems.pose.UpdateTranslationFromVision;
 import frc.robot.subsystems.vision.LimelightHelpers;
+
+import static edu.wpi.first.units.Units.*;
 
 public class BayouTroisStrategy extends AutoPathStrategy {
 
@@ -104,15 +106,17 @@ public class BayouTroisStrategy extends AutoPathStrategy {
                 : Commands.runOnce(() -> Subsystems.swerveSubsystem.resetPose(simulationPose));
 
         addCommands(
-                Commands.runOnce(() -> LimelightHelpers.SetFiducialIDFiltersOverride("limelight", firstDriveFilters)),
-                new WaitCommand(0.1),
-                initialPoseCommand,
-
+//                Commands.runOnce(() -> LimelightHelpers.SetFiducialIDFiltersOverride("limelight", firstDriveFilters)),
+//                new WaitCommand(0.1),
+//                initialPoseCommand,
 //                new ProfiledDriveCommand(targetPose)
 //                        .withTolerance(Meters.of(0.5))
 //                        .withFinalState(new State(0, 1.0)),
-                runAutoPath(firstDrive),
-                new AlignDriveInCommand(AlignTarget.LEFT).withTimeout(1.0),
+//                runAutoPath(firstDrive),
+
+                new DriveRobotCentricCommand(Seconds.of(1.1)),
+                new RotateToAngleCommand(targetPose.getRotation().getMeasure()).withTimeout(0.5),
+                new AlignDriveInCommand(AlignTarget.LEFT).withTimeout(1.25),
                 doScoreSequence(),
                 Commands.runOnce(() -> Subsystems.visionSubsystem.resetIDFilter()),
 

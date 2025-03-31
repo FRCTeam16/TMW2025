@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.3186475409836067,
-        "y": 0.7583504098360652
+        "x": 1.4375,
+        "y": 1.06875
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.0018195002397974,
-        "y": 1.3991865817159548
+        "x": 2.3625,
+        "y": 1.6
       },
       "isLocked": false,
       "linkedName": "EPR2E"
     },
     {
       "anchor": {
-        "x": 3.2246926229508195,
-        "y": 2.5804815573770488
+        "x": 3.36875,
+        "y": 2.53125
       },
       "prevControl": {
-        "x": 2.860808609218563,
-        "y": 2.246265561900546
+        "x": 3.0048659862677436,
+        "y": 2.197034004523497
       },
       "nextControl": null,
       "isLocked": false,
@@ -31,16 +31,9 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "intakeCoral",
-      "waypointRelativePos": 0,
-      "endWaypointRelativePos": null,
-      "command": null
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 4.4,
+    "maxVelocity": 3.5,
     "maxAcceleration": 3.75,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,

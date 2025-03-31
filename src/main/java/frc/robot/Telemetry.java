@@ -48,8 +48,8 @@ public class Telemetry {
 
     /* Robot pose for field positioning */
     private final NetworkTable table = inst.getTable("Pose");
-    private final StructPublisher<Pose2d> fieldPub = table.getStructTopic("robotPose", Pose2d.struct).publish();
-    private final StructPublisher<Pose2d> visionPub = table.getStructTopic("visionOdometryPose", Pose2d.struct).publish();
+    private final DoubleArrayPublisher fieldPub = table.getDoubleArrayTopic("robotPose").publish();
+    private final DoubleArrayPublisher visionPub = table.getDoubleArrayTopic("visionPose").publish();
 
     private final StringPublisher fieldTypePub = table.getStringTopic(".type").publish();
 
@@ -114,10 +114,13 @@ public class Telemetry {
 
         /* Telemeterize the pose to a Field2d */
         fieldTypePub.set("Field2d");
-        fieldPub.set(state.Pose);
+        fieldPub.set(m_poseArray);
 
         Pose2d visionPose = Subsystems.visionOdometryUpdater.getEstimatedPose();
-        visionPub.set(visionPose);
+        m_visionArray[0] = visionPose.getX();
+        m_visionArray[1] = visionPose.getY();
+        m_visionArray[2] = visionPose.getRotation().getDegrees();
+        visionPub.set(m_visionArray);
 
         /* Telemeterize the module states to a Mechanism2d */
         for (int i = 0; i < 4; ++i) {

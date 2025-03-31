@@ -102,6 +102,7 @@ public class Elevator extends SubsystemBase implements Lifecycle, AMD<ElevatorAM
             coralObstructionAlert.set(isElevatorObstructed);
             telemetry.obstructionDetected.append(isElevatorObstructed);
         }
+        telemetry.currentPosition.append(getCurrentPosition());
     }
 
     boolean isElevatorObstructedByCoral() {

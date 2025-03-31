@@ -70,6 +70,7 @@ public class SimpleAlignCommand extends Command {
         boolean hasTarget = LimelightHelpers.getTV("limelight");
 
         if (!hasTarget) {
+            BSLogger.log("SimpleAlignCommand", "No visino target");
             Subsystems.swerveSubsystem.setControl(idle);
             return;
         }
@@ -113,6 +114,7 @@ public class SimpleAlignCommand extends Command {
                 return Degrees.of((isLeft) ? 0 : 0);
             }
         }
-        return Degrees.of((isLeft) ? 22.5 : -23);
+//        return Degrees.of((isLeft) ? 22.5 : -23);
+        return Degrees.of(0);
     }
 }

@@ -41,7 +41,7 @@ public class AutoRegistrar {
 
     public static void registerNamedCommands() {
          NamedCommands.registerCommand("NamedCommandPrintTest", Commands.print("Named Command Test"));
-         NamedCommands.registerCommand("intakeCoral", new IntakeCoralCommand().withTimeout(3.0));
+         NamedCommands.registerCommand("intakeCoral", new IntakeCoralCommand().withTimeout(5.0));
     }
 
     public static void registerAutoPaths(PathRegistry pathRegistry) {

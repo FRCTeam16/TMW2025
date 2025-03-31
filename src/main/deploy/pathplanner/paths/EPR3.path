@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.3186475409836067,
-        "y": 0.7583504098360652
+        "x": 1.4375,
+        "y": 1.06875
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.4366352459016367,
-        "y": 1.2533627049180325
+        "x": 3.5554877049180305,
+        "y": 1.5637622950819687
       },
       "isLocked": false,
       "linkedName": "EPR2E"
@@ -33,7 +33,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 4.4,
+    "maxVelocity": 3.5,
     "maxAcceleration": 3.75,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,

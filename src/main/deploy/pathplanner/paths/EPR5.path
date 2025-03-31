@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.2246926229508195,
-        "y": 2.5804815573770488
+        "x": 3.36875,
+        "y": 2.53125
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.9981262135756683,
-        "y": 2.4666073082044977
+        "x": 3.1421835906248488,
+        "y": 2.417375750827449
       },
       "isLocked": false,
       "linkedName": "EPR4E"
     },
     {
       "anchor": {
-        "x": 1.3066598360655735,
-        "y": 0.9981045081967216
+        "x": 1.438,
+        "y": 1.106
       },
       "prevControl": {
-        "x": 1.9434180490988808,
-        "y": 1.4764681283552517
+        "x": 2.074755290709864,
+        "y": 1.5843675100898287
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,7 +33,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 4.4,
+    "maxVelocity": 3.5,
     "maxAcceleration": 3.75,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,

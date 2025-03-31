@@ -12,6 +12,7 @@ import edu.wpi.first.util.datalog.BooleanLogEntry;
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Subsystems;
@@ -107,7 +108,7 @@ public class AlignDriveInCommand extends Command {
             lastVisionPose.set(Pair.of(pose2d, Degrees.of(LimelightHelpers.getTX(limelightName))));
             // Reset our pose based on vision
             Subsystems.poseManager.pushRequest(new UpdateTranslationFromVision());
-            BSLogger.log("AlignDriveInCommand", "updating pose based on april tag [" + aprilTarget + "] " + pose2d);
+//            BSLogger.log("AlignDriveInCommand", "updating pose based on april tag [" + aprilTarget + "] " + pose2d);
         });
     }
 
@@ -230,14 +231,14 @@ public class AlignDriveInCommand extends Command {
                 Subsystems.poseManager.pushRequest(new PoseChangeRequest(lastPose.getFirst()));
             }
         }
-        alignTelemetry.activeLog.update(false);
+        alignTelemetry.activeLog.append(false);
     }
 
     @Override
     public boolean isFinished() {
         boolean finishedRotation = rotationController.atSetpoint();
-
-        if (lastVisionPose.get().isEmpty()) {
+        boolean isAuto = DriverStation.isAutonomous();
+        if (lastVisionPose.get().isEmpty() && isAuto) {
             BSLogger.log("AlignDriveInCommand", "Finishing command because no vision target cached");
             return true;
         }
@@ -248,7 +249,7 @@ public class AlignDriveInCommand extends Command {
                 BSLogger.log("AlignDriveInCommand", "Finishing because we are within distance threshold");
                 return true;
             };
-            alignTelemetry.visionDistanceLog.update(distance.get());
+            alignTelemetry.visionDistanceLog.append(distance.get());
         }
 
         return false;
