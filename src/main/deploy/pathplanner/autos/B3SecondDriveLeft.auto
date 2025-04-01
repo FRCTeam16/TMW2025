@@ -11,9 +11,22 @@
           }
         },
         {
-          "type": "path",
+          "type": "deadline",
           "data": {
-            "pathName": "EPL4"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "EPL4"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "intakeCoral"
+                }
+              }
+            ]
           }
         }
       ]
