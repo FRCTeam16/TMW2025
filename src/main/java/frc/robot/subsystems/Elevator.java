@@ -241,6 +241,10 @@ public class Elevator extends SubsystemBase implements Lifecycle, AMD<ElevatorAM
         return ElevatorSetpoint.Zero == Subsystems.elevator.requestedSetpoint;
     }
 
+    public boolean isNearPositionForAlgaePick() {
+        return Math.abs(getCurrentPosition() - this.currentSetpoint) < 1.0;
+    }
+
     public enum ElevatorSetpoint {
         Zero(0),
         TROUGH(-16.5),
