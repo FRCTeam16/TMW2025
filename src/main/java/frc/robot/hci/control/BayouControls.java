@@ -183,6 +183,7 @@ public class BayouControls extends ControlBinding {
     public void teleopInit() {
         this.climbEnabledState = false;
         this.manualStickControlState = false;
+        this.swerveSupplier.clearTargetHeading();
     }
 
     /**

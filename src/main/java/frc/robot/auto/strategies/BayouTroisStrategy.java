@@ -121,11 +121,11 @@ public class BayouTroisStrategy extends AutoPathStrategy {
                 Commands.runOnce(() -> Subsystems.visionSubsystem.resetIDFilter()),
 
                 runAutoPath(secondDrive),
-                new AlignDriveInCommand(AlignTarget.RIGHT).withTimeout(1.0),
+                new AlignDriveInCommand(AlignTarget.RIGHT).withTimeout(1.25),
                 doScoreSequence(),
 
                 runAutoPath(thirdDrive),
-                new AlignDriveInCommand(AlignTarget.LEFT).withTimeout(1.0),
+                new AlignDriveInCommand(AlignTarget.LEFT).withTimeout(1.25),
                 doScoreSequence(),
 
                 // Let commands finish if we have time leftover, FMS will kill this for us
