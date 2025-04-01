@@ -92,7 +92,7 @@ public class Elevator extends SubsystemBase implements Lifecycle, AMD<ElevatorAM
 
     @Override
     public void teleopInit() {
-        this.currentSetpoint = this.getCurrentPosition();
+        moveToPosition(ElevatorSetpoint.Zero);
     }
 
     @Override
