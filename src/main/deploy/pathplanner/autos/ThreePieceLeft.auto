@@ -218,6 +218,6 @@
     }
   },
   "resetOdom": false,
-  "folder": null,
+  "folder": "ThreePiece",
   "choreoAuto": false
 }
