@@ -9,6 +9,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -26,6 +27,9 @@ public class Climber extends SubsystemBase implements Lifecycle {
 
     private double openLoopMotorOutput = 0.5;
     private double currentSetpoint = 0;
+    private ClimberPosition currentClimberPosition = ClimberPosition.DOWN;
+
+    private final Alert willNotMoveBackwardsAlert = new Alert("We will not move the climber backwards", Alert.AlertType.kWarning);
 
     public Climber() {
         TalonFXConfiguration climberConfiguration = new TalonFXConfiguration();
@@ -93,7 +97,12 @@ public class Climber extends SubsystemBase implements Lifecycle {
         climberMotor.setControl(dutyCycleOut.withOutput(value));
     }
 
+
     private void moveToPosition(double position) {
+        if (position < currentSetpoint) {
+            willNotMoveBackwardsAlert.set(true);
+            return;
+        }
         this.currentSetpoint = position;
         climberMotor.setControl(
                 motionMagicVoltage.withPosition(position));
@@ -146,6 +155,7 @@ public class Climber extends SubsystemBase implements Lifecycle {
 
     public static class ClimberMoveToPositionCommand extends Command {
         private final ClimberPosition position;
+        private boolean abort = false;
 
         public ClimberMoveToPositionCommand(ClimberPosition position) {
             this.addRequirements(Subsystems.climber);
@@ -157,6 +167,9 @@ public class Climber extends SubsystemBase implements Lifecycle {
 
         @Override
         public void initialize() {
+            abort = false;
+            Subsystems.climber.willNotMoveBackwardsAlert.set(false);
+
             if (ClimberPosition.PICKUP == position) {
                 BSLogger.log("Climber", "Closing Latch");
                 Subsystems.funnelSubsystem.openLatch();
@@ -165,12 +178,19 @@ public class Climber extends SubsystemBase implements Lifecycle {
                 return;
             }
             BSLogger.log("Climber", "Moving to position: " + position.name());
+
+            // If we are requesting to move backwards, abort so we exit command
+            if (this.position.position < Subsystems.climber.currentSetpoint) {
+                abort = true;
+                Subsystems.climber.willNotMoveBackwardsAlert.set(true);
+                return;
+            }
             Subsystems.climber.moveToPosition(this.position.position);
         }
 
         @Override
         public boolean isFinished() {
-            return Subsystems.climber.isInPosition();
+            return Subsystems.climber.isInPosition() || abort;
         }
 
         @Override
