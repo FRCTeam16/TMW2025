@@ -90,21 +90,25 @@ public class RobotStateSerialData {
 
     public boolean getAprilTagDistanceInThreshold() {
         return Subsystems.visionOdometryUpdater.getTargetDistance()
-                .map(d -> MathUtil.isNear(Math.abs(d), 0.406, 0.02))
+                .map(d -> MathUtil.isNear(Math.abs(d), 0.406, 0.05))
                 .orElse(false);
     }
 
 
     public byte getAprilTagAngle() {
-        Optional<Integer> targetAngle = Subsystems.visionSubsystem.getDefaultLimelight()
+        Optional<Boolean> targetAngle = Subsystems.visionSubsystem.getDefaultLimelight()
                 .map(Limelight::getTargetInfo)
                 .map(info -> {
                     if (info.hasTarget()) {
-                        return MathUtil.isNear(22.5, Math.abs(info.xOffset()), 1.0) ? 1 : 0;
+                        if (info.xOffset() < 0) {
+                            return info.xOffset() >= -27.2 && info.xOffset() <= -19.5;
+                        } else {
+                            return info.xOffset() >= 21.7 && info.xOffset() <= 26.25;
+                        }
                     } else {
-                        return 0;
+                        return false;
                     }
                 });
-        return targetAngle.orElse(0).byteValue();
+        return targetAngle.orElse(false) ? (byte) 1 : (byte) 0;
     }
 }

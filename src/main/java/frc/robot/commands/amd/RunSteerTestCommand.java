@@ -12,6 +12,8 @@ import frc.robot.subsystems.amd.SwerveDataCollector;
 
 import java.util.Arrays;
 
+import static edu.wpi.first.units.Units.DegreesPerSecond;
+
 class RunSteerTestCommand extends AbstractRunDMSMotorTestCommand {
     private final SwerveRequest.ApplyRobotSpeeds applyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
     private final VoltageOut steerRequest = new VoltageOut(0);
@@ -25,9 +27,13 @@ class RunSteerTestCommand extends AbstractRunDMSMotorTestCommand {
     @Override
     void startMotors() {
         SwerveModule<TalonFX, TalonFX, CANcoder>[] modules = Subsystems.swerveSubsystem.getModules();
-        for (SwerveModule<TalonFX, TalonFX, CANcoder> module : modules) {
-            module.apply(steerDriveRequest, steerRequest.withOutput(12));
-        }
+        // TODO: This is a temporary fix to get the steer motors to run.
+//        for (SwerveModule<TalonFX, TalonFX, CANcoder> module : modules) {
+//            module.apply(steerDriveRequest, steerRequest.withOutput(12));
+//        }
+        Subsystems.swerveSubsystem.setControl(
+                new SwerveRequest.SysIdSwerveRotation()
+                        .withRotationalRate(DegreesPerSecond.of(360)));
     }
 
     @Override
