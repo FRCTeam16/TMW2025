@@ -1,5 +1,6 @@
 package frc.robot.subsystems.amd;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Subsystems;
 import frc.robot.subsystems.vision.Limelight;
@@ -134,19 +135,6 @@ public class AMDSerialData {
         this.algaeArmScore = score;
     }
 
-    public byte getAprilTagAngle() {
-        Optional<Double> targetAngle = Subsystems.visionSubsystem.getDefaultLimelight()
-                .map(Limelight::getTargetInfo)
-                .map(info -> {
-                    if (info.hasTarget()) {
-                        return info.xOffset();
-                    } else {
-                        return -99.0;
-                    }
-                });
-        return targetAngle.orElse(-99.0).byteValue();
-    }
-
     public byte getAlgaeIntakeScore() {
         return (byte) algaeIntakeScore;
     }
@@ -157,9 +145,4 @@ public class AMDSerialData {
         this.algaeIntakeScore = score;
     }
 
-    public boolean getAprilTagDistanceInThreshold() {
-        return Subsystems.visionOdometryUpdater.getTargetDistance()
-                .map(d -> d < 0.4)
-                .orElse(false);
-    }
 }

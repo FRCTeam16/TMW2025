@@ -1,8 +1,12 @@
 package frc.robot.subsystems.amd;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Subsystems;
 import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.vision.Limelight;
+
+import java.util.Optional;
 
 /**
  * This class is used to create status codes for the robot to send to the LED subsystem.
@@ -82,5 +86,25 @@ public class RobotStateSerialData {
             case AlgaeReefLow -> elevatorInPosition ? 9 : 7;
         };
         return(byte) elevatorStatus;
+    }
+
+    public boolean getAprilTagDistanceInThreshold() {
+        return Subsystems.visionOdometryUpdater.getTargetDistance()
+                .map(d -> MathUtil.isNear(Math.abs(d), 0.406, 0.02))
+                .orElse(false);
+    }
+
+
+    public byte getAprilTagAngle() {
+        Optional<Integer> targetAngle = Subsystems.visionSubsystem.getDefaultLimelight()
+                .map(Limelight::getTargetInfo)
+                .map(info -> {
+                    if (info.hasTarget()) {
+                        return MathUtil.isNear(22.5, Math.abs(info.xOffset()), 1.0) ? 1 : 0;
+                    } else {
+                        return 0;
+                    }
+                });
+        return targetAngle.orElse(0).byteValue();
     }
 }
