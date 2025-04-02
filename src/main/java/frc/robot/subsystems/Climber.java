@@ -181,27 +181,10 @@ public class Climber extends SubsystemBase implements Lifecycle {
         }
     }
 
-    public static class ClimberMoveToPositionNoWait extends Command {
-        private final ClimberPosition position;
-
+    public static class ClimberMoveToPositionNoWait extends ClimberMoveToPositionCommand {
         public ClimberMoveToPositionNoWait(ClimberPosition position) {
-            addRequirements(Subsystems.climber);
-            if (ClimberPosition.PICKUP == position) {
-                addRequirements(Subsystems.funnelSubsystem);
-            }
-            this.position = position;
+            super(position);
         }
-
-        @Override
-        public void initialize() {
-            if (ClimberPosition.PICKUP == position) {
-                BSLogger.log("Climber", "Closing Latch");
-                Subsystems.funnelSubsystem.closeLatch();
-            }
-            BSLogger.log("Climber", "Moving to position: " + position.name());
-            Subsystems.climber.moveToPosition(this.position.position);
-        }
-
         @Override
         public boolean isFinished() {
             return true;
