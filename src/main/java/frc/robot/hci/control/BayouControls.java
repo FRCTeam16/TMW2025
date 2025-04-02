@@ -1,4 +1,5 @@
 package frc.robot.hci.control;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -79,6 +80,11 @@ public class BayouControls extends ControlBinding {
     private final Supplier<Double> manualElevatorControl = Robot.isReal() ?
             deadband(joystick::getRightY, 0.05) :
             deadband(joystick::getRightTriggerAxis, 0.05);  // simulation mode is flipped
+
+    // Physical buttons
+    private final DigitalInput amdStartSignal = new DigitalInput(0);
+    private final Trigger amdButton = new Trigger(() -> !amdStartSignal.get()).debounce(1.0);
+
 
 
     /**
@@ -166,6 +172,9 @@ public class BayouControls extends ControlBinding {
         SmartDashboard.putData("Run Elevator AMD", new ElevatorAMDCommand());
         SmartDashboard.putData("Run AlgaeArm AMD", new AlgaeArmAMDCommand());
         SmartDashboard.putData("Run AlgaeIntake AMD", new AlgaeIntakeAMDCommand());
+
+        amdButton.onTrue(new RunAMDCommand());
+
         // End AMD
 
         SmartDashboard.putData("Open Latch", Subsystems.funnelSubsystem.openLatchCommand().ignoringDisable(true));
