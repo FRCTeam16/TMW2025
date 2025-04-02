@@ -14,7 +14,7 @@ public class FunnelSubsystem extends SubsystemBase implements Lifecycle {
     private final Latch latchImpl = new ActuatorLatch();
     private final PWM funnelLatch = latchImpl.getActuator();
     private double setpoint = 0.0;
-    private boolean latchOpened = true; // assume we start true
+    private boolean latchOpened = false; // assume we start true
 
     public FunnelSubsystem() {
     }
