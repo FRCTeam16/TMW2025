@@ -1,5 +1,6 @@
 package frc.robot.hci.swerve;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -91,8 +92,9 @@ public class JoystickSwerveSupplier implements SwerveSupplier {
 
     @Override
     public AngularVelocity supplyRotationalRate() {
-        double base = getBaseRotationalRate();
-        return RadiansPerSecond.of(base).times(Constants.MaxAngularRate.in(RadiansPerSecond));
+        double base = MathUtil.clamp(getBaseRotationalRate(), -1.0, 1.0);
+        // return RadiansPerSecond.of(base).times(Constants.MaxAngularRate.in(RadiansPerSecond));
+        return DegreesPerSecond.of(320).times(base);
     }
 
     @Override
