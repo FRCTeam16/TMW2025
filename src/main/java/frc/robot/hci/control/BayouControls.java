@@ -54,6 +54,9 @@ public class BayouControls extends ControlBinding {
     final JoystickButton alignLeftStation = new JoystickButton(steerStick, 3);
     final JoystickButton alignRightStation = new JoystickButton(steerStick, 4);
 
+    final JoystickButton overrideClimberUp = new JoystickButton(driveStick, 10);
+    final JoystickButton overrideClimberDown = new JoystickButton(driveStick, 11);
+
 
     final Trigger elevatorDown = joystick.rightTrigger();
     final Trigger elevatorL1 = joystick.x();
@@ -143,6 +146,9 @@ public class BayouControls extends ControlBinding {
 
         enableClimbToggle.onTrue(Commands.runOnce(() -> climbEnabledState = !climbEnabledState));
         enableManualStickControlToggle.onTrue(Commands.runOnce(() -> manualStickControlState = !manualStickControlState));
+
+        // overrideClimberUp.whileTrue(Subsystems.climber.openLoopUpDefault());
+        // overrideClimberDown.whileTrue(Subsystems.climber.openLoopDownDefault());
 
         bindCommonButtons();
     }

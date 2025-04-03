@@ -11,6 +11,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Robot;
@@ -40,11 +41,7 @@ public class Climber extends SubsystemBase implements Lifecycle {
         Slot0Configs slot0Configs = new Slot0Configs()
                 .withKP(5.0);
 
-        SoftwareLimitSwitchConfigs softwareLimitSwitchConfigs = new SoftwareLimitSwitchConfigs()
-                .withForwardSoftLimitEnable(true)
-                .withForwardSoftLimitThreshold(215)
-                .withReverseSoftLimitEnable(true)
-                .withReverseSoftLimitThreshold(0);
+        SoftwareLimitSwitchConfigs softwareLimitSwitchConfigs = createSoftwareLimitSwitches(true);
 
         MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs()
                 .withMotionMagicAcceleration(400)
@@ -112,12 +109,34 @@ public class Climber extends SubsystemBase implements Lifecycle {
         climberMotor.setControl(staticBrake);
     }
 
+    private SoftwareLimitSwitchConfigs createSoftwareLimitSwitches(boolean enable) {
+        SoftwareLimitSwitchConfigs softwareLimitSwitchConfigs = new SoftwareLimitSwitchConfigs()
+        .withForwardSoftLimitEnable(enable)
+        .withForwardSoftLimitThreshold(215)
+        .withReverseSoftLimitEnable(enable)
+        .withReverseSoftLimitThreshold(0);
+        return softwareLimitSwitchConfigs;
+    }
+
+    private void enableSoftwareLimitSwitches(boolean enable) {
+        SoftwareLimitSwitchConfigs configs = createSoftwareLimitSwitches(enable);
+        climberMotor.getConfigurator().apply(configs);
+    }
+
     public Command openLoopUpDefault() {
-        return this.run(() -> runOpenLoop(openLoopMotorOutput)).withName("Climber Default Open Loop Up");
+        return this.runEnd(() -> runOpenLoop(openLoopMotorOutput),
+         () -> enableSoftwareLimitSwitches(true))
+         .beforeStarting(() ->enableSoftwareLimitSwitches(false))
+         .withName("Climber Default Open Loop Up");
+        // return this.run(() -> runOpenLoop(openLoopMotorOutput)).withName("Climber Default Open Loop Up");
     }
 
     public Command openLoopDownDefault() {
-        return this.run(() -> runOpenLoop(-openLoopMotorOutput)).withName("Climber Default Open Loop Down");
+        return this.runEnd(() -> runOpenLoop(-openLoopMotorOutput),
+         () -> enableSoftwareLimitSwitches(true))
+         .beforeStarting(() ->enableSoftwareLimitSwitches(false))
+         .withName("Climber Default Open Loop Up");
+        // return this.run(() -> runOpenLoop(-openLoopMotorOutput)).withName("Climber Default Open Loop Down");
     }
 
     public Command openLoopUp(double value) {
