@@ -140,7 +140,7 @@ public class Climber extends SubsystemBase implements Lifecycle {
         DOWN(0),
         PICKUP(75),
         UP(150),
-        CLIMB(210);
+        CLIMB(225);
 
         private final double position;
 
