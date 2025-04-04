@@ -103,7 +103,7 @@ public class RobotStateSerialData {
                         if (info.xOffset() < 0) {
                             return info.xOffset() >= -27.2 && info.xOffset() <= -19.5;
                         } else {
-                            return info.xOffset() >= 20.0 && info.xOffset() <= 26.25;
+                            return info.xOffset() >= 18.50 && info.xOffset() <= 26.25;
                         }
                     } else {
                         return false;

@@ -57,7 +57,7 @@ public class BayouControls extends ControlBinding {
     final JoystickButton overrideClimberUp = new JoystickButton(driveStick, 10);
     final JoystickButton overrideClimberDown = new JoystickButton(driveStick, 11);
 
-    final JoystickButton resetPoseButton = new JoystickButton(driveStick, 14);
+    final JoystickButton resetPoseButton = new JoystickButton(steerStick, 14);
 
 
     final Trigger elevatorDown = joystick.rightTrigger();
@@ -149,7 +149,7 @@ public class BayouControls extends ControlBinding {
         enableClimbToggle.onTrue(Commands.runOnce(() -> climbEnabledState = !climbEnabledState));
         enableManualStickControlToggle.onTrue(Commands.runOnce(() -> manualStickControlState = !manualStickControlState));
 
-        resetPoseButton.onTrue(new GenericPoseRequestCommand<>(ResetToAlliancePoseRequest.class));
+        resetPoseButton.onTrue(new GenericPoseRequestCommand<>(ResetToAlliancePoseRequest.class).ignoringDisable(true));
 
         // overrideClimberUp.whileTrue(Subsystems.climber.openLoopUpDefault());
         // overrideClimberDown.whileTrue(Subsystems.climber.openLoopDownDefault());
