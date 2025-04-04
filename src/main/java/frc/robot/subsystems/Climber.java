@@ -112,7 +112,7 @@ public class Climber extends SubsystemBase implements Lifecycle {
     private SoftwareLimitSwitchConfigs createSoftwareLimitSwitches(boolean enable) {
         SoftwareLimitSwitchConfigs softwareLimitSwitchConfigs = new SoftwareLimitSwitchConfigs()
         .withForwardSoftLimitEnable(enable)
-        .withForwardSoftLimitThreshold(215)
+        .withForwardSoftLimitThreshold(221)
         .withReverseSoftLimitEnable(enable)
         .withReverseSoftLimitThreshold(0);
         return softwareLimitSwitchConfigs;
@@ -159,7 +159,7 @@ public class Climber extends SubsystemBase implements Lifecycle {
         DOWN(0),
         PICKUP(75),
         UP(150),
-        CLIMB(225);
+        CLIMB(220);
 
         private final double position;
 

@@ -135,9 +135,9 @@ public class BayouControls extends ControlBinding {
         manualStickControl.toggleOnTrue(Subsystems.algaeArm.openLoopCommand(manualAlgaeArmControl));
         manualStickControl.toggleOnTrue(Subsystems.elevator.openLoopCommand(manualElevatorControl));
 
-        alignLeft.whileTrue(new AlignDriveInCommand(AlignDriveInCommand.AlignTarget.LEFT));
-        alignRight.whileTrue(new AlignDriveInCommand(AlignDriveInCommand.AlignTarget.RIGHT));
-        alignMiddle.whileTrue(new AlignDriveInCommand(AlignDriveInCommand.AlignTarget.CENTER));
+        alignLeft.whileTrue(new AlignDriveInCommand(AlignDriveInCommand.AlignTarget.LEFT).withResetPoseDuringDrive(false));
+        alignRight.whileTrue(new AlignDriveInCommand(AlignDriveInCommand.AlignTarget.RIGHT).withResetPoseDuringDrive(false));
+        alignMiddle.whileTrue(new AlignDriveInCommand(AlignDriveInCommand.AlignTarget.CENTER).withResetPoseDuringDrive(false));
 
 
         alignLeftStation.onTrue(Commands.runOnce(() -> swerveSupplier.setTargetHeading(
