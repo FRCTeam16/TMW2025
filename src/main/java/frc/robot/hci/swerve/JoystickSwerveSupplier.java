@@ -74,7 +74,7 @@ public class JoystickSwerveSupplier implements SwerveSupplier {
             double robotDegrees = Subsystems.swerveSubsystem.getState().Pose.getRotation().getDegrees();
             baseRotation = rotationPID.calculate(robotDegrees, targetHeading.get().in(Degrees));
         }
-        return applyLimiter(baseRotation);
+        return applyLimiter(MathUtil.clamp(baseRotation, -1.0, 1.0));
     }
 
 
@@ -92,7 +92,7 @@ public class JoystickSwerveSupplier implements SwerveSupplier {
 
     @Override
     public AngularVelocity supplyRotationalRate() {
-        double base = MathUtil.clamp(getBaseRotationalRate(), -1.0, 1.0);
+        double base = getBaseRotationalRate(); 
         // return RadiansPerSecond.of(base).times(Constants.MaxAngularRate.in(RadiansPerSecond));
         return DegreesPerSecond.of(320).times(base);
     }
