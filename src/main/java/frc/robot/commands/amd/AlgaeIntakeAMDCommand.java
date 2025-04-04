@@ -47,7 +47,6 @@ public class AlgaeIntakeAMDCommand extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        Subsystems.ledSubsystem.getAMDSerialData().startAMDPhase(AMDSerialData.AMDPhase.AMDEnd);
         dataCollector.report();
         Subsystems.algaeIntake.stopAlgae();
     }

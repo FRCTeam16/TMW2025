@@ -28,7 +28,6 @@ public class RunDMSCommand extends SequentialCommandGroup {
                 Commands.runOnce(() -> {
                     driveDataCollector.report(true);
                     steerDataCollector.report(false);
-                    Subsystems.ledSubsystem.getAMDSerialData().startAMDPhase(AMDSerialData.AMDPhase.AMDEnd);
                 })
         );
     }

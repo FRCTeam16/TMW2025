@@ -70,7 +70,6 @@ public class ElevatorAMDCommand extends Command {
                 )
                 .finallyDo(() -> {
                     dataCollector.report();
-                    Subsystems.ledSubsystem.getAMDSerialData().startAMDPhase(AMDSerialData.AMDPhase.AMDEnd);
                 });
     }
 

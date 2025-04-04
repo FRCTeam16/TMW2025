@@ -177,12 +177,12 @@ public class BayouControls extends ControlBinding {
 
         // AMD
         SmartDashboard.putData("Run All AMD", new RunAMDCommand());
-        SmartDashboard.putData("Run DMS", new RunDMSCommand());
+        SmartDashboard.putData("Run DMS", new RunDMSCommand().andThen(RunAMDCommand.reportAMDEndCmd()));
         SmartDashboard.putData("Stop AMD", Commands.runOnce(() -> Subsystems.ledSubsystem.getAMDSerialData().startAMDPhase(AMDSerialData.AMDPhase.Comm)).ignoringDisable(true));
-        SmartDashboard.putData("Run CoralIntake AMD", new CoralIntakeAMDCommand());
-        SmartDashboard.putData("Run Elevator AMD", new ElevatorAMDCommand());
-        SmartDashboard.putData("Run AlgaeArm AMD", new AlgaeArmAMDCommand());
-        SmartDashboard.putData("Run AlgaeIntake AMD", new AlgaeIntakeAMDCommand());
+        SmartDashboard.putData("Run CoralIntake AMD", new CoralIntakeAMDCommand().andThen(RunAMDCommand.reportAMDEndCmd()));
+        SmartDashboard.putData("Run Elevator AMD", new ElevatorAMDCommand().andThen(RunAMDCommand.reportAMDEndCmd()));
+        SmartDashboard.putData("Run AlgaeArm AMD", new AlgaeArmAMDCommand().andThen(RunAMDCommand.reportAMDEndCmd()));
+        SmartDashboard.putData("Run AlgaeIntake AMD", new AlgaeIntakeAMDCommand().andThen(RunAMDCommand.reportAMDEndCmd()));
 
         amdButton.onTrue(new RunAMDCommand());
 

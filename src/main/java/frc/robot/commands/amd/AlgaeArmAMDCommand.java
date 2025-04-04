@@ -50,13 +50,12 @@ public class AlgaeArmAMDCommand extends Command {
                                 new AlgaeArm.SetArmPositionCommand(AlgaeArm.AlgaeArmPosition.Ground),
                                 collectDataCommand().repeatedly()
                         )
+                        .withTimeout(3.0)
                         .until(() -> Subsystems.algaeArm.isInPosition())
-                        .withTimeout(4.0)
                         .handleInterrupt(() -> dataCollector.setTimedOut(true))
                         .finallyDo(() -> {
                             BSLogger.log("AlgaeArmAMDCommand", "Algae Arm AMD Finished");
                             dataCollector.report();
-                            Subsystems.ledSubsystem.getAMDSerialData().startAMDPhase(AMDSerialData.AMDPhase.AMDEnd);
                         })
         );
         return baseCommand;

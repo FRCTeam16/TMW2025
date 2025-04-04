@@ -51,7 +51,6 @@ public class CoralIntakeAMDCommand extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        Subsystems.ledSubsystem.getAMDSerialData().startAMDPhase(AMDSerialData.AMDPhase.AMDEnd);
         dataCollector.report();
         Subsystems.coralIntake.stop();
     }

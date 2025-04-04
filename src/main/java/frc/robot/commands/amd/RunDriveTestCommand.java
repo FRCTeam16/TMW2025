@@ -1,15 +1,16 @@
 package frc.robot.commands.amd;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
+import java.util.Arrays;
+
 import com.ctre.phoenix6.swerve.SwerveRequest;
+
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.Constants;
 import frc.robot.Subsystems;
 import frc.robot.subsystems.amd.SwerveDataCollector;
 import frc.robot.util.BSLogger;
-
-import java.util.Arrays;
-
-import static edu.wpi.first.units.Units.MetersPerSecond;
 
 class RunDriveTestCommand extends AbstractRunDMSMotorTestCommand {
 
@@ -25,6 +26,7 @@ class RunDriveTestCommand extends AbstractRunDMSMotorTestCommand {
         Subsystems.swerveSubsystem.setControl(
                 applyRobotSpeeds.withSpeeds(
                         new ChassisSpeeds(Constants.MaxSpeed.in(MetersPerSecond), 0, 0)));
+        report();
     }
 
     @Override

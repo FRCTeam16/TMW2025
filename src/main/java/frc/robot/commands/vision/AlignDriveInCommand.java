@@ -49,6 +49,8 @@ public class AlignDriveInCommand extends Command {
     private final String limelightName;
     private final TimeExpiringValue<Pair<Pose2d, Angle>> lastVisionPose = new TimeExpiringValue<>(500);
 
+    private boolean resetPoseDuringDrive = true;
+
     public enum AlignTarget {
         LEFT,
         RIGHT,
@@ -66,6 +68,11 @@ public class AlignDriveInCommand extends Command {
         if (alignTelemetry == null) {
             alignTelemetry = new AlignTelemetry();
         }
+    }
+
+    public AlignDriveInCommand withResetPoseDuringDrive(boolean reset) {
+        this.resetPoseDuringDrive = reset;
+        return this;
     }
 
     public AlignDriveInCommand withApproachSpeed(LinearVelocity speed) {
@@ -107,8 +114,9 @@ public class AlignDriveInCommand extends Command {
             targetRotation = pose2d.getRotation().getMeasure().plus(Degrees.of(180));
             lastVisionPose.set(Pair.of(pose2d, Degrees.of(LimelightHelpers.getTX(limelightName))));
             // Reset our pose based on vision
-            Subsystems.poseManager.pushRequest(new UpdateTranslationFromVision());
-//            BSLogger.log("AlignDriveInCommand", "updating pose based on april tag [" + aprilTarget + "] " + pose2d);
+            if (resetPoseDuringDrive) {
+                Subsystems.poseManager.pushRequest(new UpdateTranslationFromVision());
+            }
         });
     }
 
