@@ -232,10 +232,12 @@ public class AlignDriveInCommand extends Command {
         Subsystems.swerveSubsystem.setControl(brake);
 
         if (LimelightHelpers.getTV(limelightName)) {
-            Subsystems.poseManager.pushRequest(new UpdateTranslationFromVision());
+            if (resetPoseDuringDrive) {
+                Subsystems.poseManager.pushRequest(new UpdateTranslationFromVision());
+            }
         } else {
             Pair<Pose2d, Angle> lastPose = lastVisionPose.getLastIgnoringExpiration();
-            if (lastPose != null) {
+            if (lastPose != null && resetPoseDuringDrive) {
                 Subsystems.poseManager.pushRequest(new PoseChangeRequest(lastPose.getFirst()));
             }
         }

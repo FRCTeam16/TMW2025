@@ -26,7 +26,6 @@ class RunDriveTestCommand extends AbstractRunDMSMotorTestCommand {
         Subsystems.swerveSubsystem.setControl(
                 applyRobotSpeeds.withSpeeds(
                         new ChassisSpeeds(Constants.MaxSpeed.in(MetersPerSecond), 0, 0)));
-        report();
     }
 
     @Override
@@ -39,14 +38,22 @@ class RunDriveTestCommand extends AbstractRunDMSMotorTestCommand {
 
     @Override
     double[] getMotorCurrents() {
-        return Arrays.stream(Subsystems.swerveSubsystem.getModules()).mapToDouble(module -> module.getDriveMotor().getStatorCurrent().getValueAsDouble()).toArray();
+        double[] data = new double[4];
+        for (int i=0;i<4;i++) {
+            var module = Subsystems.swerveSubsystem.getModule(i);
+            data[i] = module.getDriveMotor().getStatorCurrent().getValueAsDouble();
+        }
+        return data;
     }
 
     @Override
     double[] getMotorVelocities() {
-        return Arrays.stream(Subsystems.swerveSubsystem.getModules())
-                .mapToDouble(module -> module.getDriveMotor().getVelocity().getValueAsDouble())
-                .toArray();
+       double[] data = new double[4];
+        for (int i=0;i<4;i++) {
+            var module = Subsystems.swerveSubsystem.getModule(i);
+            data[i] = module.getDriveMotor().getVelocity().getValueAsDouble();
+        }
+        return data;
     }
 
     @Override

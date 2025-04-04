@@ -77,10 +77,18 @@ public class TestMADOutlierDetection {
             double[] RL = columnData.get("RL").stream().mapToDouble(Double::doubleValue).toArray();
             double[] RR = columnData.get("RR").stream().mapToDouble(Double::doubleValue).toArray();
             DriveInfo<Boolean> outliers = AMDStats.detectOutliers(FL, FR, RL, RR, "test");
+            assertEquals(1, outliers.FL);
             System.out.println("Outliers: " + outliers);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void testNullData() {
+        SwerveDataCollector collector = new SwerveDataCollector();
+        DriveInfo<Integer> score = collector.getScore();
+        assertEquals(0, score.FL.intValue());
     }
 
 }

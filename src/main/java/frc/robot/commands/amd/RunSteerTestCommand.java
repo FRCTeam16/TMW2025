@@ -20,7 +20,6 @@ class RunSteerTestCommand extends AbstractRunDMSMotorTestCommand {
     @Override
     void startMotors() {
         Subsystems.swerveSubsystem.setControl(spinControl);
-        report();
     }
 
     @Override

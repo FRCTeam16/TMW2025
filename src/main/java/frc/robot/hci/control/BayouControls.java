@@ -21,6 +21,7 @@ import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake.AlgaeArm;
 import frc.robot.subsystems.Intake.AlgaeArm.AlgaeArmPosition;
 import frc.robot.subsystems.amd.AMDSerialData;
+import frc.robot.subsystems.amd.AMDStats;
 import frc.robot.subsystems.pose.ResetToAlliancePoseRequest;
 import frc.robot.subsystems.pose.SeedFieldCentricRequest;
 import frc.robot.subsystems.vision.Pipeline;
@@ -183,6 +184,7 @@ public class BayouControls extends ControlBinding {
         SmartDashboard.putData("Run Elevator AMD", new ElevatorAMDCommand().andThen(RunAMDCommand.reportAMDEndCmd()));
         SmartDashboard.putData("Run AlgaeArm AMD", new AlgaeArmAMDCommand().andThen(RunAMDCommand.reportAMDEndCmd()));
         SmartDashboard.putData("Run AlgaeIntake AMD", new AlgaeIntakeAMDCommand().andThen(RunAMDCommand.reportAMDEndCmd()));
+        SmartDashboard.putData("Delete AMD CSV", Commands.runOnce(() -> AMDStats.removeKnownCSVFiles()).ignoringDisable(true));
 
         amdButton.onTrue(new RunAMDCommand());
 

@@ -2,6 +2,7 @@ package frc.robot.subsystems.amd;
 
 import frc.robot.util.BSLogger;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,12 +34,26 @@ public class AMDStats {
         return outliers;
     }
 
+    public static void removeKnownCSVFiles() {
+        try {
+            new File("/home/lvuser/current.csv").delete();
+            new File("home/lvuser/velocity.csv").delete();
+        } catch (Exception ex) {
+            BSLogger.log("AMDStats", "Error removing file: " + ex.getMessage());
+        }
+    }
+
 
     /**
      * Detects which motor(s) are outliers using the MAD approach.
      * Returns a list of motor labels that exceed the chosen z-score threshold.
      */
     public static DriveInfo<Boolean> detectOutliers(double[] FL, double[] FR, double[] RL, double[] RR, String label) {
+        if (FL.length == 0 || FR.length == 0 || RL.length == 0 || RR.length == 0) {
+            BSLogger.log("AMDStats", "detectOutliers needs at least a data point in all arrays");
+            return new DriveInfo<Boolean>(false);
+        }
+
         // 1. Concatenate all motor arrays into one
         double[] allData = concatArrays(FL, FR, RL, RR);
 
@@ -89,7 +104,7 @@ public class AMDStats {
 //            }
         }
 
-        try(FileWriter out = new FileWriter("/home/lvuser/" + label + ".csv")) {
+        try(FileWriter out = new FileWriter("/home/lvuser/" + label + ".csv", true)) {
             out.append("FL,FR,RL,RR\n");
             for (int i=0;i<FL.length;i++) {
                 out.append(Double.toString(FL[i])).append(",")
@@ -235,17 +250,28 @@ public class AMDStats {
      * Concatenates multiple double arrays into one.
      */
     public static double[] concatArrays(double[]... arrays) {
-        int totalLength = 0;
-        for (double[] arr : arrays) {
-            totalLength += arr.length;
-        }
+        // int totalLength = 0;
+        // for (double[] arr : arrays) {
+        //     totalLength += arr.length;
+        // }
 
-        double[] result = new double[totalLength];
-        int offset = 0;
-        for (double[] arr : arrays) {
-            System.arraycopy(arr, 0, result, offset, arr.length);
-            offset += arr.length;
+        // double[] result = new double[totalLength];
+        // int offset = 0;
+        // for (double[] arr : arrays) {
+        //     System.arraycopy(arr, 0, result, offset, arr.length);
+        //     offset += arr.length;
+        // }
+
+        List<Double> result = new ArrayList<Double>();
+        for (double[] arr: arrays) {
+            for (int i=0;i<arr.length;i++) {
+                result.add(arr[i]);
+            }
         }
-        return result;
+        double[] doubleResult = new double[result.size()];
+        for (int j=0; j<result.size();j++) {
+            doubleResult[j] = result.get(j);
+        }
+        return doubleResult;
     }
 }
