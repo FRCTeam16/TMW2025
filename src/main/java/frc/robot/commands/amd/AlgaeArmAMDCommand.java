@@ -2,8 +2,10 @@ package frc.robot.commands.amd;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Subsystems;
 import frc.robot.subsystems.Intake.AlgaeArm;
+import frc.robot.subsystems.Intake.AlgaeArm.AlgaeArmPosition;
 import frc.robot.subsystems.amd.AMDSerialData;
 import frc.robot.subsystems.amd.AMDStats;
 import frc.robot.subsystems.amd.AbstractDataCollector;
@@ -21,7 +23,7 @@ public class AlgaeArmAMDCommand extends Command {
 
     @Override
     public void initialize() {
-        amdCommand = createAMDCommand();
+        amdCommand = createAMDCommand().withTimeout(5.0);
         amdCommand.schedule();
     }
 
@@ -46,17 +48,14 @@ public class AlgaeArmAMDCommand extends Command {
                 Commands.runOnce(() ->
                         Subsystems.ledSubsystem.getAMDSerialData().startAMDPhase(AMDSerialData.AMDPhase.AlgaeIntake)
                 ),
-                Commands.parallel(
+                Commands.deadline(
+                                new WaitCommand(3.0),
                                 new AlgaeArm.SetArmPositionCommand(AlgaeArm.AlgaeArmPosition.Ground),
                                 collectDataCommand().repeatedly()
                         )
-                        .withTimeout(3.0)
                         .until(() -> Subsystems.algaeArm.isInPosition())
-                        .handleInterrupt(() -> dataCollector.setTimedOut(true))
-                        .finallyDo(() -> {
-                            BSLogger.log("AlgaeArmAMDCommand", "Algae Arm AMD Finished");
-                            dataCollector.report();
-                        })
+                        .handleInterrupt(() -> dataCollector.setTimedOut(true)),
+                new AlgaeArm.SetArmPositionCommand(AlgaeArmPosition.Up)
         );
         return baseCommand;
     }

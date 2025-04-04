@@ -38,6 +38,7 @@ public class AMDStats {
         try {
             new File("/home/lvuser/current.csv").delete();
             new File("home/lvuser/velocity.csv").delete();
+            new File("home/lvuser/manualCurrent.csv").delete();
         } catch (Exception ex) {
             BSLogger.log("AMDStats", "Error removing file: " + ex.getMessage());
         }

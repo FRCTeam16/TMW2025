@@ -98,8 +98,8 @@ public class ElevatorAMDCommand extends Command {
             }
             List<Double> leftScore = AMDStats.detectOutliersZScore(leftCurrents, 70);
             List<Double> rightScore = AMDStats.detectOutliersZScore(rightCurrents, 70);
-            int leftCount = leftScore.isEmpty() ? 0 : 1;
-            int rightCount = rightScore.isEmpty() ? 0 : 2;
+            int leftCount = leftScore.isEmpty() ? 1 : 2;
+            int rightCount = rightScore.isEmpty() ? 1 : 2;
             return new Pair<>(leftCount, rightCount);
         }
 

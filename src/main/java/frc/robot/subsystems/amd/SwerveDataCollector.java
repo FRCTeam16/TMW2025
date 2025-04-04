@@ -1,7 +1,9 @@
 package frc.robot.subsystems.amd;
 
 import frc.robot.Subsystems;
+import frc.robot.util.BSLogger;
 
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,8 +18,20 @@ import java.util.stream.DoubleStream;
  * https://crispinagar.github.io/blogs/mad-anomaly-detection.html
  */
 public class SwerveDataCollector extends AbstractDataCollector<DriveInfo<Integer>> {
-    private final DriveInfo<List<Double>> currentData = new DriveInfo<>(new ArrayList<>());
-    private final DriveInfo<List<Double>> velocityData = new DriveInfo<>(new ArrayList<>());
+    private final DriveInfo<List<Double>> currentData;
+    private final DriveInfo<List<Double>> velocityData;
+
+    public SwerveDataCollector() {
+        currentData = new DriveInfo<List<Double>>(new ArrayList<>());
+        currentData.FR = new ArrayList<>();
+        currentData.RL = new ArrayList<>();
+        currentData.RR = new ArrayList<>();
+
+        velocityData = new DriveInfo<List<Double>>(new ArrayList<>());
+        velocityData.FR = new ArrayList<>();
+        velocityData.RL = new ArrayList<>();
+        velocityData.RR = new ArrayList<>();
+    }
 
 
     public void addCurrent(double[] current) {
@@ -36,10 +50,26 @@ public class SwerveDataCollector extends AbstractDataCollector<DriveInfo<Integer
 
     @Override
     public DriveInfo<Integer> getScore() {
-        double[] currentFLArray = currentData.FL.stream().mapToDouble(Double::doubleValue).toArray();
-        double[] currentFRArray = currentData.FR.stream().mapToDouble(Double::doubleValue).toArray();
-        double[] currentRLArray = currentData.RL.stream().mapToDouble(Double::doubleValue).toArray();
-        double[] currentRRArray = currentData.RR.stream().mapToDouble(Double::doubleValue).toArray();
+        double[] currentFLArray = new double[currentData.FL.size()];
+        for (int i=0; i<currentData.FL.size(); i++) {
+            currentFLArray[i] = currentData.FL.get(i);
+        }
+        double[] currentFRArray = new double[currentData.FR.size()];
+        for (int i=0; i<currentData.FR.size(); i++) {
+            currentFRArray[i] = currentData.FR.get(i);
+        }
+        double[] currentRLArray = new double[currentData.RL.size()];
+        for (int i=0; i<currentData.RL.size(); i++) {
+            currentRLArray[i] = currentData.RL.get(i);
+        }
+        double[] currentRRArray = new double[currentData.RR.size()];
+        for (int i=0; i<currentData.RR.size(); i++) {
+            currentRRArray[i] = currentData.RR.get(i);
+        }
+        // double[] currentFLArray = currentData.FL.stream().mapToDouble(Double::doubleValue).toArray();
+        // double[] currentFRArray = currentData.FR.stream().mapToDouble(Double::doubleValue).toArray();
+        // double[] currentRLArray = currentData.RL.stream().mapToDouble(Double::doubleValue).toArray();
+        // double[] currentRRArray = currentData.RR.stream().mapToDouble(Double::doubleValue).toArray();
 
         double[] velocityFLArray = velocityData.FL.stream().mapToDouble(Double::doubleValue).toArray();
         double[] velocityFRArray = velocityData.FR.stream().mapToDouble(Double::doubleValue).toArray();
@@ -51,14 +81,31 @@ public class SwerveDataCollector extends AbstractDataCollector<DriveInfo<Integer
             return new DriveInfo<Integer>(0);
         }
 
+        double[] FL = currentFLArray;
+        double[] FR = currentFRArray;
+        double[] RL = currentRLArray;
+        double[] RR = currentRRArray;
+        try(FileWriter out = new FileWriter("/home/lvuser/manualCurrent.csv", true)) {
+            // out.append("FL,FR,RL,RR\n");
+            for (int i=0;i<FL.length;i++) {
+                out.append(Double.toString(FL[i])).append(",")
+                        .append(Double.toString(FR[i])).append(",")
+                        .append(Double.toString(RL[i])).append(",")
+                        .append(Double.toString(RR[i])).append("\n");
+            }
+        } catch (Exception e) {
+            BSLogger.log("SwerveDataCollector", "Error writing CSV File");
+        }
+
         DriveInfo<Boolean> currentOutliers = AMDStats.detectOutliers(currentFLArray, currentFRArray, currentRLArray, currentRRArray, "current");
         DriveInfo<Boolean> velocityOutliers = AMDStats.detectOutliers(velocityFLArray, velocityFRArray, velocityRLArray, velocityRRArray, "velocity");
 
         DriveInfo<Boolean> curOut = new DriveInfo<Boolean>(false);
-        curOut.FL = AMDStats.detectOutliersZScore(DoubleStream.of(currentFLArray).boxed().collect(Collectors.toList()), 2.5).size() > 0;
-        curOut.FR = AMDStats.detectOutliersZScore(DoubleStream.of(currentFRArray).boxed().collect(Collectors.toList()), 2.5).size() > 0;
-        curOut.RL = AMDStats.detectOutliersZScore(DoubleStream.of(currentRLArray).boxed().collect(Collectors.toList()), 2.5).size() > 0;
-        curOut.RR = AMDStats.detectOutliersZScore(DoubleStream.of(currentRRArray).boxed().collect(Collectors.toList()), 2.5).size() > 0;
+        double outlierThreshold = 3;
+        curOut.FL = AMDStats.detectOutliersZScore(DoubleStream.of(currentFLArray).boxed().collect(Collectors.toList()), outlierThreshold).size() > 0;
+        curOut.FR = AMDStats.detectOutliersZScore(DoubleStream.of(currentFRArray).boxed().collect(Collectors.toList()), outlierThreshold).size() > 0;
+        curOut.RL = AMDStats.detectOutliersZScore(DoubleStream.of(currentRLArray).boxed().collect(Collectors.toList()), outlierThreshold).size() > 0;
+        curOut.RR = AMDStats.detectOutliersZScore(DoubleStream.of(currentRRArray).boxed().collect(Collectors.toList()), outlierThreshold).size() > 0;
 
 
         DriveInfo<Integer> score = new DriveInfo<>(0);
@@ -95,7 +142,7 @@ public class SwerveDataCollector extends AbstractDataCollector<DriveInfo<Integer
     //    } else {
     //        return 5;
     //    }
-        return (currentStatus) ? 1 : 2;
+        return (currentStatus) ? 2 : 1;
     }
 
     public void report(boolean isDrive) {
