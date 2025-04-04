@@ -103,7 +103,7 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle, AMD<AlgaeIn
     }
 
     public void runAMD() {
-        this.intakeCommand();
+        algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(forwardSpeed));
     }
 
     public void stopAlgae() {

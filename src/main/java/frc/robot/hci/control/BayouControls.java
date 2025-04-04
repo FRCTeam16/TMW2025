@@ -172,6 +172,7 @@ public class BayouControls extends ControlBinding {
         SmartDashboard.putData("Move Climber Down", new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.DOWN));
 
         // AMD
+        SmartDashboard.putData("Run All AMD", new RunAMDCommand());
         SmartDashboard.putData("Run DMS", new RunDMSCommand());
         SmartDashboard.putData("Stop AMD", Commands.runOnce(() -> Subsystems.ledSubsystem.getAMDSerialData().startAMDPhase(AMDSerialData.AMDPhase.Comm)).ignoringDisable(true));
         SmartDashboard.putData("Run CoralIntake AMD", new CoralIntakeAMDCommand());

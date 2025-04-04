@@ -32,8 +32,7 @@ class RunSteerTestCommand extends AbstractRunDMSMotorTestCommand {
 //            module.apply(steerDriveRequest, steerRequest.withOutput(12));
 //        }
         Subsystems.swerveSubsystem.setControl(
-                new SwerveRequest.SysIdSwerveRotation()
-                        .withRotationalRate(DegreesPerSecond.of(360)));
+            new SwerveRequest.SysIdSwerveSteerGains().withVolts(7));
     }
 
     @Override
