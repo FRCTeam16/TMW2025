@@ -22,11 +22,16 @@ public class DriveRobotCentricCommand extends Command {
     private Pose2d startPose;
     private Pose2d lastPose;
     private final Time toRun;
-    private final LinearVelocity APPROACH_SPEED =  MetersPerSecond.of(1.6);
+    private LinearVelocity APPROACH_SPEED =  MetersPerSecond.of(1.6);
 
     public DriveRobotCentricCommand(Time runTime) {
         addRequirements(Subsystems.swerveSubsystem);
         toRun = runTime;
+    }
+
+    public DriveRobotCentricCommand withApproachSpeed(LinearVelocity velocity) {
+        this.APPROACH_SPEED = velocity;
+        return this;
     }
 
     @Override

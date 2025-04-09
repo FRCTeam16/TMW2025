@@ -1,4 +1,5 @@
 package frc.robot.hci.control;
+import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -8,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Robot;
 import frc.robot.Subsystems;
+import frc.robot.commands.DriveRobotCentricCommand;
 import frc.robot.commands.PickAlgaeCommand;
 import frc.robot.commands.PickAlgaeSoonerCommand;
 import frc.robot.commands.RotateToAngleCommand;
@@ -30,7 +32,7 @@ import frc.robot.util.GameInfo;
 
 import java.util.function.Supplier;
 
-import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.*;
 
 public class BayouControls extends ControlBinding {
 
@@ -194,6 +196,10 @@ public class BayouControls extends ControlBinding {
         SmartDashboard.putData("Close Latch", Subsystems.funnelSubsystem.closeLatchCommand().ignoringDisable(true));
 
         SmartDashboard.putData("Debug Rotate", new RotateToAngleCommand(Degrees.of(120)));
+
+        new JoystickButton(steerStick, 10).whileTrue(
+                new DriveRobotCentricCommand(Seconds.of(0.5))
+                        .withApproachSpeed(MetersPerSecond.of(-0.5)));
     }
 
     @Override

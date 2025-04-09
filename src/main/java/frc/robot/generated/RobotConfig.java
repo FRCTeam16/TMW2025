@@ -62,7 +62,8 @@ public class RobotConfig {
                     .map(Limelight::new).collect(Collectors.toSet());
             default -> //Collections.emptyList();
                     Stream.of(
-                            new VisionTypes.LimelightInfo("limelight", Inches.of(22.125), Degrees.of(-35)))
+                            new VisionTypes.LimelightInfo("limelight", Inches.of(22.125), Degrees.of(-35)),
+                            new VisionTypes.LimelightInfo("limelight-base", Inches.of(22.125), Degrees.of(-35)))
                     .map(Limelight::new).collect(Collectors.toSet());
         };
     }

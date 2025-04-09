@@ -65,7 +65,8 @@ public class Robot extends TimedRobot {
   public void disabledInit() {
     // We may want to switch to the view pipeline when disabled for thermal reasons
    Subsystems.visionSubsystem.selectPipeline(Pipeline.April);
-    LimelightHelpers.SetIMUMode("limelight", 1);
+   Subsystems.visionSubsystem.getLimelights().forEach(limelight ->
+           LimelightHelpers.SetIMUMode(limelight.getName(), 1));
   }
 
   @Override
@@ -79,7 +80,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    LimelightHelpers.SetIMUMode("limelight", 2);
+    Subsystems.visionSubsystem.getLimelights().forEach(limelight ->
+            LimelightHelpers.SetIMUMode(limelight.getName(), 2));
+
     Subsystems.visionSubsystem.selectPipeline(Pipeline.April);
     BSLogger.log("Robot", "autoInit:: Started at:" + Timer.getFPGATimestamp());
     autonomousCommand = m_robotContainer.getAutonomousCommand();
@@ -104,7 +107,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    LimelightHelpers.SetIMUMode("limelight", 2);
+    Subsystems.visionSubsystem.getLimelights().forEach(limelight ->
+            LimelightHelpers.SetIMUMode(limelight.getName(), 2));
+
     Subsystems.visionSubsystem.selectPipeline(Pipeline.April);
     if (autonomousCommand != null) {
       autonomousCommand.cancel();

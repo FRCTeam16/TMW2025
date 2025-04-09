@@ -82,7 +82,7 @@ public class ProfiledDriveCommand extends Command {
 
     @Override
     public void execute() {
-        boolean hasTarget = LimelightHelpers.getTV("limelight");
+        boolean hasTarget = LimelightHelpers.getTV(Subsystems.visionSubsystem.getActiveLimelightName());
         Optional<Double> visionDistance = Subsystems.visionOdometryUpdater.getTargetDistance();
         if (hasTarget && visionDistance.isPresent() && visionDistance.get() < 2.0 ) {
             Subsystems.poseManager.pushRequest(new UpdateTranslationFromVision());

@@ -2,6 +2,8 @@ package frc.robot.subsystems.vision;
 
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Subsystems;
+import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Lifecycle;
 import frc.robot.util.BSLogger;
 
@@ -79,5 +81,15 @@ public class VisionSubsystem extends SubsystemBase implements Lifecycle {
 
     public void resetIDFilter() {
         getLimelights().forEach(limelight -> LimelightHelpers.SetFiducialIDFiltersOverride(limelight.getName(), new int[] {}));
+    }
+
+    // Robot specific
+
+    public String getActiveLimelightName() {
+        return (Elevator.ElevatorSetpoint.Zero == Subsystems.elevator.getRequestedSetpoint() ? "limelight" : "limelight-base");
+    }
+
+    public Limelight getActiveLimelight() {
+        return getLimelightByName(getActiveLimelightName());
     }
 }

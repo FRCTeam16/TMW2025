@@ -3,12 +3,14 @@
   "robotLength": 1.016,
   "holonomicMode": true,
   "pathFolders": [
-    "Tests",
+    "Center",
     "OnePush",
+    "Tests",
     "ThreePiece"
   ],
   "autoFolders": [
     "Bayou",
+    "Center",
     "OnePush",
     "Test",
     "ThreePiece"

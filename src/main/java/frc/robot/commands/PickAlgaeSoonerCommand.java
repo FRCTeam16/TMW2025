@@ -25,7 +25,7 @@ public class PickAlgaeSoonerCommand extends SequentialCommandGroup {
                                                 },
                                                 Subsystems.algaeArm
                                         )
-                                )
+                                ).until(() -> Subsystems.algaeIntake.isAlgaeDetected())
                 )
         );
     }

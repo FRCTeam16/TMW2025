@@ -1,0 +1,70 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 7.5,
+        "y": 5.021141581632652
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 6.793005325349285,
+        "y": 5.181112803745847
+      },
+      "isLocked": false,
+      "linkedName": "CenterAlga1"
+    },
+    {
+      "anchor": {
+        "x": 6.364859693877552,
+        "y": 5.491230867346939
+      },
+      "prevControl": {
+        "x": 6.612458731758548,
+        "y": 5.456666196939062
+      },
+      "nextControl": {
+        "x": 5.7559758211712415,
+        "y": 5.576230674118729
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.275446428571429,
+        "y": 5.491230867346939
+      },
+      "prevControl": {
+        "x": 5.993504419375693,
+        "y": 5.706770775229217
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "CenterPick2"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.5,
+    "maxAcceleration": 3.75,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -124.30778784471602
+  },
+  "reversed": false,
+  "folder": "Center",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "useDefaultConstraints": true
+}

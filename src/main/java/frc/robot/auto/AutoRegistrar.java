@@ -7,7 +7,14 @@ import frc.robot.auto.strategies.BayouTroisStrategy.StartingPosition;
 
 import com.pathplanner.lib.auto.NamedCommands;
 import frc.robot.auto.strategies.debug.*;
+import frc.robot.commands.DriveRobotCentricCommand;
+import frc.robot.commands.PickAlgaeSoonerCommand;
+import frc.robot.commands.vision.AlignDriveInCommand;
+import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake.IntakeCoralCommand;
+
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 
 
 /**
@@ -21,9 +28,11 @@ public class AutoRegistrar {
         autoManager.registerStrategy("TestNamedAutoStrategy", "TestNamedAutoStrategy", () -> new TestNamedAutoStategy("TestPathParts"));
         autoManager.registerStrategy("Debug Path Part", () -> new TestNamedAutoStategy("B3FirstDriveRight"));
 
+        autoManager.registerStrategy("Center", () -> new TestNamedAutoStategy("Center"));
+
         // autoManager.registerStrategy("Arkansas Right Red", "Arkansas Right Red", () -> new ArkansasStrategy(false, true));
         // autoManager.registerStrategy("Arkansas Left Red", "Arkansas Left Red", () -> new ArkansasStrategy(true, true));
-        autoManager.registerStrategy("Arkansas Right Blue", "Arkansas Right Blue", () -> new ArkansasStrategy(false, false));
+//        autoManager.registerStrategy("Arkansas Right Blue", "Arkansas Right Blue", () -> new ArkansasStrategy(false, false));
         // autoManager.registerStrategy("Arkansas Left Blue", "Arkansas Left Blue", () -> new ArkansasStrategy(true, false));
 
         autoManager.registerStrategy("Bayou Right Red", () -> new BayouTroisStrategy(StartingPosition.RED_RIGHT));
@@ -42,7 +51,37 @@ public class AutoRegistrar {
     public static void registerNamedCommands() {
          NamedCommands.registerCommand("NamedCommandPrintTest", Commands.print("Named Command Test"));
          NamedCommands.registerCommand("intakeCoral", new IntakeCoralCommand().withTimeout(5.0));
+
+         // Center Auto
+        NamedCommands.registerCommand("alignDriveRight", new AlignDriveInCommand(AlignDriveInCommand.AlignTarget.RIGHT));
+        NamedCommands.registerCommand("elevatorZero", new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.Zero));
+
+//        NamedCommands.registerCommand("elevatorL4", new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4));
+        NamedCommands.registerCommand("elevatorReefHigh", new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.AlgaeReefHigh).withTimeout(1.0));
+        NamedCommands.registerCommand("elevatorReefLow", new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.AlgaeReefLow).withTimeout(1.0));
+//        NamedCommands.registerCommand("shootCoral", Subsystems.coralIntake.shootCoralCommand().withTimeout(0.5));
+//        NamedCommands.registerCommand("stopCoral", Subsystems.coralIntake.stopCommand());
+        NamedCommands.registerCommand("pickAlgaeHigh", new PickAlgaeSoonerCommand(Elevator.ElevatorSetpoint.AlgaeReefHigh));
+        NamedCommands.registerCommand("pickAlgaeLow", new PickAlgaeSoonerCommand(Elevator.ElevatorSetpoint.AlgaeReefLow));
+        NamedCommands.registerCommand("holdAlgae", Subsystems.algaeIntake.holdAlgaeROCommand());
+
+        NamedCommands.registerCommand("scoreCoralL4", Commands.sequence(
+                new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4).withTimeout(1.5),
+                Subsystems.coralIntake.shootCoralCommand().withTimeout(0.5),
+                Subsystems.coralIntake.stopCommand()
+                ));
+
+        NamedCommands.registerCommand("scoreAlgaeInBarge", Commands.sequence(
+                new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4).withTimeout(1.5),
+                Subsystems.algaeIntake.ejectCommand().withTimeout(0.5),
+                Subsystems.algaeIntake.stopCommand().withTimeout(0.1)   // todo: change to fire once
+                ));
+
+        NamedCommands.registerCommand("backOffBarge",
+                new DriveRobotCentricCommand(Seconds.of(0.5))
+                        .withApproachSpeed(MetersPerSecond.of(-0.5)).withTimeout(0.5));
     }
+
 
     public static void registerAutoPaths(PathRegistry pathRegistry) {
     }

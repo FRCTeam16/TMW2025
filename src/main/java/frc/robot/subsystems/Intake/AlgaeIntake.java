@@ -132,6 +132,14 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle, AMD<AlgaeIn
 
     }
 
+    public Command holdAlgaeROCommand() {
+        return this.runOnce(this::holdAlgae)
+                .alongWith(Commands.runOnce(() -> requestedState = "Hold"))
+                .withName("Algae Hold (RO)");
+
+    }
+
+
     public Command stopCommand() {
         return this.run(this::stopAlgae)
                 .alongWith(Commands.runOnce(() -> requestedState = "Stop"))

@@ -46,7 +46,7 @@ public class AlignDriveInCommand extends Command {
     private final SwerveRequest.Idle idle = new SwerveRequest.Idle();
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
 
-    private final String limelightName;
+    private String limelightName;
     private final TimeExpiringValue<Pair<Pose2d, Angle>> lastVisionPose = new TimeExpiringValue<>(500);
 
     private boolean resetPoseDuringDrive = true;
@@ -87,6 +87,8 @@ public class AlignDriveInCommand extends Command {
 
     @Override
     public void initialize() {
+        this.limelightName = Subsystems.visionSubsystem.getActiveLimelightName();
+        BSLogger.log("AlignDriveInCommand", "initialize: limelight used: " + this.limelightName);
         alignTelemetry.activeLog.append(true);
         boolean hasTarget = LimelightHelpers.getTV(limelightName);
         targetRotation = Subsystems.swerveSubsystem.getState().Pose.getRotation().getMeasure();
