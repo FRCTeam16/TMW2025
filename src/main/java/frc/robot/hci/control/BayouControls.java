@@ -1,5 +1,5 @@
 package frc.robot.hci.control;
-import com.pathplanner.lib.auto.NamedCommands;
+
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -10,9 +10,9 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Robot;
 import frc.robot.Subsystems;
 import frc.robot.commands.DriveRobotCentricCommand;
-import frc.robot.commands.PickAlgaeCommand;
 import frc.robot.commands.PickAlgaeSoonerCommand;
 import frc.robot.commands.RotateToAngleCommand;
+import frc.robot.commands.TrackNeuralTargetCommand;
 import frc.robot.commands.amd.*;
 import frc.robot.commands.pose.GenericPoseRequestCommand;
 import frc.robot.commands.vision.AlignDriveInCommand;
@@ -139,7 +139,11 @@ public class BayouControls extends ControlBinding {
 
         alignLeft.whileTrue(new AlignDriveInCommand(AlignDriveInCommand.AlignTarget.LEFT).withResetPoseDuringDrive(false));
         alignRight.whileTrue(new AlignDriveInCommand(AlignDriveInCommand.AlignTarget.RIGHT).withResetPoseDuringDrive(false));
-        alignMiddle.whileTrue(new AlignDriveInCommand(AlignDriveInCommand.AlignTarget.CENTER).withResetPoseDuringDrive(false));
+        alignMiddle.whileTrue(new TrackNeuralTargetCommand(this.swerveSupplier));
+
+        new JoystickButton(driveStick, 15)
+                .whileTrue(Commands.runOnce(() -> Subsystems.algaeArm.setArmPosition(AlgaeArm.AlgaeArmPosition.PickFromReef)))
+                .onFalse(Commands.runOnce(() -> Subsystems.algaeArm.setArmPosition(AlgaeArmPosition.Up)));
 
 
         alignLeftStation.onTrue(Commands.runOnce(() -> swerveSupplier.setTargetHeading(
@@ -168,6 +172,7 @@ public class BayouControls extends ControlBinding {
 
         SmartDashboard.putData("Set LLs to Apriltag", new PipelineSwitcher(Pipeline.April));
         SmartDashboard.putData("Set LLs to Viewfinder", new PipelineSwitcher(Pipeline.View));
+        SmartDashboard.putData("Set LLs to NeuralDetect", new PipelineSwitcher(Pipeline.NeuralDetector));
         SmartDashboard.putData("Clear LL ID Filter", Commands.runOnce(() -> Subsystems.visionSubsystem.resetIDFilter()));
 
         // reset the field-centric heading on left bumper press

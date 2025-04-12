@@ -1,16 +1,16 @@
 package frc.robot.subsystems.vision;
 
-import javax.swing.text.html.Option;
 import java.util.Optional;
 
 public enum Pipeline {
     April(0),
-    View(1);
+    View(1),
+    NeuralDetector(2);
 
 
     public final int pipelineNumber;
 
-    private Pipeline(int number) {
+    Pipeline(int number) {
         this.pipelineNumber = number;
     }
 
