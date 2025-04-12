@@ -67,7 +67,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle, AMD<AlgaeArmAM
                 .withForwardSoftLimitThreshold(0.240
                 )
                 .withReverseSoftLimitEnable(true)
-                .withReverseSoftLimitThreshold(0.086);
+                .withReverseSoftLimitThreshold(0.03);
 
         MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs()
                 .withMotionMagicCruiseVelocity(0.6)
@@ -181,8 +181,8 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle, AMD<AlgaeArmAM
     }
 
     public enum AlgaeArmPosition {
-        Up(0.239),   // 0.235
-        Ground(0.087),
+        Up(0.24),   // 0.235
+        Ground(0.02),
         Processor(0.087),
         Shooting(0.15),
         PickFromReef(0.11);
