@@ -1,13 +1,10 @@
 package frc.robot.auto.strategies;
 
 import com.pathplanner.lib.util.FlippingUtil;
-
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -16,17 +13,14 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Subsystems;
 import frc.robot.commands.DriveRobotCentricCommand;
 import frc.robot.commands.RotateToAngleCommand;
-import frc.robot.commands.path.ProfiledDriveCommand;
 import frc.robot.commands.pose.GenericPoseRequestCommand;
 import frc.robot.commands.vision.AlignDriveInCommand;
 import frc.robot.commands.vision.AlignDriveInCommand.AlignTarget;
-import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Elevator.ElevatorSetpoint;
 import frc.robot.subsystems.pose.UpdateTranslationFromVision;
-import frc.robot.subsystems.vision.LimelightHelpers;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.Seconds;
 
 public class BayouTroisStrategy extends AutoPathStrategy {
 
