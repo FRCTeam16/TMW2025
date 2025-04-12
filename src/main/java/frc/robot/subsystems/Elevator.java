@@ -70,7 +70,7 @@ public class Elevator extends SubsystemBase implements Lifecycle, AMD<ElevatorAM
                 .withForwardSoftLimitEnable(true)
                 .withForwardSoftLimitThreshold(0.0)
                 .withReverseSoftLimitEnable(true)
-                .withReverseSoftLimitThreshold(-60);
+                .withReverseSoftLimitThreshold(-55);
 
         TalonFXConfiguration configuration = new TalonFXConfiguration()
                 .withSlot0(slot0)
@@ -247,14 +247,14 @@ public class Elevator extends SubsystemBase implements Lifecycle, AMD<ElevatorAM
 
     public enum ElevatorSetpoint {
         Zero(0),
-        TROUGH(-16.5),
-        L2(-25.75),
-        L3(-38),
-        L4(-56.5),
-        AlgaeBarge(-38.5),
+        TROUGH(-16),
+        L2(-21.25),
+        L3(-30.5),
+        L4(-47.5),
+        AlgaeBarge(-47.5),
         AlgaeProcessor(0.0),
-        AlgaeReefHigh(-20.75),
-        AlgaeReefLow(-7.75);
+        AlgaeReefHigh(-15),
+        AlgaeReefLow(-4.65);
 
         public final double val;
 
