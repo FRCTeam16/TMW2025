@@ -76,6 +76,7 @@ public class AlignDriveInCommand extends Command {
     }
 
     public AlignDriveInCommand withApproachSpeed(LinearVelocity speed) {
+        SmartDashboard.putNumber("AlignDrive/Approach", speed.in(MetersPerSecond));
         this.approachSpeed = speed;
         return this;
     }

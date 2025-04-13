@@ -3,6 +3,7 @@ package frc.robot.commands;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.Subsystems;
@@ -21,11 +22,12 @@ public class TrackNeuralTargetCommand extends Command {
     private final SwerveSupplier swerveSupplier;
     private SwerveRequest.RobotCentric robotCentric = new SwerveRequest.RobotCentric();
     private final RotationController pid = new RotationController(0.016, 0, 0);
-    private Angle targetAngle = Degrees.of(-12);
+    private Angle targetAngle = Degrees.of(0);
 
 
     public TrackNeuralTargetCommand(SwerveSupplier swerveSupplier) {
         this.swerveSupplier = swerveSupplier;
+        SmartDashboard.putNumber("TrackAlgae/targetAngle", targetAngle.in(Degrees));
         addRequirements(Subsystems.swerveSubsystem);
     }
 
@@ -42,7 +44,8 @@ public class TrackNeuralTargetCommand extends Command {
         AngularVelocity rotation = swerveSupplier.supplyRotationalRate();
         if (target.isPresent() && target.get().hasTarget()) {
             double tx = target.get().xOffset();
-            double error = pid.calculate(tx, targetAngle.in(Degrees));
+            double targetDegrees = SmartDashboard.getNumber("TrackAlgae/targetAngle", -10);
+            double error = pid.calculate(tx, targetDegrees);
             rotation = Constants.MaxAngularRate.times(error);
         }
 
