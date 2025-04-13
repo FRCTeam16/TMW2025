@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.345790386430868,
-        "y": 4.3986490307389445
+        "x": 6.6625,
+        "y": 4.1812499999999995
       },
       "isLocked": false,
       "linkedName": null
@@ -28,10 +28,22 @@
       "linkedName": "CenterAlga1"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.11964980544747073,
+      "rotationDegrees": 180.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "elevatorL4",
+      "waypointRelativePos": 0.40000000000000024,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 3.5,
     "maxAcceleration": 3.75,

@@ -68,6 +68,7 @@ public class AutoRegistrar {
         NamedCommands.registerCommand("elevatorReefLow", new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.AlgaeReefLow).withTimeout(1.0));
         NamedCommands.registerCommand("elevatorReefHighNoWait", new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.AlgaeReefHigh).withNoWait());
         NamedCommands.registerCommand("elevatorReefLowNoWait", new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.AlgaeReefLow).withNoWait());
+        NamedCommands.registerCommand("elevatorL4", new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4));
         NamedCommands.registerCommand("elevatorL4NoWait", new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4).withNoWait());
 
 //        NamedCommands.registerCommand("shootCoral", Subsystems.coralIntake.shootCoralCommand().withTimeout(0.5));
