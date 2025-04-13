@@ -1,5 +1,6 @@
 package frc.robot.auto;
 
+import com.pathplanner.lib.events.EventTrigger;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Subsystems;
 import frc.robot.auto.strategies.*;
@@ -13,6 +14,7 @@ import frc.robot.commands.auto.CenterPickHighCommand;
 import frc.robot.commands.auto.CenterStartCommand;
 import frc.robot.commands.vision.AlignDriveInCommand;
 import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.Intake.AlgaeArm;
 import frc.robot.subsystems.Intake.IntakeCoralCommand;
 
 import javax.naming.Name;
@@ -29,10 +31,9 @@ public class AutoRegistrar {
     public static void registerStrategies(AutoManager autoManager) {
         autoManager.registerStrategy("Debug Auto", "Debug Auto", DebugAutoStrategy::new, true);
         autoManager.registerStrategy("Debug Auto Path", "Debug Auto Path", DebugAutoPathStrategy::new);
-        autoManager.registerStrategy("TestNamedAutoStrategy", "TestNamedAutoStrategy", () -> new TestNamedAutoStategy("TestPathParts"));
-        autoManager.registerStrategy("Debug Path Part", () -> new TestNamedAutoStategy("B3FirstDriveRight"));
+        autoManager.registerStrategy("TestNamedAutoStrategy", "TestNamedAutoStrategy", () -> new TestNamedAutoStategy("ElevatorEvent"));
 
-        autoManager.registerStrategy("Center", () -> new TestNamedAutoStategy("Center"));
+        autoManager.registerStrategy("Center", CenterAutoStrategy::new);
 
         // autoManager.registerStrategy("Arkansas Right Red", "Arkansas Right Red", () -> new ArkansasStrategy(false, true));
         // autoManager.registerStrategy("Arkansas Left Red", "Arkansas Left Red", () -> new ArkansasStrategy(true, true));
@@ -48,8 +49,13 @@ public class AutoRegistrar {
 //        autoManager.registerStrategy("TestDP", TestDPStrategy::new);
 //        autoManager.registerStrategy("Spin", "Spin", SpinStrategy::new);
 //        autoManager.registerStrategy("Cresent", "Cresent", CresentStrategy::new);
-       autoManager.registerStrategy("ThreePiece", "ThreePiece", ThreePieceStrategy::new);
+//       autoManager.registerStrategy("ThreePiece", "ThreePiece", ThreePieceStrategy::new);
 //        autoManager.registerStrategy("BlueReefCheck", "BlueReefCheck", () -> new SimplePathStrategy("BlueReefCheck"));
+    }
+
+    public static void registerEventTriggers() {
+        new EventTrigger("triggerElevL4").onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4).withNoWait());
+        new EventTrigger("debugEvent").onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4).withNoWait());
     }
 
     public static void registerNamedCommands() {
@@ -70,6 +76,7 @@ public class AutoRegistrar {
         NamedCommands.registerCommand("elevatorReefLowNoWait", new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.AlgaeReefLow).withNoWait());
         NamedCommands.registerCommand("elevatorL4", new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4));
         NamedCommands.registerCommand("elevatorL4NoWait", new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4).withNoWait());
+
 
 //        NamedCommands.registerCommand("shootCoral", Subsystems.coralIntake.shootCoralCommand().withTimeout(0.5));
 //        NamedCommands.registerCommand("stopCoral", Subsystems.coralIntake.stopCommand());

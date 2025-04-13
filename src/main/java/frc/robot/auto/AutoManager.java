@@ -37,6 +37,7 @@ public class AutoManager {
      * Registers named commands, auto paths, and strategies.
      */
     public void initialize() {
+        AutoRegistrar.registerEventTriggers();
         AutoRegistrar.registerNamedCommands();
         AutoRegistrar.registerAutoPaths(pathRegistry);
         AutoRegistrar.registerStrategies(this);

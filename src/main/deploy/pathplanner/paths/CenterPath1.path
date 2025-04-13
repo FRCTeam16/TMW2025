@@ -38,8 +38,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "elevatorL4",
-      "waypointRelativePos": 0.40000000000000024,
+      "name": "triggerElevL4",
+      "waypointRelativePos": 0.40207715133531163,
       "endWaypointRelativePos": null,
       "command": null
     }
