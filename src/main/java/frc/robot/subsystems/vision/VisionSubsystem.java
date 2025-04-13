@@ -100,7 +100,7 @@ public class VisionSubsystem extends SubsystemBase implements Lifecycle {
     }
 
     // Robot specific
-
+    // 2025 specific
     public String getActiveLimelightName() {
         String active = (Elevator.ElevatorSetpoint.Zero == Subsystems.elevator.getRequestedSetpoint() ? "limelight" : "limelight-base");
         SmartDashboard.putString("Subsystems/Vision/activeLimelight", active);
@@ -109,5 +109,13 @@ public class VisionSubsystem extends SubsystemBase implements Lifecycle {
 
     public Limelight getActiveLimelight() {
         return getLimelightByName(getActiveLimelightName());
+    }
+
+    /**
+     * 2025 specific, whether we are using the default limelight on the coral mechanism
+     * @return
+     */
+    public boolean isMainLimelight() {
+        return getActiveLimelightName().equals("limelight");
     }
 }

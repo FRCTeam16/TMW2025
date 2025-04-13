@@ -31,10 +31,12 @@ import static edu.wpi.first.units.Units.*;
 public class AlignDriveInCommand extends Command {
     private final Distance DEFAULT_TARGET_DISTANCE = Meters.of(0.375);
     private final Distance LIMELIGHT_OFFSET = Inches.of(12.279);
+    private final Distance BASE_LIMELIGHT_OFFSET = LIMELIGHT_OFFSET;
 
     private final AlignTarget alignTarget;
     private Angle targetRotation;
     private LinearVelocity approachSpeed = MetersPerSecond.of(1.25);
+    private LinearVelocity baseApproachSpeed = MetersPerSecond.of(0.85);
     private Distance targetDistance = DEFAULT_TARGET_DISTANCE;
     private boolean useTargetDistanceForApproachSpeed = false;
 
@@ -64,6 +66,7 @@ public class AlignDriveInCommand extends Command {
         this.addRequirements(Subsystems.swerveSubsystem);
         this.limelightName = "limelight";
         SmartDashboard.putNumber("AlignDrive/Approach", 1.25);
+        SmartDashboard.putNumber("AlignDrive/BaseApproach", 0.85);
 
         if (alignTelemetry == null) {
             alignTelemetry = new AlignTelemetry();
@@ -78,6 +81,12 @@ public class AlignDriveInCommand extends Command {
     public AlignDriveInCommand withApproachSpeed(LinearVelocity speed) {
         SmartDashboard.putNumber("AlignDrive/Approach", speed.in(MetersPerSecond));
         this.approachSpeed = speed;
+        return this;
+    }
+
+    public AlignDriveInCommand withBaseApproachSpeed(LinearVelocity speed) {
+        SmartDashboard.putNumber("AlignDrive/BaseApproach", speed.in(MetersPerSecond));
+        this.baseApproachSpeed = speed;
         return this;
     }
 
@@ -153,18 +162,18 @@ public class AlignDriveInCommand extends Command {
         //
         // Calculate speeds
         //
-        approachSpeed = MetersPerSecond.of(SmartDashboard.getNumber("AlignDrive/Approach", 1.25));
+        LinearVelocity currentApproachSpeed = getApproachSpeed();
 
         // Approach speed is the speed we want to drive towards the target
-        LinearVelocity xspeed = approachSpeed.times(Math.cos(headingRadians));
+        LinearVelocity xspeed = currentApproachSpeed.times(Math.cos(headingRadians));
         if (useTargetDistanceForApproachSpeed) {
             Optional<Double> seenDistance = Subsystems.visionOdometryUpdater.getTargetDistance();
             xspeed = seenDistance.map(seenDistanceM -> calculateXSpeedFromDistance(Meters.of(seenDistanceM)))
-                    .orElseGet(() -> approachSpeed.times(Math.cos(headingRadians)));
+                    .orElseGet(() -> currentApproachSpeed.times(Math.cos(headingRadians)));
         }
 
         // Y speed is the speed we want to drive horizontally towards the target point
-        LinearVelocity yspeed = approachSpeed.times(Math.sin(headingRadians));
+        LinearVelocity yspeed = currentApproachSpeed.times(Math.sin(headingRadians));
 
         // Robot Rotation
         double currentDegrees = Subsystems.swerveSubsystem.getState().Pose.getRotation().getDegrees();
@@ -180,6 +189,12 @@ public class AlignDriveInCommand extends Command {
         );
 
         alignTelemetry.periodic(Radians.of(headingRadians), xspeed, yspeed, rotationSpeed);
+    }
+
+    private LinearVelocity getApproachSpeed() {
+        approachSpeed = MetersPerSecond.of(SmartDashboard.getNumber("AlignDrive/Approach", 1.25));
+        baseApproachSpeed = MetersPerSecond.of(SmartDashboard.getNumber("AlignDrive/BaseApproach", 0.85));
+        return Subsystems.visionSubsystem.isMainLimelight() ? approachSpeed : baseApproachSpeed;
     }
 
     /**
@@ -202,7 +217,7 @@ public class AlignDriveInCommand extends Command {
                     Inches.of(6.5);                         // distance to reef pole or center
 
             Distance x = D.times(Math.cos(angle.in(Radians)));             // R in reference system, the vertical vector
-            x = x.minus(LIMELIGHT_OFFSET);                                 // limelight offset, take off the limelight offset within the robot
+            x = x.minus(getLimelightOffset());                                 // limelight offset, take off the limelight offset within the robot
             Distance y = (D.times(Math.sin(angle.in(Radians)))).minus(d);  // r in reference system, the horizontal vector component
 
             // For right target add twice the small d distance
@@ -213,16 +228,22 @@ public class AlignDriveInCommand extends Command {
             double rawResult = Math.atan2(y.in(Meters), x.in(Meters));
             Angle result = Radians.of(rawResult);
 
-//            BSLogger.log("calculateYTarget", "tx=" + angle.in(Degrees));
-//            BSLogger.log("calculateYTarget", "D =" + D);
-//            BSLogger.log("calculateYTarget", "d =" + d);
-//            BSLogger.log("calculateYTarget", "x =" + x);
-//            BSLogger.log("calculateYTarget", "y =" + y);
-//            BSLogger.log("calculateYTarget", "R =" + result.in(Degrees));
+            if (false) {
+                BSLogger.log("calculateYTarget", "tx=" + angle.in(Degrees));
+                BSLogger.log("calculateYTarget", "D =" + D);
+                BSLogger.log("calculateYTarget", "d =" + d);
+                BSLogger.log("calculateYTarget", "x =" + x);
+                BSLogger.log("calculateYTarget", "y =" + y);
+                BSLogger.log("calculateYTarget", "R =" + result.in(Degrees));
+            }
             return result;
         }
         // Default if no distance read
         return Degrees.of((AlignTarget.LEFT == alignTarget) ? 22.5 : -23);
+    }
+
+    private Distance getLimelightOffset() {
+        return Subsystems.visionSubsystem.isMainLimelight() ? LIMELIGHT_OFFSET : BASE_LIMELIGHT_OFFSET;
     }
 
     private LinearVelocity calculateXSpeedFromDistance(Distance distance) {
