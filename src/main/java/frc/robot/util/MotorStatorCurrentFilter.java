@@ -11,10 +11,10 @@ import edu.wpi.first.units.measure.Current;
 // FIXME: Rename
 public class MotorStatorCurrentFilter {
     // private LinearFilter filter = LinearFilter.movingAverage(5); // taps == Num of values
-    private LinearFilter filter = LinearFilter.highPass(0.1, 0.02);
-    private Current threshold;
+    private final LinearFilter filter = LinearFilter.highPass(0.1, 0.02);
+    private final Current threshold;
     private Current current = Amps.of(0);
-    private Supplier<Current> currentSupplier;
+    private final Supplier<Current> currentSupplier;
     
         public MotorStatorCurrentFilter(Current threshold, Supplier<Current> currentSupplier){
             this.threshold = threshold;

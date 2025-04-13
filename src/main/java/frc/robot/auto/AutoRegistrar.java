@@ -9,9 +9,13 @@ import com.pathplanner.lib.auto.NamedCommands;
 import frc.robot.auto.strategies.debug.*;
 import frc.robot.commands.DriveRobotCentricCommand;
 import frc.robot.commands.PickAlgaeSoonerCommand;
+import frc.robot.commands.auto.CenterPickHighCommand;
+import frc.robot.commands.auto.CenterStartCommand;
 import frc.robot.commands.vision.AlignDriveInCommand;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake.IntakeCoralCommand;
+
+import javax.naming.Name;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
@@ -53,16 +57,23 @@ public class AutoRegistrar {
          NamedCommands.registerCommand("intakeCoral", new IntakeCoralCommand().withTimeout(5.0));
 
          // Center Auto
+        NamedCommands.registerCommand("centerStartCommand", new CenterStartCommand());
+        NamedCommands.registerCommand("centerPickHigh", new CenterPickHighCommand());
+
         NamedCommands.registerCommand("alignDriveRight", new AlignDriveInCommand(AlignDriveInCommand.AlignTarget.RIGHT));
         NamedCommands.registerCommand("elevatorZero", new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.Zero));
 
 //        NamedCommands.registerCommand("elevatorL4", new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4));
         NamedCommands.registerCommand("elevatorReefHigh", new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.AlgaeReefHigh).withTimeout(1.0));
         NamedCommands.registerCommand("elevatorReefLow", new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.AlgaeReefLow).withTimeout(1.0));
+        NamedCommands.registerCommand("elevatorReefHighNoWait", new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.AlgaeReefHigh).withNoWait());
+        NamedCommands.registerCommand("elevatorReefLowNoWait", new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.AlgaeReefLow).withNoWait());
+        NamedCommands.registerCommand("elevatorL4NoWait", new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4).withNoWait());
+
 //        NamedCommands.registerCommand("shootCoral", Subsystems.coralIntake.shootCoralCommand().withTimeout(0.5));
 //        NamedCommands.registerCommand("stopCoral", Subsystems.coralIntake.stopCommand());
-        NamedCommands.registerCommand("pickAlgaeHigh", new PickAlgaeSoonerCommand(Elevator.ElevatorSetpoint.AlgaeReefHigh));
-        NamedCommands.registerCommand("pickAlgaeLow", new PickAlgaeSoonerCommand(Elevator.ElevatorSetpoint.AlgaeReefLow));
+        NamedCommands.registerCommand("pickAlgaeHigh", new PickAlgaeSoonerCommand.AutoPick(Elevator.ElevatorSetpoint.AlgaeReefHigh));
+        NamedCommands.registerCommand("pickAlgaeLow", new PickAlgaeSoonerCommand.AutoPick(Elevator.ElevatorSetpoint.AlgaeReefLow));
         NamedCommands.registerCommand("holdAlgae", Subsystems.algaeIntake.holdAlgaeROCommand());
 
         NamedCommands.registerCommand("scoreCoralL4", Commands.sequence(
@@ -72,9 +83,9 @@ public class AutoRegistrar {
                 ));
 
         NamedCommands.registerCommand("scoreAlgaeInBarge", Commands.sequence(
-                new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4).withTimeout(1.5),
+                new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4).withTimeout(1),
                 Subsystems.algaeIntake.ejectCommand().withTimeout(0.5),
-                Subsystems.algaeIntake.stopCommand().withTimeout(0.1)   // todo: change to fire once
+                Subsystems.algaeIntake.stopCommand().withTimeout(0.1)
                 ));
 
         NamedCommands.registerCommand("backOffBarge",

@@ -1,6 +1,8 @@
 package frc.robot.subsystems.vision;
 
 import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Subsystems;
 import frc.robot.subsystems.Elevator;
@@ -9,9 +11,13 @@ import frc.robot.util.BSLogger;
 
 import java.util.*;
 
+import static edu.wpi.first.units.Units.Seconds;
+
+
 public class VisionSubsystem extends SubsystemBase implements Lifecycle {
     private final Map<String, Limelight> limelightLookup = new HashMap<>();
     private final Limelight defaultLimelight;
+    private final Timer updateTimer = new Timer();
 
     public VisionSubsystem(Iterable<Limelight> limelights) {
         Limelight tmpLimelight = null;
@@ -27,6 +33,7 @@ public class VisionSubsystem extends SubsystemBase implements Lifecycle {
             this.defaultLimelight = null;
             BSLogger.log("VisionSubsystem", "No Limelights were added to the VisionSubsystem");
         }
+        updateTimer.start();
     }
 
     @Override
@@ -42,6 +49,15 @@ public class VisionSubsystem extends SubsystemBase implements Lifecycle {
     @Override
     public void autoInit() {
         selectPipeline(Pipeline.April);
+    }
+
+
+    @Override
+    public void periodic() {
+        if (updateTimer.hasElapsed(1.0)) {
+            getActiveLimelightName();
+            updateTimer.reset();
+        }
     }
 
     public Optional<Limelight> getDefaultLimelight() {
@@ -86,7 +102,9 @@ public class VisionSubsystem extends SubsystemBase implements Lifecycle {
     // Robot specific
 
     public String getActiveLimelightName() {
-        return (Elevator.ElevatorSetpoint.Zero == Subsystems.elevator.getRequestedSetpoint() ? "limelight" : "limelight-base");
+        String active = (Elevator.ElevatorSetpoint.Zero == Subsystems.elevator.getRequestedSetpoint() ? "limelight" : "limelight-base");
+        SmartDashboard.putString("Subsystems/Vision/activeLimelight", active);
+        return active;
     }
 
     public Limelight getActiveLimelight() {

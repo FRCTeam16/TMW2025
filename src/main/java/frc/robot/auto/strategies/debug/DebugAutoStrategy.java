@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Subsystems;
+import frc.robot.auto.strategies.BayouTroisStrategy;
 import frc.robot.commands.DriveRobotCentricCommand;
 import frc.robot.commands.RotateToAngleCommand;
 import frc.robot.commands.vision.AlignDriveInCommand;
@@ -20,19 +21,31 @@ import static edu.wpi.first.units.Units.*;
 public class DebugAutoStrategy extends SequentialCommandGroup {
     public DebugAutoStrategy() {
         this.addCommands(
-                new PrintCommand("Debug Auto Strategy")
+                new PrintCommand("Debug Auto Strategy"),
+                testReverseDrive(),
+                new PrintCommand("Debug Auto Strategy Finished")
+
+        );
+    }
+
+    public Command testReverseDrive() {
+        return Commands.sequence(
+                new DriveRobotCentricCommand(Seconds.of(0.5))
+                        .withApproachSpeed(MetersPerSecond.of(-0.5))
         );
     }
 
     public Command testingFirstDrive() {
         return Commands.sequence(
-                new DriveRobotCentricCommand(Seconds.of(1.3)),
-                new RotateToAngleCommand(Degrees.of(120)).withTimeout(0.5),
+                new DriveRobotCentricCommand(Seconds.of(1.3))
+                        .withCalcFacingAngle(BayouTroisStrategy.StartingPosition.BLUE_RIGHT),
+//                new RotateToAngleCommand(Degrees.of(120)).withTimeout(0.5),
 //                Commands.runOnce(() -> {
 //                    Subsystems.swerveSubsystem.setControl(new SwerveRequest.SwerveDriveBrake());
 //                }),
                 new AlignDriveInCommand(AlignDriveInCommand.AlignTarget.RIGHT),
-                doScoreSequence()
+//                doScoreSequence()
+                new PrintCommand("Debug Auto Strategy Finished")
         );
     }
 

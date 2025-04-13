@@ -1,5 +1,6 @@
 package frc.robot.subsystems.Intake;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
@@ -7,7 +8,12 @@ import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.util.datalog.BooleanLogEntry;
+import edu.wpi.first.util.datalog.DataLog;
+import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -20,17 +26,19 @@ import frc.robot.subsystems.AMD;
 import frc.robot.subsystems.Lifecycle;
 import frc.robot.util.MotorStatorCurrentFilter;
 
+import java.util.function.Supplier;
+
 import static edu.wpi.first.units.Units.Amps;
 
 public class AlgaeIntake extends SubsystemBase implements Lifecycle, AMD<AlgaeIntakeAMDCommand.AlgaeIntakeDataCollector> {
     private final TalonFX algaeIntakeMotor = new TalonFX(Robot.robotConfig.getCanID("algaeIntakeMotor"));
     private final NeutralOut brake = new NeutralOut();
     private final DutyCycleOut intakeDutyCycleOut = new DutyCycleOut(1);
-    private final MotorStatorCurrentFilter detector = new MotorStatorCurrentFilter(Amps.of(30),
-            algaeIntakeMotor.getStatorCurrent().asSupplier());
-    private final MotorStatorCurrentFilter dropDetector = new MotorStatorCurrentFilter(Amps.of(-20),
-            algaeIntakeMotor.getStatorCurrent().asSupplier());
+    private final Supplier<Current> statorCurrentSupplier = algaeIntakeMotor.getStatorCurrent().asSupplier();
+    private final MotorStatorCurrentFilter detector = new MotorStatorCurrentFilter(Amps.of(30), statorCurrentSupplier);
+    private final MotorStatorCurrentFilter dropDetector = new MotorStatorCurrentFilter(Amps.of(-1.5), statorCurrentSupplier);
 
+    private final AlgaeIntakeTelemetry telemetry = new AlgaeIntakeTelemetry();
 
     private double forwardSpeed = 0.6;
     private double backwardSpeed = -0.3;
@@ -41,7 +49,12 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle, AMD<AlgaeIn
     public AlgaeIntake() {
         MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs()
                 .withNeutralMode(NeutralModeValue.Brake);
+        CurrentLimitsConfigs currentLimitConfigs = new CurrentLimitsConfigs()
+                .withStatorCurrentLimitEnable(true)
+                .withStatorCurrentLimit(Amps.of(70));
+
         TalonFXConfiguration intakeConfiguration = new TalonFXConfiguration()
+                .withCurrentLimits(currentLimitConfigs)
                 .withMotorOutput(motorOutputConfigs);
         algaeIntakeMotor.getConfigurator().apply(intakeConfiguration);
 
@@ -49,14 +62,31 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle, AMD<AlgaeIn
     }
 
     @Override
+    public void teleopInit() {
+        if (this.getDefaultCommand() == null) {
+            this.setDefaultCommand(new DefaultHoldCommand());
+        }
+    }
+
+    @Override
+    public void autoInit() {
+        this.removeDefaultCommand();
+    }
+
+    @Override
     public void periodic() {
-        detector.update();
+        telemetry.statorCurrent.append(statorCurrentSupplier.get().in(Amps));
+        Current detectCurrent = detector.update();
+        telemetry.detectorCurrent.append(detectCurrent.in(Amps));
         if (detector.isOverThreshold()) {
+            telemetry.algaeDetected.append(true);
             algaeDetected = true;
         }
 
-        dropDetector.update();
+        Current dropCurrent = dropDetector.update();
+        telemetry.dropDetectorCurrent.append(dropCurrent.in(Amps));
         if (algaeDetected && dropDetector.isUnderThreshold()) {
+            telemetry.algaeDetected.append(false);
             algaeDetected = false;
         }
     }
@@ -118,10 +148,10 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle, AMD<AlgaeIn
 
     public Command ejectCommand() {
         return this.startRun(
-            () -> this.algaeDetected = false,
-            () -> algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(backwardSpeed))
-            ).alongWith(Commands.runOnce(() -> requestedState = "Eject"))
-            .withName("Algae Eject");
+                        () -> this.algaeDetected = false,
+                        () -> algaeIntakeMotor.setControl(intakeDutyCycleOut.withOutput(backwardSpeed))
+                ).alongWith(Commands.runOnce(() -> requestedState = "Eject"))
+                .withName("Algae Eject");
 
     }
 
@@ -151,6 +181,26 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle, AMD<AlgaeIn
         dataCollector.addCurrents(algaeIntakeMotor.getStatorCurrent().getValueAsDouble());
     }
 
+    static class AlgaeIntakeTelemetry {
+        private final String BASE = "Telemetry/AlgaeIntake/";
+        //        StringLogEntry requestedState;
+        DoubleLogEntry statorCurrent;
+        BooleanLogEntry algaeDetected;
+        DoubleLogEntry detectorCurrent;
+        DoubleLogEntry dropDetectorCurrent;
+
+
+        AlgaeIntakeTelemetry() {
+            DataLog log = DataLogManager.getLog();
+//            requestedState = new StringLogEntry(log, BASE+"requestedState");
+            statorCurrent = new DoubleLogEntry(log, BASE + "statorCurrent");
+            algaeDetected = new BooleanLogEntry(log, BASE + "algaeDetected");
+            detectorCurrent = new DoubleLogEntry(log, BASE + "detectorCurrent");
+            dropDetectorCurrent = new DoubleLogEntry(log, BASE + "dropDetectorCurrent");
+        }
+
+    }
+
     class DefaultHoldCommand extends Command {
         DefaultHoldCommand() {
             addRequirements(AlgaeIntake.this);
@@ -166,10 +216,9 @@ public class AlgaeIntake extends SubsystemBase implements Lifecycle, AMD<AlgaeIn
 
     class PulseHoldAlgaeCommand extends Command {
         private final Timer timer = new Timer();
-        private boolean pulseState = false;
-
         private final DutyCycleOut pulse = new DutyCycleOut(holdSpeed);
         private final StaticBrake brake = new StaticBrake();
+        private boolean pulseState = false;
 
         public PulseHoldAlgaeCommand() {
             addRequirements(Subsystems.algaeIntake);

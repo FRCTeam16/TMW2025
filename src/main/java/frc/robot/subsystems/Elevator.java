@@ -53,6 +53,7 @@ public class Elevator extends SubsystemBase implements Lifecycle, AMD<ElevatorAM
     private final ElevatorTelemetry telemetry = new ElevatorTelemetry();
 
     public Elevator() {
+        right.getConfigurator().apply(new TalonFXConfiguration());
         right.setControl(new Follower(left.getDeviceID(), true));
 
         Slot0Configs slot0 = new Slot0Configs()
@@ -93,6 +94,12 @@ public class Elevator extends SubsystemBase implements Lifecycle, AMD<ElevatorAM
     @Override
     public void teleopInit() {
         moveToPosition(ElevatorSetpoint.Zero);
+        this.setDefaultCommand(new DefaultHoldPositionCommand(this));
+    }
+
+    @Override
+    public void autoInit() {
+        this.removeDefaultCommand();
     }
 
     @Override
