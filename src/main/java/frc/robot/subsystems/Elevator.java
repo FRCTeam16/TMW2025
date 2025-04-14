@@ -20,6 +20,7 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Robot;
@@ -39,18 +40,14 @@ public class Elevator extends SubsystemBase implements Lifecycle, AMD<ElevatorAM
     private final DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
     private final MotionMagicVoltage motionMagicV = new MotionMagicVoltage(0)
             .withFeedForward(Units.Volts.of(GRAVITY_VOLTS));
-
+    private final ElevatorTelemetry telemetry = new ElevatorTelemetry();
     private double openLoopMotorSpeed = -0.2;
     private double currentSetpoint = 0;
     private ElevatorSetpoint requestedSetpoint = Elevator.ElevatorSetpoint.Zero;
     private boolean lazyHold;
     private double openLoopMax = 0.3;
-
     private double elevatorUpThreshold = -26.0;
-
     private Alert coralObstructionAlert = new Alert("Coral is obstructing elevator path", Alert.AlertType.kError);
-
-    private final ElevatorTelemetry telemetry = new ElevatorTelemetry();
 
     public Elevator() {
         right.getConfigurator().apply(new TalonFXConfiguration());
@@ -75,7 +72,7 @@ public class Elevator extends SubsystemBase implements Lifecycle, AMD<ElevatorAM
 
         TalonFXConfiguration configuration = new TalonFXConfiguration()
                 .withSlot0(slot0)
-                .withMotionMagic(motionMagicConfigs)
+                .withMotionMagic(ElevatorMMConfig.defaultMagicConfigs)
                 .withSoftwareLimitSwitch(softwareLimitSwitchConfigs);
 
         left.getConfigurator().apply(configuration);
@@ -110,6 +107,13 @@ public class Elevator extends SubsystemBase implements Lifecycle, AMD<ElevatorAM
             telemetry.obstructionDetected.append(isElevatorObstructed);
         }
         telemetry.currentPosition.append(getCurrentPosition());
+    }
+
+    void setSlowMode(boolean slowMode) {
+        // Future: investigate configurator refresh?
+        MotionMagicConfigs mmConfig = slowMode ? ElevatorMMConfig.slowMagicConfigs : ElevatorMMConfig.defaultMagicConfigs;
+        left.getConfigurator().apply(mmConfig);
+        telemetry.slowMode.append(slowMode);
     }
 
     boolean isElevatorObstructedByCoral() {
@@ -155,12 +159,12 @@ public class Elevator extends SubsystemBase implements Lifecycle, AMD<ElevatorAM
         final double error = Math.abs(currentPos - currentSetpoint);
 
         if (ElevatorSetpoint.Zero == requestedSetpoint) {
-             if (lazyHold) {
-                 return true;
-             }
-             if (error < 5) {
-                 return true;
-             }
+            if (lazyHold) {
+                return true;
+            }
+            if (error < 5) {
+                return true;
+            }
         }
 
         boolean inPosition = error < ELEVATOR_POSITION_THRESHOLD && left.getVelocity().getValueAsDouble() < 0.1;
@@ -204,6 +208,22 @@ public class Elevator extends SubsystemBase implements Lifecycle, AMD<ElevatorAM
      */
     public Command openLoopStopCommand() {
         return this.runOnce(() -> left.setControl(neutralOut)).withName("Open Loop Stop");
+    }
+
+    /**
+     * Use slow MM config to move to a position. Warning! This does not lock the Elevator in requirements.
+     *
+     * @param elevatorSetpoint
+     * @return
+     */
+    public Command slowMoveToPositionCommand(ElevatorSetpoint elevatorSetpoint) {
+        return Commands.startEnd(
+                () -> {
+                    Subsystems.elevator.setSlowMode(true);
+                    Subsystems.elevator.moveToPosition(elevatorSetpoint);
+                },
+                () -> Subsystems.elevator.setSlowMode(false)
+        );
     }
 
     @Override
@@ -270,14 +290,37 @@ public class Elevator extends SubsystemBase implements Lifecycle, AMD<ElevatorAM
         }
     }
 
+    static class ElevatorMMConfig {
+        static MotionMagicConfigs defaultMagicConfigs = new MotionMagicConfigs()
+                .withMotionMagicCruiseVelocity(80) // 80
+                .withMotionMagicAcceleration(160) // 140
+                .withMotionMagicJerk(0)
+                .withMotionMagicExpo_kA(0.0)
+                .withMotionMagicExpo_kV(0.01);
+
+        static MotionMagicConfigs slowMagicConfigs = new MotionMagicConfigs()
+                .withMotionMagicCruiseVelocity(40) // 80
+                .withMotionMagicAcceleration(40) // 140
+                .withMotionMagicJerk(0)
+                .withMotionMagicExpo_kA(0.0)
+                .withMotionMagicExpo_kV(0.01);
+    }
+
     public static class ElevatorMoveToPositionCommand extends Command {
         private final ElevatorSetpoint setpoint;
         private boolean abort = false;
         private boolean noWaitForFinish = false;
+        private boolean slowMode = false;
 
         public ElevatorMoveToPositionCommand(ElevatorSetpoint setpoint) {
             this.setpoint = setpoint;
             addRequirements(Subsystems.elevator);
+        }
+
+
+        public ElevatorMoveToPositionCommand withSlowMode() {
+            this.slowMode = true;
+            return this;
         }
 
         @Override
@@ -287,22 +330,59 @@ public class Elevator extends SubsystemBase implements Lifecycle, AMD<ElevatorAM
                 BSLogger.log("ElevatorMoveToPositionCommand", "Coral obstruction detected, setting abort");
                 return;
             }
+            if (this.slowMode) {
+                Subsystems.elevator.setSlowMode(true);
+            }
             Subsystems.elevator.moveToPosition(this.setpoint);
         }
 
         @Override
         public boolean isFinished() {
             if (abort || noWaitForFinish || Subsystems.elevator.isInPosition()) {
-                BSLogger.log("ElevatorMoveToPositionCommand", "abort: " + abort + 
-                " | noWaitForFinish: " + noWaitForFinish + " | inPosition: " + Subsystems.elevator.isInPosition());
+                BSLogger.log("ElevatorMoveToPositionCommand", "abort: " + abort +
+                        " | noWaitForFinish: " + noWaitForFinish + " | inPosition: " + Subsystems.elevator.isInPosition());
                 return true;
             }
             return false;
         }
 
+        @Override
+        public void end(boolean interrupted) {
+            if (this.slowMode) {
+                // reset elevator back to normal operation
+                Subsystems.elevator.setSlowMode(false);
+            }
+        }
+
         public ElevatorMoveToPositionCommand withNoWait() {
             this.noWaitForFinish = true;
             return this;
+        }
+    }
+
+    static class ElevatorTelemetry {
+
+        DoubleLogEntry leftMotorCurrent;
+        DoubleLogEntry rightMotorCurrent;
+        DoubleLogEntry currentPosition;
+        DoubleLogEntry currentSetpoint;
+        BooleanLogEntry isInPosition;
+        StringLogEntry requestedSetpoint;
+        BooleanLogEntry obstructionDetected;
+        DoubleLogEntry openLoopMotorSpeed;
+        BooleanLogEntry slowMode;
+
+        ElevatorTelemetry() {
+            DataLog log = DataLogManager.getLog();
+            leftMotorCurrent = new DoubleLogEntry(log, "Telemetry/Elevator/LeftMotorCurrent");
+            rightMotorCurrent = new DoubleLogEntry(log, "Telemetry/Elevator/RightMotorCurrent");
+            currentPosition = new DoubleLogEntry(log, "Telemetry/Elevator/CurrentPosition");
+            currentSetpoint = new DoubleLogEntry(log, "Telemetry/Elevator/CurrentSetpoint");
+            isInPosition = new BooleanLogEntry(log, "Telemetry/Elevator/IsInPosition");
+            requestedSetpoint = new StringLogEntry(log, "Telemetry/Elevator/RequestedSetpoint");
+            obstructionDetected = new BooleanLogEntry(log, "Telemetry/Elevator/ObstructionDetected");
+            openLoopMotorSpeed = new DoubleLogEntry(log, "Telemetry/Elevator/OpenLoopMotorSpeed");
+            slowMode = new BooleanLogEntry(log, "Telemetry/Elevator/SlowMode");
         }
     }
 
@@ -331,34 +411,7 @@ public class Elevator extends SubsystemBase implements Lifecycle, AMD<ElevatorAM
 
         @Override
         public void end(boolean interrupted) {
-            if (lazyHold && isRequestedZero()) {
-//                Subsystems.elevator.left.setPosition(0);
-            }
             Subsystems.elevator.setLazyHold(false);
-        }
-    }
-
-    class ElevatorTelemetry {
-
-        DoubleLogEntry leftMotorCurrent;
-        DoubleLogEntry rightMotorCurrent;
-        DoubleLogEntry currentPosition;
-        DoubleLogEntry currentSetpoint;
-        BooleanLogEntry isInPosition;
-        StringLogEntry requestedSetpoint;
-        BooleanLogEntry obstructionDetected;
-        DoubleLogEntry openLoopMotorSpeed;
-
-        ElevatorTelemetry() {
-            DataLog log = DataLogManager.getLog();
-            leftMotorCurrent = new DoubleLogEntry(log, "Telemetry/Elevator/LeftMotorCurrent");
-            rightMotorCurrent = new DoubleLogEntry(log, "Telemetry/Elevator/RightMotorCurrent");
-            currentPosition = new DoubleLogEntry(log, "Telemetry/Elevator/CurrentPosition");
-            currentSetpoint = new DoubleLogEntry(log, "Telemetry/Elevator/CurrentSetpoint");
-            isInPosition = new BooleanLogEntry(log, "Telemetry/Elevator/IsInPosition");
-            requestedSetpoint = new StringLogEntry(log, "Telemetry/Elevator/RequestedSetpoint");
-            obstructionDetected = new BooleanLogEntry(log, "Telemetry/Elevator/ObstructionDetected");
-            openLoopMotorSpeed = new DoubleLogEntry(log, "Telemetry/Elevator/OpenLoopMotorSpeed");
         }
     }
 }

@@ -141,6 +141,7 @@ public class BayouControls extends ControlBinding {
         alignRight.whileTrue(new AlignDriveInCommand(AlignDriveInCommand.AlignTarget.RIGHT).withResetPoseDuringDrive(false));
         alignMiddle.whileTrue(new TrackNeuralTargetCommand(this.swerveSupplier));
 
+        // Manual Pick
         new JoystickButton(driveStick, 15)
                 .whileTrue(Commands.runOnce(() -> Subsystems.algaeArm.setArmPosition(AlgaeArm.AlgaeArmPosition.PickFromReef)))
                 .onFalse(Commands.runOnce(() -> Subsystems.algaeArm.setArmPosition(AlgaeArmPosition.Up)));
@@ -157,9 +158,6 @@ public class BayouControls extends ControlBinding {
         enableManualStickControlToggle.onTrue(Commands.runOnce(() -> manualStickControlState = !manualStickControlState));
 
         resetPoseButton.onTrue(new GenericPoseRequestCommand<>(ResetToAlliancePoseRequest.class).ignoringDisable(true));
-
-        // overrideClimberUp.whileTrue(Subsystems.climber.openLoopUpDefault());
-        // overrideClimberDown.whileTrue(Subsystems.climber.openLoopDownDefault());
 
         bindCommonButtons();
     }
@@ -191,8 +189,7 @@ public class BayouControls extends ControlBinding {
         SmartDashboard.putData("Run Elevator AMD", new ElevatorAMDCommand().andThen(RunAMDCommand.reportAMDEndCmd()));
         SmartDashboard.putData("Run AlgaeArm AMD", new AlgaeArmAMDCommand().andThen(RunAMDCommand.reportAMDEndCmd()));
         SmartDashboard.putData("Run AlgaeIntake AMD", new AlgaeIntakeAMDCommand().andThen(RunAMDCommand.reportAMDEndCmd()));
-        SmartDashboard.putData("Delete AMD CSV", Commands.runOnce(() -> AMDStats.removeKnownCSVFiles()).ignoringDisable(true));
-
+        SmartDashboard.putData("Delete AMD CSV", Commands.runOnce(AMDStats::removeKnownCSVFiles).ignoringDisable(true));
         amdButton.onTrue(new RunAMDCommand());
 
         // End AMD
@@ -200,7 +197,13 @@ public class BayouControls extends ControlBinding {
         SmartDashboard.putData("Open Latch", Subsystems.funnelSubsystem.openLatchCommand().ignoringDisable(true));
         SmartDashboard.putData("Close Latch", Subsystems.funnelSubsystem.closeLatchCommand().ignoringDisable(true));
 
+
         SmartDashboard.putData("Debug Rotate", new RotateToAngleCommand(Degrees.of(120)));
+        SmartDashboard.putData("Debug Slow Elevator RL",
+                new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.AlgaeReefLow).withSlowMode());
+        SmartDashboard.putData("Debug Slow Elevator L4",
+                new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4).withSlowMode());
+
 
         new JoystickButton(steerStick, 10).whileTrue(
                 new DriveRobotCentricCommand(Seconds.of(0.5))

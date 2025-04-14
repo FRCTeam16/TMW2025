@@ -27,14 +27,14 @@ public class CenterStartCommand extends SequentialCommandGroup {
                 ),
                 new ParallelDeadlineGroup(
                         new WaitCommand(1.5),
-                        new AlignDriveInCommand(AlignDriveInCommand.AlignTarget.RIGHT)
+                        new AlignDriveInCommand(AlignDriveInCommand.AlignTarget.RIGHT).withResetPoseDuringDrive(false)
                 ),
                 new SequentialCommandGroup(
                         Subsystems.algaeIntake.ejectCommand().withTimeout(0.3),
                         Subsystems.algaeIntake.stopCommand().withTimeout(0.1)
                 ),
                 Commands.parallel(
-                        new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.AlgaeReefLow).withNoWait(),
+                        new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.AlgaeReefLow).withSlowMode(),
                         Commands.runOnce(() -> Subsystems.algaeArm.setArmPosition(AlgaeArm.AlgaeArmPosition.PickFromReef)),
                         Commands.runOnce(() -> Subsystems.algaeIntake.intakeAlgae())
                 ),

@@ -54,7 +54,8 @@ public class AutoRegistrar {
     }
 
     public static void registerEventTriggers() {
-        new EventTrigger("triggerElevL4").onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4).withNoWait());
+        new EventTrigger("triggerElevL4").onTrue(
+                Subsystems.elevator.slowMoveToPositionCommand(Elevator.ElevatorSetpoint.L4));
         new EventTrigger("debugEvent").onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4).withNoWait());
     }
 
@@ -69,7 +70,6 @@ public class AutoRegistrar {
         NamedCommands.registerCommand("alignDriveRight", new AlignDriveInCommand(AlignDriveInCommand.AlignTarget.RIGHT));
         NamedCommands.registerCommand("elevatorZero", new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.Zero));
 
-//        NamedCommands.registerCommand("elevatorL4", new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4));
         NamedCommands.registerCommand("elevatorReefHigh", new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.AlgaeReefHigh).withTimeout(1.0));
         NamedCommands.registerCommand("elevatorReefLow", new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.AlgaeReefLow).withTimeout(1.0));
         NamedCommands.registerCommand("elevatorReefHighNoWait", new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.AlgaeReefHigh).withNoWait());
