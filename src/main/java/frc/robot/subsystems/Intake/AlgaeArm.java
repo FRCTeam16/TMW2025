@@ -45,7 +45,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle, AMD<AlgaeArmAM
                 .withMagnetSensor(
                         new MagnetSensorConfigs()
                                 .withSensorDirection(SensorDirectionValue.Clockwise_Positive)
-                                .withMagnetOffset(0.007812));
+                                .withMagnetOffset(0.638916015625));
         algaeArmEncoder.getConfigurator().apply(encoderConfiguration);
 
         Slot0Configs slot0 = new Slot0Configs()
@@ -64,10 +64,10 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle, AMD<AlgaeArmAM
 
         SoftwareLimitSwitchConfigs softwareLimitSwitchConfigs = new SoftwareLimitSwitchConfigs()
                 .withForwardSoftLimitEnable(true)
-                .withForwardSoftLimitThreshold(0.240
+                .withForwardSoftLimitThreshold(0.220
                 )
                 .withReverseSoftLimitEnable(true)
-                .withReverseSoftLimitThreshold(0.03);
+                .withReverseSoftLimitThreshold(-0.1);
 
         MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs()
                 .withMotionMagicCruiseVelocity(0.6)
@@ -181,8 +181,8 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle, AMD<AlgaeArmAM
     }
 
     public enum AlgaeArmPosition {
-        Up(0.24),   // 0.235
-        Ground(0.02),
+        Up(0.21),   // 0.21
+        Ground(-0.05),
         Processor(0.087),
         Shooting(0.15),
         PickFromReef(0.11);
