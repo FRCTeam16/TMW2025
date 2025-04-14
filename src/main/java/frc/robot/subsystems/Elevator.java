@@ -277,7 +277,7 @@ public class Elevator extends SubsystemBase implements Lifecycle, AMD<ElevatorAM
         TROUGH(-16),
         L2(-21.25),
         L3(-30.5),
-        L4(-47.5),
+        L4(-46.5),
         AlgaeBarge(-47.5),
         AlgaeProcessor(0.0),
         AlgaeReefHigh(-15),

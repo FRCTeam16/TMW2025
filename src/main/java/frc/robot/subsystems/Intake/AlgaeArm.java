@@ -183,7 +183,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle, AMD<AlgaeArmAM
     public enum AlgaeArmPosition {
         Up(0.21),   // 0.21
         Ground(-0.05),
-        Processor(0.087),
+        Processor(0.053),
         Shooting(0.15),
         PickFromReef(0.11);
 
