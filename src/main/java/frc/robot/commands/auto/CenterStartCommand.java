@@ -8,6 +8,7 @@ import frc.robot.commands.PickAlgaeSoonerCommand;
 import frc.robot.commands.vision.AlignDriveInCommand;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake.AlgaeArm;
+import frc.robot.subsystems.Intake.CoralIntake;
 import frc.robot.subsystems.vision.Pipeline;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -25,20 +26,21 @@ public class CenterStartCommand extends SequentialCommandGroup {
                         new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4).withNoWait(),
                         new DriveRobotCentricCommand(Seconds.of(0.6))
                 ),
+//                new WaitCommand(3.0).until(() -> Subsystems.visionSubsystem.getActiveLimelight().getTargetInfo().hasTarget()),
                 new ParallelDeadlineGroup(
                         new WaitCommand(1.5),
                         new AlignDriveInCommand(AlignDriveInCommand.AlignTarget.RIGHT).withResetPoseDuringDrive(false)
                 ),
                 new SequentialCommandGroup(
-                        Subsystems.algaeIntake.ejectCommand().withTimeout(0.3),
-                        Subsystems.algaeIntake.stopCommand().withTimeout(0.1)
+                        Subsystems.coralIntake.shootCoralCommand().withTimeout(0.75)
                 ),
                 Commands.parallel(
+                        Subsystems.coralIntake.stopCommand().withTimeout(0.1),
                         new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.AlgaeReefLow).withSlowMode(),
                         Commands.runOnce(() -> Subsystems.algaeArm.setArmPosition(AlgaeArm.AlgaeArmPosition.PickFromReef)),
                         Commands.runOnce(() -> Subsystems.algaeIntake.intakeAlgae())
-                ),
-                new WaitCommand(1.5).until(Subsystems.algaeIntake::isAlgaeDetected),
+                ).withTimeout(2.0).until(Subsystems.algaeIntake::isAlgaeDetected),
+//                new WaitCommand(2.5).until(Subsystems.algaeIntake::isAlgaeDetected),
                 Subsystems.algaeArm.setArmPositionCommand(AlgaeArm.AlgaeArmPosition.Up).withTimeout(0.1),
                 Subsystems.algaeIntake.holdAlgaeROCommand()
         );

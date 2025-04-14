@@ -299,7 +299,7 @@ public class Elevator extends SubsystemBase implements Lifecycle, AMD<ElevatorAM
                 .withMotionMagicExpo_kV(0.01);
 
         static MotionMagicConfigs slowMagicConfigs = new MotionMagicConfigs()
-                .withMotionMagicCruiseVelocity(40) // 80
+                .withMotionMagicCruiseVelocity(60) // 80
                 .withMotionMagicAcceleration(40) // 140
                 .withMotionMagicJerk(0)
                 .withMotionMagicExpo_kA(0.0)

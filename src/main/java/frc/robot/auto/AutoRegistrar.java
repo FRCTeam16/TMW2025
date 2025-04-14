@@ -56,6 +56,9 @@ public class AutoRegistrar {
     public static void registerEventTriggers() {
         new EventTrigger("triggerElevL4").onTrue(
                 Subsystems.elevator.slowMoveToPositionCommand(Elevator.ElevatorSetpoint.L4));
+        new EventTrigger("triggerElevL4v2").onTrue(
+                Subsystems.elevator.slowMoveToPositionCommand(Elevator.ElevatorSetpoint.L4));
+
         new EventTrigger("debugEvent").onTrue(new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.L4).withNoWait());
     }
 
