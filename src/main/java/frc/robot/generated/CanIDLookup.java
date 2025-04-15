@@ -36,6 +36,7 @@ public class CanIDLookup {
 
         // Work around Java limitations
         canIDMap.put("algaeArmEncoder", 5);
+        canIDMap.put("climberEncoder", 6);
 
         if (config == RobotConfig.ConfigName.LOWRIDA) {
             canIDMap.putAll(lowridaIDMap);

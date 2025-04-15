@@ -30,7 +30,7 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle, AMD<AlgaeArmAM
     public static final double ALLOWED_POSITION_ERROR = 0.1;
     private static final double GRAVITY_COMPENSATION = 0; //-0.49;
     private final TalonFX algaeArmMotor = new TalonFX(Robot.robotConfig.getCanID("algaeArmMotor"));
-    private final CANcoder algaeArmEncoder = new CANcoder(Robot.robotConfig.getCanID("algaeArmEncoder"));
+//    private final CANcoder algaeArmEncoder = new CANcoder(Robot.robotConfig.getCanID("algaeArmEncoder"));
     private final DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
     private final PositionVoltage positionVoltage = new PositionVoltage(0).withSlot(0);
     private final MotionMagicVoltage motionMagic = new MotionMagicVoltage(0).withSlot(1);
@@ -41,12 +41,12 @@ public class AlgaeArm extends SubsystemBase implements Lifecycle, AMD<AlgaeArmAM
 
 
     public AlgaeArm() {
-        CANcoderConfiguration encoderConfiguration = new CANcoderConfiguration()
-                .withMagnetSensor(
-                        new MagnetSensorConfigs()
-                                .withSensorDirection(SensorDirectionValue.Clockwise_Positive)
-                                .withMagnetOffset(0.638916015625));
-        algaeArmEncoder.getConfigurator().apply(encoderConfiguration);
+//        CANcoderConfiguration encoderConfiguration = new CANcoderConfiguration()
+//                .withMagnetSensor(
+//                        new MagnetSensorConfigs()
+//                                .withSensorDirection(SensorDirectionValue.Clockwise_Positive)
+//                                .withMagnetOffset(0.638916015625));
+//        algaeArmEncoder.getConfigurator().apply(encoderConfiguration);
 
         Slot0Configs slot0 = new Slot0Configs()
                 .withKP(45)

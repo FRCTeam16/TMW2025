@@ -6,12 +6,12 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Robot;
@@ -39,18 +39,24 @@ public class Climber extends SubsystemBase implements Lifecycle {
                 .withNeutralMode(NeutralModeValue.Brake);
 
         Slot0Configs slot0Configs = new Slot0Configs()
-                .withKP(5.0);
+                .withKP(100.0);
 
-        SoftwareLimitSwitchConfigs softwareLimitSwitchConfigs = createSoftwareLimitSwitches(true);
+        FeedbackConfigs feedbackConfigs = new FeedbackConfigs()
+                .withFeedbackRemoteSensorID(Robot.robotConfig.getCanID("climberEncoder"))
+                .withRotorToSensorRatio(288)
+                .withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANcoder);
+
+        SoftwareLimitSwitchConfigs softwareLimitSwitchConfigs = createSoftwareLimitSwitches(false);
 
         MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs()
-                .withMotionMagicAcceleration(400)
-                .withMotionMagicCruiseVelocity(100);
+                .withMotionMagicAcceleration(10)
+                .withMotionMagicCruiseVelocity(10);
 
         climberConfiguration
                 .withMotionMagic(motionMagicConfigs)
                 .withMotorOutput(motorOutputConfigs)
                 .withSlot0(slot0Configs)
+                .withFeedback(feedbackConfigs)
                 .withSoftwareLimitSwitch(softwareLimitSwitchConfigs);
 
         climberMotor.getConfigurator().apply(climberConfiguration);
@@ -79,6 +85,7 @@ public class Climber extends SubsystemBase implements Lifecycle {
         builder.setSmartDashboardType("Climber");
         builder.addDoubleProperty("currentSetpoint", () -> currentSetpoint, (v) -> currentSetpoint = v);
         builder.addDoubleProperty("position", this::getPosition, null);
+        builder.addDoubleProperty("rawPosition", () -> climberMotor.getPosition().getValueAsDouble(), null);
         builder.addBooleanProperty("inPosition", this::isInPosition, null);
 
         if (Constants.DebugSendables.Climber) {
@@ -87,7 +94,7 @@ public class Climber extends SubsystemBase implements Lifecycle {
     }
 
     public boolean isInPosition() {
-        return Math.abs(getPosition() - currentSetpoint) < 0.5;
+        return Math.abs(getPosition() - currentSetpoint) < 0.001;
     }
 
     private void runOpenLoop(double value) {
@@ -100,6 +107,7 @@ public class Climber extends SubsystemBase implements Lifecycle {
             willNotMoveBackwardsAlert.set(true);
             return;
         }
+        BSLogger.log("Climber", "Moving to position: " + position);
         this.currentSetpoint = position;
         climberMotor.setControl(
                 motionMagicVoltage.withPosition(position));
@@ -112,7 +120,7 @@ public class Climber extends SubsystemBase implements Lifecycle {
     private SoftwareLimitSwitchConfigs createSoftwareLimitSwitches(boolean enable) {
         SoftwareLimitSwitchConfigs softwareLimitSwitchConfigs = new SoftwareLimitSwitchConfigs()
         .withForwardSoftLimitEnable(enable)
-        .withForwardSoftLimitThreshold(221)
+        .withForwardSoftLimitThreshold(0.8)
         .withReverseSoftLimitEnable(enable)
         .withReverseSoftLimitThreshold(0);
         return softwareLimitSwitchConfigs;
@@ -157,9 +165,9 @@ public class Climber extends SubsystemBase implements Lifecycle {
 
     public enum ClimberPosition {
         DOWN(0),
-        PICKUP(75),
-        UP(150),
-        CLIMB(220);
+        PICKUP(0.27),
+        UP(0.52),
+        CLIMB(0.69);
 
         private final double position;
 
@@ -200,6 +208,7 @@ public class Climber extends SubsystemBase implements Lifecycle {
 
             // If we are requesting to move backwards, abort so we exit command
             if (this.position.position < Subsystems.climber.currentSetpoint) {
+                BSLogger.log("Climber", "Aborting because we won't move  backwards");
                 abort = true;
                 Subsystems.climber.willNotMoveBackwardsAlert.set(true);
                 return;

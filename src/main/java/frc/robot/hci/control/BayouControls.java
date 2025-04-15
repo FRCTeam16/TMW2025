@@ -131,7 +131,7 @@ public class BayouControls extends ControlBinding {
         algaeHighElevator.whileTrue(new PickAlgaeSoonerCommand(Elevator.ElevatorSetpoint.AlgaeReefHigh)).onFalse(Subsystems.algaeIntake.holdAlgaeCommand());
         algaeLowElevator.whileTrue(new PickAlgaeSoonerCommand(Elevator.ElevatorSetpoint.AlgaeReefLow)).onFalse(Subsystems.algaeIntake.holdAlgaeCommand());
 
-        climberPickup.onTrue(new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.PICKUP));
+        climberPickup.onTrue(new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.PICKUP).withTimeout(5.0)  );
         climberClimb.onTrue(new Climber.ClimberMoveToPositionCommand(Climber.ClimberPosition.CLIMB));
 
         manualStickControl.toggleOnTrue(Subsystems.algaeArm.openLoopCommand(manualAlgaeArmControl));
