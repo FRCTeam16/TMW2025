@@ -35,6 +35,7 @@ public class AutoRegistrar {
 
         autoManager.registerStrategy("Center", CenterAutoStrategy::new);
         autoManager.registerStrategy("Center Quals", CenterQualsAutoStrategy::new);
+        autoManager.registerStrategy("Center Quals Left", CenterQualsLeftAutoStrategy::new);
 
         // autoManager.registerStrategy("Arkansas Right Red", "Arkansas Right Red", () -> new ArkansasStrategy(false, true));
         // autoManager.registerStrategy("Arkansas Left Red", "Arkansas Left Red", () -> new ArkansasStrategy(true, true));
