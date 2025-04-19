@@ -99,7 +99,12 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousPeriodic() {
-    Subsystems.visionOdometryUpdater.updateOdometry();
+    try{
+
+      Subsystems.visionOdometryUpdater.updateOdometry();
+    }catch (Exception e){
+      BSLogger.log("Robot", "Error updating odometry in autonomousPeriodic: " + e.getMessage());
+    }
   }
 
   @Override

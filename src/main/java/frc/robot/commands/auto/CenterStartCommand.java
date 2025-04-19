@@ -39,7 +39,8 @@ public class CenterStartCommand extends SequentialCommandGroup {
                         new Elevator.ElevatorMoveToPositionCommand(Elevator.ElevatorSetpoint.AlgaeReefLow).withSlowMode(),
                         Commands.runOnce(() -> Subsystems.algaeArm.setArmPosition(AlgaeArm.AlgaeArmPosition.PickFromReef)),
                         Commands.runOnce(() -> Subsystems.algaeIntake.intakeAlgae())
-                ).withTimeout(2.0).until(Subsystems.algaeIntake::isAlgaeDetected),
+                ).withTimeout(3.0),
+                
 //                new WaitCommand(2.5).until(Subsystems.algaeIntake::isAlgaeDetected),
                 Subsystems.algaeArm.setArmPositionCommand(AlgaeArm.AlgaeArmPosition.Up).withTimeout(0.1),
                 Subsystems.algaeIntake.holdAlgaeROCommand()
